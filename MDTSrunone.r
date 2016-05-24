@@ -40,7 +40,7 @@ misinformed_baditem <- 30 # 30th out of 120th best utility replaces all the top 
 ###### END ARGUMENTS ###### 
 
 
-niters <- 1
+niters <- 100
 nrespondents <- 1020
 nitems <- 120
 nitemsperset <- 5
@@ -168,7 +168,7 @@ if (args==1){# fixed sparse
 
 
 source( paste(folder,"MDedTSmaster.r",sep="") )
-	args = list(
+	argz = list(
 	folder = folder,
 	niters = niters, nrespondents = nrespondents, nitems=nitems,
 	nitemsperset=nitemsperset, nquestions=nquestions, nitemsperbot=nitemsperbot,
@@ -177,5 +177,5 @@ source( paste(folder,"MDedTSmaster.r",sep="") )
 	nmisinformed = nmisinformed, misinformed_baditem = misinformed_baditem,
 	SAVEFLAG=SAVEFLAG
 	)
-res <- MDedTSmaster(args)
-save(res,filepaste(folder,"../DataDump/res ", res$filesuffix, ".RData",sep="") )
+res <- MDedTSmaster(argz)
+save(res,file=paste(folder,"../DataDump/res ", res$filesuffix, ".RData",sep="") )
