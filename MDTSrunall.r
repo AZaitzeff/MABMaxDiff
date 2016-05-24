@@ -15,7 +15,7 @@ if (OS=="PC"){ CC = "C:" } else {CC = ""}
 
 #folder <- "/Users/ericmsch/Dropbox/Sawtooth/Bandit Code Files/"
 #folder <- "C:/Users/ericmsch/Dropbox/Sawtooth/Bandit Code Files/"
-folder <- paste(CC,"/Users/azaitzeff/Documents/MultiArmedBandits/MABMaxDiff/",sep="")
+folder <- paste0(CC,tools:::file_path_as_absolute("."),"/")
 
 niters = 100
 nrespondents = 1020

@@ -61,8 +61,12 @@ misinf <- (nmisinformed > 0)
 
 
 ## make sure consistent with  nitems, nitemsperbot, TSeps, TSgamma;
-
+if(fixed_sparse==TRUE){
+filesuffix <- paste(" (fixed_sparse - ",nitems, " items - ",nitemsperbot, " items per resp - misinf ", nmisinformed, " )",sep="")
+}
+else{
 filesuffix <- paste(" (TS - ",nitems, " items - ",nitemsperbot, " items per resp - split ", TSnreg, " TS ", TSnbig, " TSx", TSgamma, " - misinf ", nmisinformed, " )",sep="")
+}
 # filesuffix <- paste(" (TS - 120 items - 30 items per resp - split none - misinformed)",sep="")
 
 #filesuffix <- paste(" (TS - 120 items - 30 items per resp - split ", TSnreg, " TS ", TSnbig, " TSx", TSgamma, ")",sep="")
@@ -136,7 +140,6 @@ for(l in 1:length(simschedule))
   for(i in 1:nbot)
   {
 
-    fixed_sparse = FALSE
 
     #Estimate incremental scores.
     if(i %% 20 == 1 & i >= 20)
@@ -214,9 +217,8 @@ for(l in 1:length(simschedule))
 
     # Initial period before updates
     # IF fixed_sparse = TRUE, then always do balance of items
-    if(i <= 20) {fixed_sparse = TRUE} else {fixed_sparse = FALSE}
 
-    if (fixed_sparse==TRUE)
+    if (fixed_sparse==TRUE || i <= 20)
     { 
       if(length(nextitemlist) < nitemsperbot)
       {
@@ -477,11 +479,11 @@ for(l in 1:length(simschedule))
   
   } # IF SAVEFLAG==TRUE
 
-  time_avg <- (Sys.time() - timestart)/l 
-  iters_remaining <- length(simschedule) - l
-  time_remaining <- time_avg * iters_remaining
-  print(paste("iter ",l," -- resp ",nbot," -- ",date(),sep=""))
-  print(paste("The remaining ",iters_remaining," iterations will take approx. ", time_remaining, sep=""  ))
+  #time_avg <- (Sys.time() - timestart)/l 
+  #iters_remaining <- length(simschedule) - l
+  #time_remaining <- time_avg * iters_remaining
+  #print(paste("iter ",l," -- resp ",nbot," -- ",date(),sep=""))
+  #print(paste("The remaining ",iters_remaining," iterations will take approx. ", time_remaining, sep=""  ))
   #print( paste( "- Finished world", w, "... at ... ", Sys.time() ) )
   #?save
   
