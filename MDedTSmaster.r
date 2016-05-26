@@ -152,7 +152,7 @@ for(l in 1:length(simschedule))
     #Estimate incremental scores.
     if(i %% 20 == 1 & i >= 20)
     { ## BEGIN if i == 21, 41, 61, ...
-      #Works - AI
+      #Works - parameter estimation
       resultssub<-results[1:((i-1)*nquestions),]
       
       Xb<-matrix(0,(i-1)*nquestions*nitemsperset,nitems)
@@ -333,7 +333,7 @@ for(l in 1:length(simschedule))
  
 
     # loop over questions
-
+    # robot AI - this definitly could not be in a for loop
     for(j in 1:nquestions) {    
       setref<-designmatrix[i,((j-1)*nitemsperset+1):(j*nitemsperset)]  
       utilssub<-utils[i,setref] 

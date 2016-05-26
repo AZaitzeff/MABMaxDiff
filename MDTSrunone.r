@@ -74,31 +74,31 @@ if (args==1){# fixed sparse
 	TSgamma <- 20
 }else if (args==7){# 120 # fixed sparse,misinformed
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 	fixed_sparse <- TRUE
 }else if (args==8){ # eps=0,gamma=1,misinformed
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 	TSeps <- 0 
 	TSgamma <- 1
 }else if (args==9){# eps=10/30,gamma=10,misinformed
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 	TSeps <- 10/30
 	TSgamma <- 10
 }else if (args==10){ # eps=10/30,gamma=20,misinformed
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 	TSeps <- 10/30
 	TSgamma <- 20
 }else if (args==11){# eps=15/30,gamma=10,misinformed
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 	TSeps <- 15/30
 	TSgamma <- 10
 }else if (args==12){# eps=15/30,gamma=20,misinformed
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 	TSeps <- 15/30 
 	TSgamma <- 20
 }else if (args==13){# 40 # fixed sparse 
@@ -112,7 +112,7 @@ if (args==1){# fixed sparse
 	nitemsperbot <- 20
 	fixed_sparse <- TRUE
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 }else if (args==15){# eps=0,gamma=1
 	nitems <- 40
 	nquestions <- 12
@@ -124,7 +124,7 @@ if (args==1){# fixed sparse
 	nitemsperbot <- 20
 	nquestions <- 12
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 	TSeps <- 0 
 	TSgamma <- 1
 }else if (args==17){# eps=5/20,gamma=10
@@ -138,7 +138,7 @@ if (args==1){# fixed sparse
 	nitemsperbot <- 20
 	nquestions <- 12
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 	TSeps <- 5/20
 	TSgamma <- 10
 }else if (args==19){# 300 # fixed sparse
@@ -148,7 +148,7 @@ if (args==1){# fixed sparse
 	nitems <- 300
 	fixed_sparse <- TRUE
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 }else if (args==21){# eps=0,gamma=1
 	nitems <- 300
 	TSeps <- 0 
@@ -156,7 +156,7 @@ if (args==1){# fixed sparse
 }else if (args==22){# eps=0,gamma=1,misinformed
 	nitems <- 300
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 	TSeps <- 0 
 	TSgamma <- 1
 }else if (args==23){# eps=10/30,gamma=10
@@ -167,12 +167,12 @@ if (args==1){# fixed sparse
 }else if (args==24){# eps=10/30,gamma=10,misinformed
 	nitems <- 300
 	nmisinformed <- 50
-	misinformed_baditem <- 30
+	misinformed_baditem <- nitems*.25
 	TSeps <- 10/30
 	TSgamma <- 10
 }
 
-
+print(misinformed_baditem)
 source( paste(folder,"MDedTSmaster.r",sep="") )
 	argz = list(
 	folder = folder,
