@@ -103,34 +103,40 @@ if (args==1){# fixed sparse
 	TSgamma <- 20
 }else if (args==13){# 40 # fixed sparse 
 	nitems <- 40
+	nquestions <- 12
 	nitemsperbot <- 20
 	fixed_sparse <- TRUE
 }else if (args==14){# fixed sparse,misinformed
 	nitems <- 40
+	nquestions <- 12
 	nitemsperbot <- 20
 	fixed_sparse <- TRUE
 	nmisinformed <- 50
 	misinformed_baditem <- 30
 }else if (args==15){# eps=0,gamma=1
 	nitems <- 40
+	nquestions <- 12
 	nitemsperbot <- 20
 	TSeps <- 0 
 	TSgamma <- 1
 }else if (args==16){# eps=0,gamma=1,misinformed
-	items <- 40
+	nitems <- 40
 	nitemsperbot <- 20
+	nquestions <- 12
 	nmisinformed <- 50
 	misinformed_baditem <- 30
 	TSeps <- 0 
 	TSgamma <- 1
 }else if (args==17){# eps=5/20,gamma=10
-	items <- 40
+	nitems <- 40
 	nitemsperbot <- 20
+	nquestions <- 12
 	TSeps <- 5/20 
 	TSgamma <- 10
 }else if (args==18){# eps=5/20,gamma=10,misinformed
-	items <- 40
+	nitems <- 40
 	nitemsperbot <- 20
+	nquestions <- 12
 	nmisinformed <- 50
 	misinformed_baditem <- 30
 	TSeps <- 5/20

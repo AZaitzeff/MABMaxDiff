@@ -21,7 +21,6 @@ library(MASS)
 timestamp()
 
 
-
 ###### ARGUMENTS ###### 
 
 #MAC:
@@ -29,18 +28,27 @@ timestamp()
 #PC:
 # folder <- "C:/Users/ericmsch/Dropbox/Sawtooth/Bandit Code Files/"
 
-
+if (nitems==120){
 data1<-read.csv( file=paste(folder,"HB_120items.csv",sep="") )
 #data1<-rbind(c(1,1000,seq(-2,2,length.out=120)))
 #head(data1)
-
 MDDesign <-read.csv( file=paste(folder,"30itemMD_MD30_Design.csv",sep="") ) 
-#MDDesign<-read.csv( file=paste(folder,"MD_MD1_Design.csv",sep="") ) 
+} else if (nitems==300){
+data1<-read.csv( file=paste(folder,"HB_300items.csv",sep="") )
+#data1<-rbind(c(1,1000,seq(-2,2,length.out=120)))
+#head(data1)
+MDDesign <-read.csv( file=paste(folder,"30itemMD_MD30_Design.csv",sep="") )
+} else if (nitems==40){
+data1<-read.csv( file=paste(folder,"HB_40items.csv",sep="") )
+#data1<-rbind(c(1,1000,seq(-2,2,length.out=120)))
+#head(data1)
+MDDesign <-read.csv( file=paste(folder,"20itemMD_MD20_Design.csv",sep="") ) 
+} else{
+warning('We do not support that number of items')
+}
 outfolder <- folder
-
 # niters <- 100
 # nrespondents <- 1020
-
 # nitems<-120
 # nitemsperset<-5
 # nquestions<-18
@@ -125,7 +133,7 @@ for(l in 1:length(simschedule))
   results<-matrix(NA,nbot*nquestions,nitemsperset*1+6)
   
   ID  <- rep(1:nbot,each=2*nitemsperset*nquestions)
-  Set <- rep(1:18,nbot,each=2*nitemsperset)
+  Set <- rep(1:nquestions,nbot,each=2*nitemsperset)
   
   nextitemlist<-NULL  
   
@@ -172,7 +180,7 @@ for(l in 1:length(simschedule))
       y[bwindexsub=="Worst"]<-yw  
       
       IDsub  <- rep(1:(i-1),each=2*nitemsperset*nquestions)
-      Setsub <- rep(1:18,(i-1),each=2*nitemsperset)
+      Setsub <- rep(1:nquestions,(i-1),each=2*nitemsperset)
       
       dallsub<- data.frame(
         IDsub  = IDsub,
@@ -224,9 +232,9 @@ for(l in 1:length(simschedule))
       {
         nextitemlist<-c(nextitemlist,sample(1:nitems))
       }
+      #print(MDDesign$Version==(i-1)%%max(MDDesign$Version)+1)
       #  nextitemlist <-NULL
       botitemlist[i,]<-nextitemlist[1:nitemsperbot]
-     
       designmatrix[i,]<- nextitemlist[c(t(as.matrix(MDDesign[MDDesign$Version==(i-1)%%max(MDDesign$Version)+1,-(1:2)])))]
       nextitemlist    <- nextitemlist[-(1:(nitemsperbot))]
       
@@ -347,8 +355,7 @@ for(l in 1:length(simschedule))
       worst<-setref[which.min(combutilw)]
       bestind<-which.max(combutilb)
       worstind<-which.min(combutilw)      
-      
-      results[(i-1)*nquestions+j,]<-c(setref,best,worst,bestind,worstind,i,j)        
+      results[(i-1)*nquestions+j,]<-c(setref,best,worst,bestind,worstind,i,j)      
     }  # END loop over questions
 
   } ## END loop over respondents 'bots' (i in 1:nbot)
