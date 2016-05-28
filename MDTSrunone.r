@@ -1,6 +1,7 @@
 # MDTSrunall.r
 
 ## Act like master file running subscripts 
+## Run one version of MDTS with arguments passed to master
 
 theargs<-commandArgs(trailingOnly = TRUE)
 
