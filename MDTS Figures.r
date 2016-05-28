@@ -1,4 +1,4 @@
-
+# Eric looked at this and used git
 # rev 2016-04-09 ES
 
 #MAC:
