@@ -171,6 +171,30 @@ if (args==1){# fixed sparse
 	misinformed_baditem <- nitems*.25
 	TSeps <- 10/30
 	TSgamma <- 10
+}else if (args==25){#uniform for ten items
+	nitems <- 120
+	nmisinformed <- 0
+	misinformed_baditem <- nitems*.25
+	TSeps <- 10/30
+	TSgamma <- 10000
+}else if (args==26){#uniform for ten items,misinformed
+	nitems <- 120
+	nmisinformed <- 50
+	misinformed_baditem <- nitems*.25
+	TSeps <- 10/30
+	TSgamma <- 10000
+}else if (args==27){# greedy
+	nitems <- 120
+	nmisinformed <- 0
+	misinformed_baditem <- nitems*.25
+	TSeps <- 30/30
+	TSgamma <- 0.0001
+}else if (args==28){# greedy, misinformed
+	nitems <- 120
+	nmisinformed <- 50
+	misinformed_baditem <- nitems*.25
+	TSeps <- 30/30
+	TSgamma <- 0.0001
 }
 
 print(misinformed_baditem)
