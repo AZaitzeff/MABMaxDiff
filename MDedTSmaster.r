@@ -286,19 +286,21 @@ for(l in 1:length(simschedule))
       # TSnbig
       # TSnreg
       #-----
-      if (TSnbig > 0){
+      if (TSnbig > 0 && TSnreg>0){
         cur_TS_order <- order(uk_samp_cur,decreasing=T)
         cur_TSbig_order <- order(uk_samp_cur_big,decreasing=T)
         cur_TS_overlap <- cur_TSbig_order %in% cur_TS_order[1:TSnreg]
         nextitemlist <- c( cur_TS_order[1:TSnreg], cur_TSbig_order[!cur_TS_overlap][1:TSnbig] )
         #--- previous four lines in one line:
         ## nextitemlist <- c(order(uk_samp_cur,decreasing=T)[1:TSnreg],order(uk_samp_cur_big,decreasing=T)[!order(uk_samp_cur_big,decreasing=T) %in% order(uk_samp_cur,decreasing=T)[1:TSnreg]][1:TSnbig])
+      } else if(TSnreg ==0){
+        cur_TS_order <- order(uk_samp_cur_big,decreasing=T)
+        nextitemlist <- cur_TS_order[1:TSnbig]
       } else {
         cur_TS_order <- order(uk_samp_cur,decreasing=T)
         nextitemlist <- cur_TS_order[1:TSnreg]
       }
 
-      
       botitemlist[i,]<-nextitemlist
       designmatrix[i,]<-nextitemlist[c(t(as.matrix(MDDesign[MDDesign$Version==(i-1)%%max(MDDesign$Version)+1,-(1:2)])))]               
 

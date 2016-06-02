@@ -197,7 +197,6 @@ if (args==1){# fixed sparse
 	TSgamma <- 0.0001
 }
 
-print(misinformed_baditem)
 source( paste(folder,"MDedTSmaster.r",sep="") )
 	argz = list(
 	folder = folder,
