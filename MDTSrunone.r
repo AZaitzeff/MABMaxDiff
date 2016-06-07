@@ -53,6 +53,8 @@ fixed_sparse <- FALSE
 nmisinformed <- 0
 misinformed_baditem <- 30
 SAVEFLAG <- TRUE
+greed <- FALSE
+numrand <- 20
 
 # 120
 if (args==1){# fixed sparse
@@ -187,16 +189,63 @@ if (args==1){# fixed sparse
 	nitems <- 120
 	nmisinformed <- 0
 	misinformed_baditem <- nitems*.25
-	TSeps <- 30/30
-	TSgamma <- 0.0001
+	greed <- TRUE
 }else if (args==28){# greedy, misinformed
 	nitems <- 120
 	nmisinformed <- 50
 	misinformed_baditem <- nitems*.25
-	TSeps <- 30/30
-	TSgamma <- 0.0001
+	greed <- TRUE
+}else if (args==29){#greedy, uniform for ten items
+	nitems <- 120
+	nmisinformed <- 0
+	misinformed_baditem <- nitems*.25
+	TSeps <- 10/30
+	TSgamma <- 10000
+	greed <- TRUE
+}else if (args==30){#greedy, uniform for ten items,misinformed
+	nitems <- 120
+	nmisinformed <- 50
+	misinformed_baditem <- nitems*.25
+	TSeps <- 10/30
+	TSgamma <- 10000
+	greed <- TRUE
+}else if (args==31){# learn than earn
+	nitems <- 120
+	nmisinformed <- 0
+	misinformed_baditem <- nitems*.25
+	greed <- TRUE
+	numrand <- 200
+}else if (args==32){# learn than earn, misinformed
+	nitems <- 120
+	nmisinformed <- 50
+	misinformed_baditem <- nitems*.25
+	greed <- TRUE
+	numrand <- 200
+}else if (args==33){# learn than earn
+	nitems <- 120
+	nmisinformed <- 0
+	misinformed_baditem <- nitems*.25
+	greed <- TRUE
+	numrand <- 400
+}else if (args==34){# learn than earn, misinformed
+	nitems <- 120
+	nmisinformed <- 50
+	misinformed_baditem <- nitems*.25
+	greed <- TRUE
+	numrand <- 400
+}else if (args==35){# learn than earn
+	nitems <- 120
+	nmisinformed <- 0
+	misinformed_baditem <- nitems*.25
+	greed <- TRUE
+	numrand <- 600
+}else if (args==36){# learn than earn, misinformed
+	nitems <- 120
+	nmisinformed <- 50
+	misinformed_baditem <- nitems*.25
+	greed <- TRUE
+	numrand <- 600
 }
-
 source( paste(folder,"MDedTSmaster.r",sep="") )
 	argz = list(
 	folder = folder,
@@ -205,7 +254,7 @@ source( paste(folder,"MDedTSmaster.r",sep="") )
 	TSeps = TSeps, TSgamma = TSgamma,
 	fixed_sparse = fixed_sparse,
 	nmisinformed = nmisinformed, misinformed_baditem = misinformed_baditem,
-	SAVEFLAG=SAVEFLAG
+	SAVEFLAG=SAVEFLAG, greed=greed, numrand=numrand
 	)
 res <- MDedTSmaster(argz)
 save(res,file=paste(folder,"../DataDump/res ", res$filesuffix, ".RData",sep="") )

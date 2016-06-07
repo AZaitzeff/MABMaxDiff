@@ -14,6 +14,8 @@ fixed_sparse <- arguments$fixed_sparse
 nmisinformed <- arguments$nmisinformed 
 misinformed_baditem <- arguments$misinformed_baditem 
 SAVEFLAG <- arguments$SAVEFLAG
+greed <- arguments$greed
+numrand <- arguments$numrand
 
 library(mlogit)
 library(MASS)
@@ -72,8 +74,14 @@ misinf <- (nmisinformed > 0)
 if(fixed_sparse==TRUE){
 filesuffix <- paste(" (fixed_sparse - ",nitems, " items - ",nitemsperbot, " items per resp - misinf ", nmisinformed, " )",sep="")
 }
+else if(numrand >20 ){
+filesuffix <- paste(" (learnthenearn - ",nitems, " items - ",nitemsperbot, " items per resp - misinf ", nmisinformed, " - alpha ", numrand/1000, " )",sep="")
+}
+else if(greed==TRUE){
+filesuffix <- paste(" (greedy - ",nitems, " items - ",nitemsperbot, " items per resp - split ", TSnreg, " TS ", TSnbig, " TSx", TSgamma, " - misinf ", nmisinformed," )",sep="")
+}
 else{
-filesuffix <- paste(" (TS - ",nitems, " items - ",nitemsperbot, " items per resp - split ", TSnreg, " TS ", TSnbig, " TSx", TSgamma, " - misinf ", nmisinformed, " )",sep="")
+filesuffix <- paste(" (TS - ",nitems, " items - ",nitemsperbot, " items per resp - split ", TSnreg, " TS ", TSnbig, " TSx", TSgamma, " - misinf ", nmisinformed," )",sep="")
 }
 # filesuffix <- paste(" (TS - 120 items - 30 items per resp - split none - misinformed)",sep="")
 
@@ -226,7 +234,7 @@ for(l in 1:length(simschedule))
     # Initial period before updates
     # IF fixed_sparse = TRUE, then always do balance of items
 
-    if (fixed_sparse==TRUE || i <= 20)
+    if (fixed_sparse==TRUE || i <= numrand)
     { 
       if(length(nextitemlist) < nitemsperbot)
       {
@@ -248,12 +256,17 @@ for(l in 1:length(simschedule))
       # TSeps = 10/30  # how many are sampled from a diffuse distribution? e.g., 10 out of 30 items are drawn from a diffuse
       # TSgamma = 10  # how diffuse is it? e.g., the diffuse distn has 10 * standard deviation of regular distn
       # ----------
-      
       # Regular Thompson Sample
-      uk_samp_cur <- mvrnorm(n = 1, 
+      if(greed==FALSE){
+        uk_samp_cur <- mvrnorm(n = 1, 
                                mu = est_mean, 
                                Sigma = est_vcov )
-        
+      }
+      else{
+        uk_samp_cur <- mvrnorm(n = 1, 
+                               mu = est_mean, 
+                               Sigma = est_vcov*.00001 )
+      }
       
       # Diffuse Thompson Sample
       # TSgamma = 10
