@@ -20,5 +20,12 @@ vignettes/*.pdf
 
 #CSV
 *.csv
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
 
 .DS_Store
