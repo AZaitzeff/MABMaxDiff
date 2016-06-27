@@ -343,10 +343,10 @@ We also tested a pair of existing fixed MaxDiff approaches.
 \label{fig:10hit}
 \end{figure}
 Figure \ref{fig:3hit} shows the results for the 120-item dataset.  The X-axis indicates the number of cumulative respondents interviewed, and the Y-axis reports the hit rate obtained at each cumulative sample size.  For example, after the first 200 respondents, the Fixed Express Design obtains a hit rate of less than 60\% whereas both Bandit MaxDiff approaches achieve a hit rate of about 85\%.\\
-The key takeaway from Figure \ref{3hit} is simple: Thompson Sampling is about 4x more efficient than the standard Fixed Express MaxDiff approach. We show in Table ADAPTIVE V FIXED. After about 140 respondents, we’ve obtained an 80\% hit rate; which we wouldn’t achieve with traditional Express MaxDiff until about the 740th respondent.  As shown, we can accomplish with about 240 respondents what it takes 1000 respondents to do with Express MaxDiff.  Either comparison shows that you can obtain equally good hit rates using the adaptive Bandit MaxDiff methodology with $\frac{1}{4}$ the sample size.\\
+The key takeaway from Figure \ref{fig:3hit} is simple: Thompson Sampling is about 4x more efficient than the standard Fixed Express MaxDiff approach. We show in Table ADAPTIVE V FIXED. After about 140 respondents, we’ve obtained an 80\% hit rate; which we wouldn’t achieve with traditional Express MaxDiff until about the 740th respondent.  As shown, we can accomplish with about 240 respondents what it takes 1000 respondents to do with Express MaxDiff.  Either comparison shows that you can obtain equally good hit rates using the adaptive Bandit MaxDiff methodology with $\frac{1}{4}$ the sample size.\\
 INSERT TABLE ADAPTIVE V FIXED ABOUT HERE\\
-Figure \ref{3hit} also shows the two Thompson Sampling approaches achieve nearly identical results. But we will show later this isn’t the case if we use a misinformed start (Section Misinformed Start)\\
-Figure \ref{fig:10hit} shows the results for Top-10 hit rate for our 120-item MaxDiff, which is a broader measure of success that requires obtaining a high degree of precision for an even broader reach of items than the Top-3 hit rate.  The conclusions are fairly similar as with Figure \ref{3hit}.  It takes about 400 respondents to accomplish with Bandit MaxDiff what we accomplish with 1000 respondents under the non-adaptive express MaxDiff approach. This is supported in Table 1 ADAPTIVE V FIXED. \\
+Figure \ref{fig:3hit} also shows the two Thompson Sampling approaches achieve nearly identical results. But we will show later this isn’t the case if we use a misinformed start (Section Misinformed Start)\\
+Figure \ref{fig:10hit} shows the results for Top-10 hit rate for our 120-item MaxDiff, which is a broader measure of success that requires obtaining a high degree of precision for an even broader reach of items than the Top-3 hit rate.  The conclusions are fairly similar as with Figure \ref{fig:3hit}.  It takes about 400 respondents to accomplish with Bandit MaxDiff what we accomplish with 1000 respondents under the non-adaptive express MaxDiff approach. This is supported in Table 1 ADAPTIVE V FIXED. \\
 \section{Robustness tests}
 \subsection{Misinformed Starts (When Early Responders Are Horribly Non-Representative)}
 To this point, it seems like the adaptive Bandit MaxDiff approach using Thompson Sampling is the clear winner.  However, what would happen if the first 50 respondents we interviewed were actually not very representative of the average preferences for the sample?  What if we tried to throw Bandit MaxDiff off the scent?  In fact, let’s consider a worst-case scenario: the first responders actually believe \textit{nearly the opposite} from the rest of the sample\\
@@ -373,8 +373,63 @@ Our Bandit model has a great advantage over fixed designs for very large numbers
 By reducing the number of items to 40 and changing the number of tasks to 12, the fixed express design can now show each item an average of 1.5 times per respondent, which is much less sparse than in larger item cases.\\
 Nevertheless, our results for Bandit MaxDiff are still much better than traditional MaxDiff (Table NUMBER OF ITEMS). We see about a 2x efficiency gain compared to the Sparse MaxDiff. We also still see a tremendous advantage in the case of a misinformed start.\\
 \subsection{Using True Utility as a Generalization of Hit-Rate}
+Say an algorithm gets the top 9 items and the 11th item in the 10 top items. One might like to differentiate that between another algorithm that gets the top 9 items and the 40th item in the 10 top items is Percent True Utility. \\
+\textbf{Exponetial Weighted Utility}: For a set $S$ the exponential weighted utility is \[\mu_S=\sum_{x \in S}b(x)=\sum_{x \in S}e^{u(x)}\]
+\textbf{Percent True Utility of the Top 3 (or 10)}: The exponential weighted true utility of the top 3 (10) items that the robotic respondents identified over the maximum exponential weighted true utility that could be attained with 3 (10) items. Mathmetical if $S^*$ is the top 3 (10) items and $S$ is the current 3 (10) top items identified robotic respondents then Percent True Utility is 
+\[
+\frac{\mu_S}{\mu_{S^*}}
+\]
+This can be see as a Generalization of Hit-Rate though it has the advantage of differentiating as in the case above. Though one loses easy interpretability. 
+\begin{figure}
+\caption{Percent True Utility of the Top 3 with 120 items}
+\includegraphics[width=1\textwidth]{plots/3util120show3.pdf}
+\label{fig:3util}
+\end{figure}
+In Figure \ref{fig:3util} Percent True Utility tells a similar story to Hit Rate.
 
 \subsection{Using Regret as a Stopping Rule}
+In practice we do not know the True Utilities \textit{a priori} but we would like to know 
+Taken from ~\cite{scott2015multi} and ~\cite{scott2010modern} for MAB, The value remaining in the experiment is the posterior distribution of $\frac{\mu_{S^*}-\mu_{S}}{\mu_{S}}$ where $\mu_{S^*}$ is the largest value of the exponential weighted utility and $\mu_{S}$ is the exponential weighted utility of the set that is most likely to be optimal denoted $S$. This is constructed as follows, take $n$ Monte Carlo draws from $p(\mu|y_t)$. Let $\mu_{S^*}^{m}$ be the max exponential weighted utility of draw $m$ and $\mu_{S}^{m}$ be the utility using the draw $m$ using the set $S$. Let $\Delta^{m}=\frac{\mu^m_{S^*}-\mu^m_{S}}{\mu^m_{S}}$.\\
+\begin{table}
+\begin{center}
+\begin{tabular}{l | c c c c c c c c}
+Current & 1st &  2nd  &  3rd  &  4th &  5th & 6th & 7th &  8th \\
+\hline
+Draw 1 & 4.02 &  3.50 &  5.08 & 4.16&  4.22 & 4.41 & 3.65 &  3.27 \\
+Draw 2 &4.18 & 4.72 & 3.49 & 3.48 & 3.63 & 3.60 & 3.56 &  3.70 \\
+Draw 3 &4.81 & 5.23 & 5.04 &  3.96 &  4.17 & 4.37 &  3.58 & 2.99 \\ 
+\end{tabular}
+\end{center}
+\caption{Draws of the exponetial utility of the items after 100 iterations}
+\label{table:data}
+\end{table}
+
+\begin{figure}
+\includegraphics[width=1\linewidth]{plots/valremhist.pdf}
+\caption{Two histograms of $\Delta$. Left: After 100 iterations, the potential value remaining is .092. Right: After 220 iterations, the potential value remaining is .008}
+\label{fig:data}
+\end{figure}
+
+As an example I took draws after respondent 100 in TS $\epsilon=.67$ $\delta=10$ for 120 items see table \ref{table:data} for draws of exponetial weighted utility of a single item. I put the columns in current rank order and only show the top 8 for convenience. Say we were finding the value remaining for the the utility score using the top 3. Then $S=\{1,2,3\}$. Then $\mu^1_{S}=4.02+3.50+5.08=12.6$ and $\mu_{S^*}^{1}=5.08+4.41+4.16=13.65$ So $\Delta^{1}=\frac{13.65-12.6}{12.6}=.083$. Likewise $\Delta^{2}=\frac{12.6-12.39}{12.39}=.017$ and $\Delta^{3}=\frac{15.08-15.08}{15.08}=0$ (Note $\Delta^m=0$ when the $S$ contains the top utilities). The histogram of $\Delta$ after 100 iterations and 220 iterations is shown in figure \ref{fig:data}. \\
+ The `potential value remaining' (PVR) is the .95 quantile of the distribution $\Delta$ which in this case was .092. A way to interpret this number is ``We do not know what the utility of $S$ is, but whatever it is, a different set might beat it by as much as 9.2\%.''\\
+ A good stopping rule is to stop when the PVR drops below a certain threshold, (We use .02). One advantage of this is it handles ties (two sets with close exponetial weighted utility scores) really well. 
+\begin{figure}
+\caption{Potential Value Remaining of the Top 3 with 120 items}
+\includegraphics[width=1\textwidth]{plots/3vr120show3.pdf}
+\label{fig:3vr}
+\end{figure}
+\begin{figure}
+\caption{Histogram of When Iterations Would Stop Using a .02 Stopping Rule}
+\includegraphics[width=1\textwidth]{plots/stop120items23.pdf}
+\label{fig:3vrhist}
+\end{figure}
+\begin{figure}
+\caption{Percent True Utility of the Top 3 When Iteration Stops}
+\includegraphics[width=1\textwidth]{plots/util120items23.pdf}
+\label{fig:3vrutil}
+\end{figure}
+In Figure \ref{fig:3vr} we see the average PVR using the top 3 items on a log scale .Figure \ref{fig:3vrhist} show on which respondant the iterations' PVR would reach .02 (with the max being 1020)and Figure \ref{fig:3vrutil} shows what the Percent True Utility would be at those points. Another advatange we see for Bandit MaxDiff $\epsilon$-diffuse TS approach is that on average it stops sooner that standard TS with no decrease in profomance. Both Bandit MaxDiff TS stop much sooner and preform much better then fixed express.
+ 
 \subsection{Asking for Bests instead of Best-Worst}
 Because a key assumption for using the Bandit MaxDiff approach is that the researcher is mainly interested in identifying the top few items, we wondered about the value of spending time asking respondents to identify the worst item within each MaxDiff set.  What would happen if we asked our robotic respondents only to select the best item within each set?  The results somewhat surprised us.  The value of asking respondents to indicate both best and worst within each set more than compensated for the 40\% additional effort we suppose these “worst” questions add to the total interview time when interviewing human respondents.
 In a five item set (A,B,C,D and E) there are 10 possible 2-way comparisons. If we assume A is preferred to B and B is preferred to C and so on, then asking about only the best item will let us know A$>$B, A$>$C, A$>$D and A$>$E (4/10 comparisons).  By asking about worsts as well, for only one additional question we also add B$>$E, C$>$E, and D$>$E (7/10 comparisons), leaving only the order relationship between B, C, and D unknown.
