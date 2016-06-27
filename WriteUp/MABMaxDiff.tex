@@ -17,7 +17,6 @@
 %\documentclass[dvipsone,mksc]{informs3}   % if dvipsone is used, etc.
 
 % Private macros here (check that there is no clash with the style)
-\usepackage{algorithmic}
 \usepackage{subcaption}
 % Natbib setup for author-year style
 \usepackage{natbib}
@@ -144,9 +143,7 @@ While our problem is not a bandit problem exactly, it is a bandit-inspired probl
 Consider what would occur if the reward was whether an item is selected as best alternative, the arm’s reward would be completely dependent on all of the other items presented in the set (e.g., was it presented alongside poor items). 
 Second, the need to optimize this process is greater for large-scale problems with extremely large number of possible attribute levels or items.  In settings with hundreds of items, there is greater opportunity cost of focusing on items that are not important, calling for a need to improve efficiency.\\
 Third, we propose an adaptive method for best-worst scaling. Existing adaptive methods have been largely limited to conjoint, adapting at both the aggregate level (Arora and Huber) and the individual level (Toubia et al). Yet best-worst methods, such as MaxDiff, have continued to emerge as important and commonly used in areas including marketing research and public health. We introduce a first step to make MaxDiff adaptive in a principled manner by using MAB methods. We accommodate an increasingly accepted method of solving multi-armed bandit problems, Thompson Sampling. We introduce two versions: MaxDiff - Thompson Sampling and its generalization MaxDiff $\epsilon$-diffuse Thompson Sampling.\\
-The rest of the paper is structured as follows. In the next section we introduce the illustrative problem of maximum difference scaling focusing on its use in practice with large numbers of items. We then briefly introduce the multi-armed bandit framework. After formalizing the discrete choice model of maxdiff analysis, we introduce TO DO\\
-
-
+The rest of the paper is structured as follows. In the next section we introduce the illustrative problem of maximum difference scaling focusing on its use in practice with large numbers of items. We then briefly introduce the multi-armed bandit framework. After formalizing the discrete choice model of maxdiff analysis, we introduce our two algorithms that implement this method for Maxdiff Surveys. Then we present our empirical results in regular setting ane then present variants of our main results.\\
 
 By analogy, our bandit adaptive proposal relates to existing adaptive conjoint just as M-efficiency criterion is to D-efficiency.  Unlike M-efficienc designs where the researcher decides the managerial weight of different factors a priori, we know which of the items should receive more weight. Instead, that is exactly what we want to learn actively. \\
 
@@ -263,17 +260,31 @@ Since we are uncertain about the each parameter value, we continue collecting da
 \end{align*}
 Discuss relation to the Follow the regularized leader / perturbed leader 
 \subsection{Algorithm MaxDiff TS}
-\begin{algorithmic}
-\FOR{respondents n =1,\ldots,initial} \STATE {TO DO} \ENDFOR
-\FOR{respondents n = initial + 1,\ldots, N}
-\STATE{Estimate: update model $p(D|\theta)$ - }
-\STATE{Sample model parameters $u_1,\ldots,u_k \sim p(u|D)$}
-\STATE{Value: rank items by utility -}
-\STATE{Rank and take top $L$ subset $u^{(1)},u^{(2)}\ldots,u^{(L)}$} 
-\STATE{Act: select items for MaxDiff design -}
-\STATE{Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)}
-\ENDFOR
-\end{algorithmic}
+\begin{itemize}
+\item For respondents n =1,\ldots,initial
+\begin{enumerate}
+\item Act: select items for MaxDiff design
+\begin{itemize}
+\item Sample $L$ items from the population 
+\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
+\end{itemize}
+\end{enumerate}
+\item For respondents n = initial + 1,\ldots, N
+\begin{enumerate}
+\item Estimate: update model $p(D|\theta)$
+\begin{itemize}
+\item Sample model parameters $u_1,\ldots,u_k \sim p(u|D)$
+\end{itemize}
+\item Value: rank items by utility
+\begin{itemize}
+\item Rank and take top $L$ subset $u^{(1)},u^{(2)}\ldots,u^{(L)}$
+\end{itemize}
+\item Act: select items for MaxDiff design
+\begin{itemize}
+\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
+\end{itemize}
+\end{enumerate}
+\end{itemize}
 We follow the algorithm Bandit MaxDiff-TS. After an initial number of respondents, we begin adapting. We update beliefs about the model parameters. We can draw from an exact or approximate posterior distribution. \footnote{In the case of the multinomial logit, we can use MCMC to obtain samples or, as we do in the empirical application, we can sample from asymptotic distribution via MLE implied by the estimated mean and standard errors.}\\
 From a single sample of parameter values, we rank the items by utility. We select the top $L$ items, and we generate a MaxDiff design of $J$ best-worst tasks, each with a choice set of $|S|$ items.  We use $L=30$, $J=18$, $|S|=5$ as a default since it is a standard number of items used in MaxDiff studies (Wirth). 
 While typical Bayesian or numerical integration methods call for large numbers of draws (or sufficient number) to achieve coverage of the full distribution of parameter values, our  approach relies on the variability of a single sample. There is value in the sample to sample differences in the value of parameters and their relative rank ordering. It allows  \\
@@ -285,23 +296,37 @@ However, as this continues, the uncertainty is reduced around these poor items t
 \subsection{Algorithm MaxDiff $\epsilon$-Diffuse TS}
 Perhaps the natural parameter uncertainty is not enough or is perhaps too slow to adjust, so we propose an algorithm MaxDiff epsilon-diffuse TS, which has an extra layer of self-correction, making it more robust to non-stationarity or respondent self-selection. 
 The way the $\epsilon$-$\delta$ version hedges its bets on the best items intuitively. As in illustration, instead of sampling 30 items from TS, we use 20 of the items drawn using standard Thompson Sampling (L=30,$\epsilon$=1/3), and 10 of the items drawn using Thompson Sampling with a much more diffuse prior (variance of estimate multiplied by $\delta$=10).
-For e-d case, its density does not become a spike as quickly as it does without e-d. This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and $\delta$, the more exploration and slower the algorithm settles on its set of items. The epsilon comes from the popular epsilon-greedy. 
-The e-d generalization is just like a two-component mixture model, which nests a pooled model without segments. As the epsilon is zero, the diffuse distribution is never used, so the algorithm collapses to regular TS. As $\delta$ is 1, the diffuse distribution is equivalent to the. 
+For e-d case, its density does not become a spike as quickly as it does without e-d. This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and $\delta$, the more exploration and slower the algorithm settles on its set of items. The epsilon comes from the popular epsilon-greedy.
+The e-d generalization is just like a two-component mixture model, which nests a pooled model without segments. As the epsilon is zero, the diffuse distribution is never used, so the algorithm collapses to regular TS. As $\delta$ is 1, the diffuse distribution is equivalent to the nondiffuse distribution. 
 \subsection{Algorithm MaxDiff epsilon-Diffuse TS}
-\begin{algorithmic}
-\FOR{respondents n =1,\ldots,initial} \STATE {TO DO} \ENDFOR
-\FOR{respondents n = initial + 1,\ldots, N}
-\STATE{Estimate: update model $p(D|\theta)$ to obtain population-level estimates, $\bar{u}$ and $\Sigma$.- }
-\STATE{Diffuse TS: Sample model parameters from diffuse distribution, by using rescaled larger variance-covariance $\delta \Sigma$, with $\delta > 1$ \[ u_D \sim N(\bar{u},\delta \Sigma)\]}
-\STATE{Regular TS: Sample model parameters \[u_R \sim N(\bar{u},\Sigma)\]}
-\STATE{Value: rank items by utility -}
-\STATE{Take top $\epsilon L$ items ranked diffuse sample $u_D^{(1)},u_D^{(2)}\ldots,u_D^{(\epsilon L)}$} 
-\STATE{Take top $(1-\epsilon)L$ items ranked regular sample $u_R^{(1)},u_R^{(2)}\ldots,u_R^{((1-\epsilon)L)}$} 
-\STATE{Combine diffuse and regular samples into $L$ items. (Remove duplicates items. Take the next best unique item from the diffuse sample not already selected.)}
-\STATE{Act: select items for MaxDiff design -}
-\STATE{Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)}
-\ENDFOR
-\end{algorithmic}
+\begin{itemize}
+\item For respondents n =1,\ldots,initial
+\begin{enumerate}
+\item Act: select items for MaxDiff design
+\begin{itemize}
+\item Sample $L$ items from the population 
+\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
+\end{itemize}
+\end{enumerate}
+\item For respondents n = initial + 1,\ldots, N
+\begin{enumerate}
+\item Estimate: update model $p(D|\theta)$ to obtain population-level estimates, $\bar{u}$ and $\Sigma$.
+\begin{itemize}
+\item Diffuse TS: Sample model parameters from diffuse distribution, by using rescaled larger variance-covariance $\delta \Sigma$, with $\delta > 1$ \[ u_D \sim N(\bar{u},\delta \Sigma)\]
+\item Regular TS: Sample model parameters \[u_R \sim N(\bar{u},\Sigma)\]
+\end{itemize}
+\item Value: rank items by utility
+\begin{itemize}
+\item Take top $\epsilon L$ items ranked diffuse sample $u_D^{(1)},u_D^{(2)}\ldots,u_D^{(\epsilon L)}$
+\item Take top $(1-\epsilon)L$ items ranked regular sample $u_R^{(1)},u_R^{(2)}\ldots,u_R^{((1-\epsilon)L)}$
+\item Combine diffuse and regular samples into $L$ items. (Remove duplicates items. Take the next best unique item from the diffuse sample not already selected.)
+\end{itemize}
+\item Act: select items for MaxDiff design
+\begin{itemize}
+\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
+\end{itemize}
+\end{enumerate}
+\end{itemize}
 \subsection{Main Empirical Analysis}
 We compared our proposed bandit MaxDiff approaches to existing non-adaptive fixed MaxDiff design strategies using simulation based on inferred preferences from an actual MaxDiff survey. We used MaxDiff data from a survey conducted by Procter \& Gamble with Sawtooth Software. The study involved 981 respondents and 120 items from a sparse MaxDiff study. The subject matter and exact item text was hidden for confidentiality purposes. They provided us with the individual-level posterior mean utilities for all respondents and items, which were obtained via Markov Chain Monte Carlo sampling for a hierarchical Bayes (HB) logit model. We call those individual-level utilities the true HB utilities.  These HB utilities offered realistic patterns of preferences across the items and respondents for use in our respondent simulations.  Our simulated respondents mimicked the actual respondents’ preferences, on average: to answer each new MaxDiff task, we perturbed those true HB utilities by iid Gumbel error.  \\
 For each sample of simulated respondents, we ran aggregate logit and compared the current rank order of the estimated aggregate item scores to the true rank order for the known true utilities.  We define hit rate to reflect how accurately we could recover the top few items as observed in the true preferences for the Procter \& Gamble dataset.  To stabilize the hit rate results (since there was a random component to the responses), we ran the simulations each 100 of times. \\
@@ -320,18 +345,7 @@ Bandit MaxDiff epsilon-diffuse TS: We begin with $\frac{1}{3}-\frac{2}{3} $split
 We also tested a pair of existing fixed MaxDiff approaches.
 \textbf{Fixed Sparse MaxDiff}: we showed each item to each respondent an equal number of times (if possible).  With 120 items, 18 sets, and 5 items per set each item appeared on average $\frac{18*5}{120} = 0.75$ times per respondent. \\
 \textbf{Fixed Express MaxDiff}: we randomly drew 30 of the 120 items to show to each respondent.  Each item appeared $\frac{18*5}{30} = 3$ times per respondent.  Across respondents, each item appeared the same number of times. We primarily use Express MaxDiff as our base case.\\
-%\begin{figure}[!ht]
-%\begin{subfigure}{.5\textwidth}
-%\caption{Distrubution of True Utilities}
-%\includegraphics[width=1\textwidth]{plots/10hitrate120show3.pdf}
-%\label{fig:10hit}
-%\end{subfigure}
-%\begin{subfigure}{.5\textwidth}
-%\caption{Distrubution of True Utilities}
-%\includegraphics[width=1\textwidth]{plots/3hitrate120show3.pdf}
-%\label{fig:3hit}
-%\end{subfigure}
-%\end{figure}
+
 \begin{figure}
 \caption{3 Hit Rate with 120 items}
 \includegraphics[width=1\textwidth]{plots/3hitrate120show3.pdf}
@@ -378,6 +392,52 @@ The key takeaway from Figure \ref{fig:3hit} is simple: Thompson Sampling is abou
  We show in Table \ref{table:top3}. After about 160 respondents, we’ve obtained an 80\% hit rate; which we wouldn’t achieve with traditional Express MaxDiff until about the 800th respondent.  As shown, we can accomplish with about 260 respondents what it takes 1000 respondents to do with Express MaxDiff.  Either comparison shows that you can obtain equally good hit rates using the adaptive Bandit MaxDiff methodology with $\frac{1}{4}$ the sample size.\\
 Figure \ref{fig:3hit} also shows the two Thompson Sampling approaches achieve nearly identical results. But we will show later this isn’t the case if we use a misinformed start (Section Misinformed Start)\\
 Figure \ref{fig:10hit} shows the results for Top-10 hit rate for our 120-item MaxDiff, which is a broader measure of success that requires obtaining a high degree of precision for an even broader reach of items than the Top-3 hit rate.  The conclusions are fairly similar as with Figure \ref{fig:3hit}.  It takes about 400 respondents to accomplish with Bandit MaxDiff what we accomplish with 1000 respondents under the non-adaptive express MaxDiff approach. This is supported in Table \ref{table:top3}\\
+\subsection{Empirical Evidence of TS Focusing on Top Items}
+%\begin{figure}
+%\caption{Utility: Mean and 90\% Interval}
+%\includegraphics[width=1\textwidth]{plots/betavalconfidence.pdf}
+%\label{fig:utilcof}
+%\end{figure}
+\begin{figure}
+\caption{Precision}
+\includegraphics[width=1\textwidth]{plots/precision.pdf}
+\label{fig:per}
+\end{figure}
+
+\begin{figure}[!ht]
+\caption{Distrubution of Utility Belief Distribution}
+\begin{subfigure}{.5\textwidth}
+\caption{At 120th Respondent}
+\includegraphics[width=1\textwidth]{plots/beliefdistrBegin.pdf}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\caption{At 1020th Respondent}
+\includegraphics[width=1\textwidth]{plots/beliefdistrEnd.pdf}
+\end{subfigure}
+\label{fig:belief}
+\end{figure}
+Figures \ref{fig:per} and \ref{fig:belief} show between the 120th and 1020th respondant the rank 60 item gets almost no update from TS while TS has a large precision on rank 1 item, while Fixed Express updates them both equally as evidence to our claim why TS works well in this context, TS increases the precision a lot on the higher ranked items of those items while not learning the lower ranked items while Sparse Express spends its resources equally.
+
+%\begin{figure}[!ht]
+%\caption{Distrubution of Final Utility}
+%\begin{subfigure}{.5\textwidth}
+%\caption{Rank 1 Item}
+%\includegraphics[width=1\textwidth]{plots/endbetadis1.pdf}
+%\end{subfigure}
+%\begin{subfigure}{.5\textwidth}
+%\caption{Rank 30 Item}
+%\includegraphics[width=1\textwidth]{plots/endbetadis30.pdf}
+%\end{subfigure}
+%\begin{subfigure}{.5\textwidth}
+%\caption{Rank 60 Item}
+%\includegraphics[width=1\textwidth]{plots/endbetadis60.pdf}
+%\end{subfigure}
+%\begin{subfigure}{.5\textwidth}
+%\caption{Rank 90 Item}
+%\includegraphics[width=1\textwidth]{plots/endbetadis90.pdf}
+%\end{subfigure}
+%\label{fig:end}
+%\end{figure}
 \section{Robustness tests}
 \subsection{Misinformed Starts (When Early Responders Are Horribly Non-Representative)}
 To this point, it seems like the adaptive Bandit MaxDiff approach using Thompson Sampling is the clear winner.  However, what would happen if the first 50 respondents we interviewed were actually not very representative of the average preferences for the sample?  What if we tried to throw Bandit MaxDiff off the scent?  In fact, let’s consider a worst-case scenario: the first responders actually believe \textit{nearly the opposite} from the rest of the sample\\
