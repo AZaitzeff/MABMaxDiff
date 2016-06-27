@@ -415,7 +415,7 @@ As an example I took draws after respondent 100 in TS $\epsilon=.67$ $\delta=10$
  A good stopping rule is to stop when the PVR drops below a certain threshold, (We use .02). One advantage of this is it handles ties (two sets with close exponetial weighted utility scores) really well. 
 \begin{figure}
 \caption{Potential Value Remaining of the Top 3 with 120 items}
-\includegraphics[width=1\textwidth]{plots/3vr120show3.pdf}
+\includegraphics[width=1\textwidth]{plots/3vr120show3ex.pdf}
 \label{fig:3vr}
 \end{figure}
 \begin{figure}
@@ -428,8 +428,30 @@ As an example I took draws after respondent 100 in TS $\epsilon=.67$ $\delta=10$
 \includegraphics[width=1\textwidth]{plots/util120items23.pdf}
 \label{fig:3vrutil}
 \end{figure}
-In Figure \ref{fig:3vr} we see the average PVR using the top 3 items on a log scale .Figure \ref{fig:3vrhist} show on which respondant the iterations' PVR would reach .02 (with the max being 1020)and Figure \ref{fig:3vrutil} shows what the Percent True Utility would be at those points. Another advatange we see for Bandit MaxDiff $\epsilon$-diffuse TS approach is that on average it stops sooner that standard TS with no decrease in profomance. Both Bandit MaxDiff TS stop much sooner and preform much better then fixed express.
- 
+In Figure \ref{fig:3vr} we see the average PVR using the top 3 items on a log scale. Figure \ref{fig:3vrhist} show on which respondant the iterations' PVR would reach .02 (with the max being 1020)and Figure \ref{fig:3vrutil} shows what the Percent True Utility would be at those points. Another advatange we see for Bandit MaxDiff $\epsilon$-diffuse TS approach is that on average it stops sooner that standard TS with no decrease in profomance. Both Bandit MaxDiff TS stop much sooner and preform much better then fixed express.\\
+\begin{table}
+\begin{center}
+\begin{tabular}{l | c | c | c}
+ & Fixed Express &  TS $\epsilon$=$\frac{1}{3}$ $\delta$=10  &TS $\epsilon$=0 $\delta$=1 \\
+\hline
+40 items&&&\\
+Mean Stop& 358.6&  190.4 &  201.8\\
+Mean PTU&.993 & .997 & .997 \\
+\hline
+120 items&&&\\
+Mean Stop& 980.8 &  440.6 &  606.0 \\
+Mean PTU& .976 & .997 & .996 \\
+\hline
+300 items&&&\\
+Mean Stop& 1020.0 &  674.2 &  929.4\\
+Mean PTU&.904 & .992 & .988 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Mean respondant each algorithm would stop at and the mean percent true utility (PTU) at that point when a stopping rule at PVR .02 is implemented}
+\label{table:stop}
+\end{table}
+In Table \ref{table:stop} We see the means under different numbers of items. We see the benefits of using $\epsilon$-diffuse TS grow much larger as the number of items increases.
 \subsection{Asking for Bests instead of Best-Worst}
 Because a key assumption for using the Bandit MaxDiff approach is that the researcher is mainly interested in identifying the top few items, we wondered about the value of spending time asking respondents to identify the worst item within each MaxDiff set.  What would happen if we asked our robotic respondents only to select the best item within each set?  The results somewhat surprised us.  The value of asking respondents to indicate both best and worst within each set more than compensated for the 40\% additional effort we suppose these “worst” questions add to the total interview time when interviewing human respondents.
 In a five item set (A,B,C,D and E) there are 10 possible 2-way comparisons. If we assume A is preferred to B and B is preferred to C and so on, then asking about only the best item will let us know A$>$B, A$>$C, A$>$D and A$>$E (4/10 comparisons).  By asking about worsts as well, for only one additional question we also add B$>$E, C$>$E, and D$>$E (7/10 comparisons), leaving only the order relationship between B, C, and D unknown.
