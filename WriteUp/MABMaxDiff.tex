@@ -188,25 +188,23 @@ Thompson Sampling makes a new draw from the vector of item preferences using the
 \begin{figure}[!ht]
 \caption{Respondent-by-item counts}
 \includegraphics[width=1\textwidth]{plots/3dotplot.pdf}
-\label{fig:purpose}
+\label{fig:dots}
 \end{figure}
 To understand the logic of the algorithm, consider a snapshot in time during the data collection. Imagine we have just collected data from 100 respondents, and we decide to summarize their preferences (for each of 100+ items) with aggregate logit.  Then, to generate a MaxDiff task for the 101st respondent, we could generate a draw from the population preferences leveraging the population means and normal errors with standard deviations equal to the empirically estimated standard errors.  We then can sort that newly sampled vector of preference scores from the most to the least preferred item.  The five most preferred items might be taken into the first task to show to the 101st respondent.  The process (with or without updating the logit weights after recording the first task's answer) could be repeated to choose the five items to show in the second task for the 101st respondent, etc.  To reduce the load on the server managing the data collection, perhaps only after every 20th respondent has completed the survey, the logit weights and standard errors would be updated.\\
 We note that the translation of MaxDiff into a bandit problem is not obvious. Our goal is identifying the utilities of the top set of items with maximum precision. Selecting an arm corresponds to including it in the survey for the next respondent. The reward, however, is not as clear. On the one hand, suppose each task included all possible items. Then the reward would be clear: whether the item is chosen as the ``best.'' But it is not feasible to show so many items to respondents, so that's not a relevant scenario. On the other hand, given we only select a subset of items, the item receiving the ``best'' label doesn't translate directly to a reward. Indirectly, that choice data does enable us to infer how it ranks among all items, exactly aligning with our goal. We use the alignment of the managerial goal and the MAB algorithm's balancing of learning and earning to our advantage. \\
 \section{Specifically Bandit + Conjoint = Thompsons + MaxDiff}
-\subsection{Thompson Sampling}
-\subsection{Eps-Diffuse Thompson Sampling}
 We formalize the proposed procedure in three stages. First, we introduce MaxDiff as a best-worst scaling discrete choice task, and we relate it to the standard multinomial logit model. Next, we introduce Thompson Sampling as the natural method of resolving the learn-vs-earn tradeoff as in a multi-armed bandit problem.  Then we generalize that Thompson Sampling algorithm to be more robust by sampling a proportion of items from a more diffuse distribution.
 \subsection{MaxDiff choice model}
 Every respondent selects both the best and the worst option from an available set of options in each discrete choice task. The model for that data comes from a class of probability models known as best-worst scaling, and MaxDiff is one such model. We adopt the framework from the best-worst scaling literature. For a review, see ~\cite{marley2012models} Marley 2010, ~\cite{marley2005some}. 
 We have K possible items, and we select a set S for each choice task. To describe the items, we define two random variables, best $B_z$ and worst $W_z$, for each $z \in S$.  We then define a third random variable, best-worst $BW_{r,s}$, for any $r,s \in S$.\\
 Following a random utility framework, these utilities have deterministic and stochastic components.\\ 
-A consistent extreme value random utility model is a Thurstone random utility model where each $e_z$ has the extreme value distribution. Consistent model means $B_z=-W_z=U_z$ and $BW_{r,s}=U_r-U_s$, then
+A consistent extreme value random utility model is a Thurstone random utility model where each $\varepsilon_z$ has the extreme value distribution. Consistent model means $B_z=-W_z=U_z$ and $BW_{r,s}=U_r-U_s$, then
 \begin{align*}
-&B_z=v_z+\epsilon_z\\
-&W_z=-v_z-\epsilon_z\\
-&BW_{r,s}=v_r-v_s+\epsilon_r-\epsilon_s\\
+&B_z=v_z+\varepsilon_z\\
+&W_z=-v_z-\varepsilon_z\\
+&BW_{r,s}=v_r-v_s+\varepsilon_r-\varepsilon_s\\
 \end{align*}
-We can write the probability that an item is the best and the probability that the item is the worst. 
+We can write the probability that an item is the best and the probability that the item is the worst.
 \begin{align*}
 &B_S (x)= Pr⁡( B_x=\max_{z \in S} B_z)\\
 &W_S (y)= Pr⁡( W_y=\max_{z \in S} W_z)\\
@@ -227,7 +225,7 @@ To accommodate the standard utility structure, we let utility $u(z)=\log{(b(z))}
 &W_X(y)=\frac{e^{u(y)}}{\sum_{z \in X} e^{u(z)}}\\
 &WB_X(x,y)=\frac{e^{u(x)-u(y)}}{\sum_{r,s \in X, r\neq s} e^{u(r)-u(s)}}
 \end{align*}
-We can derive the same representation from the random utility model ~\cite{marley2005some}. \\
+We can derive the same representation from the random utility model~\cite{marley2005some}. \\
 We can view best-worst choice as a generalization of the classic multinomial logit for the choice of the best only.\\
 \subsection{Estimation}
 From our perspective as researchers, all of the utilities are unknown. We can estimate the MaxDiff choice model in a variety of ways. One way to do this exactly is to enumerate all possible pairs of items $x$ and $y$ and then we describe their joint probability of being best and worst, which is the probability of being having the largest difference $BW_S(x,y)$. The pairwise approach scales quadratically in the number of items. We adopt an alternative approach, which reflects the literature and practice and is shown to be a near exact approximation ~\cite{cohen2003maximum}. This allows us to estimate the best model and worst model independently, without explicitly estimating the best-worst probability. 
@@ -521,19 +519,40 @@ Our Bandit model has a great advantage over fixed designs for very large numbers
 By reducing the number of items to 40 and changing the number of tasks to 12, the fixed express design can now show each item an average of 1.5 times per respondent, which is much less sparse than in larger item cases.\\
 Nevertheless, our results for Bandit MaxDiff are still much better than traditional MaxDiff (Table \ref{table:40top3}). We see about a 2x efficiency gain compared to the Sparse MaxDiff. We also still see a tremendous advantage in the case of a misinformed start.\\
 \subsection{Using True Utility as a Generalization of Hit-Rate}
+\begin{table}
+\begin{center}
+\begin{tabular}{c | c }
+$S$& Percent True Utility \\
+\hline
+\{1,2,3\}& 1.0 \\
+\{1,2,4\}&.973 \\
+\{1,2,5\}&.948 \\
+\{1,3,4\}&.934 \\
+\{1,3,5\}&.910 \\
+\{1,4,5\}&.882 \\
+\{2,3,4\}&.922 \\
+\{2,3,5\}&.897 \\
+\{2,4,5\}&.870 \\
+\{3,4,5\}&.831 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Percent true utility for Various $S$ for a Top 3 scheme from the Procter \& Gamble data}
+\label{table:PTU}
+\end{table}
 Say an algorithm gets the top 9 items and the 11th item in the 10 top items. One might like to differentiate that between another algorithm that gets the top 9 items and the 40th item in the 10 top items is Percent True Utility. \\
 \textbf{Exponetial Weighted Utility}: For a set $S$ the exponential weighted utility is \[\mu_S=\sum_{x \in S}b(x)=\sum_{x \in S}e^{u(x)}\]
-\textbf{Percent True Utility of the Top 3 (or 10)}: The exponential weighted true utility of the top 3 (10) items that the robotic respondents identified over the maximum exponential weighted true utility that could be attained with 3 (10) items. Mathematical if $S^*$ is the top 3 (10) items and $S$ is the current 3 (10) top items identified robotic respondents then Percent True Utility is 
+\textbf{Percent True Utility of the Top 3 (or 10)}: The exponential weighted true utility of the top 3 (10) items that the robotic respondents identified over the maximum exponential weighted true utility that could be attained with 3 (10) items. Mathematical if $S^*$ is the top 3 (10) items and $S$ is the current 3 (10) top items identified robotic respondents then percent true utility is 
 \[
 \frac{\mu_S}{\mu_{S^*}}
 \]
-This can be see as a Generalization of Hit-Rate though it has the advantage of differentiating as in the case above. Though one loses the ability to easy interpret the result . 
+This can be see as a Generalization of Hit-Rate though it has the advantage of differentiating as in the case above. Though one loses the ability to easy interpret the result. In Table \ref{table:PTU} we show the percent true utility the Data for various sets.  
 \begin{figure}
 \caption{Percent True Utility of the Top 3 with 120 items}
 \includegraphics[width=1\textwidth]{plots/3util120show3.pdf}
 \label{fig:3util}
 \end{figure}
-In Figure \ref{fig:3util} Percent True Utility tells a similar story to Hit Rate.
+In Figure \ref{fig:3util} we see after 200 respondents TS on average is about .97 so from table \ref{table:PTU} we can deduce that usually TS has the top 2 items in the top 3 and trying to decide between the 3rd and 4th item. After 200 respondents Sparse Express is about .89 which means that on average after 200 iterations has top 10 items in its top 3 but has trouble differentiating between them at that point.
 
 \subsection{Using Regret as a Stopping Rule}
 In practice we do not know the True Utilities \textit{a priori} but we would like to know 
@@ -560,46 +579,77 @@ Draw 3 &4.81 & 5.23 & 5.04 &  3.96 &  4.17 & 4.37 &  3.58 & 2.99 \\
 
 As an example I took draws after respondent 100 in TS $\epsilon=.67$ $\delta=10$ for 120 items see table \ref{table:data} for draws of exponential weighted utility of a single item. I put the columns in current rank order and only show the top 8 for convenience. Say we were finding the value remaining for the the utility score using the top 3. Then $S=\{1,2,3\}$. Then $\mu^1_{S}=4.02+3.50+5.08=12.6$ and $\mu_{S^*}^{1}=5.08+4.41+4.16=13.65$ So $\Delta^{1}=\frac{13.65-12.6}{12.6}=.083$. Likewise $\Delta^{2}=\frac{12.6-12.39}{12.39}=.017$ and $\Delta^{3}=\frac{15.08-15.08}{15.08}=0$ (Note $\Delta^m=0$ when the $S$ contains the top utilities). The histogram of $\Delta$ after 100 iterations and 220 iterations is shown in figure \ref{fig:data}. \\
  The `potential value remaining' (PVR) is the .95 quantile of the distribution $\Delta$ which in this case was .092. A way to interpret this number is ``We do not know what the utility of $S$ is, but whatever it is, a different set might beat it by as much as 9.2\%.''\\
- A good stopping rule is to stop when the PVR drops below a certain threshold, (We use .02). One advantage of this is it handles ties (two sets with close exponential weighted utility scores) really well. 
+ A good stopping rule is to stop when the PVR drops below a certain threshold, (We use .05 and .02). One advantage of this is it handles ties (two sets with close exponential weighted utility scores) really well. 
 \begin{figure}
-\caption{Potential Value Remaining of the Top 3 with 120 items}
-\includegraphics[width=1\textwidth]{plots/3vr120show3ex.pdf}
+\caption{Potential Value Remaining of the Top 3 with 120 items on a semi log plot, the dashed lines are at .05 and .02}
+\includegraphics[width=1\textwidth]{plots/3vr120show3.pdf}
 \label{fig:3vr}
 \end{figure}
 \begin{figure}
-\caption{Histogram of When Iterations Would Stop Using a .02 Stopping Rule}
+\caption{Histogram of When Iterations Would Stop and PTU Using a .02 Stopping Rule for Top 3 for 120 Items}
+\begin{subfigure}{.5\textwidth}
+\caption{On which Respondent does Iteration Stops}
 \includegraphics[width=1\textwidth]{plots/stop120items23.pdf}
-\label{fig:3vrhist}
+\label{fig:3vrstop2}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\caption{Percent True Utility When Iteration Stops}
+\includegraphics[width=1\textwidth]{plots/util120items23.pdf}
+\label{fig:3vrutil2}
+\end{subfigure}
 \end{figure}
 \begin{figure}
-\caption{Percent True Utility of the Top 3 When Iteration Stops}
-\includegraphics[width=1\textwidth]{plots/util120items23.pdf}
-\label{fig:3vrutil}
+\caption{Histogram of When Iterations Would Stop and PTU Using a .05 Stopping Rule for Top 3 for 120 Items}
+\begin{subfigure}{.5\textwidth}
+\caption{On which Respondent does Iteration Stops}
+\includegraphics[width=1\textwidth]{plots/stop120items53.pdf}
+\label{fig:3vrstop5}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+\caption{Percent True Utility When Iteration Stops}
+\includegraphics[width=1\textwidth]{plots/util120items53.pdf}
+\label{fig:3vrutil5}
+\end{subfigure}
 \end{figure}
-In Figure \ref{fig:3vr} we see the average PVR using the top 3 items on a log scale. Figure \ref{fig:3vrhist} show on which respondent the iterations' PVR would reach .02 (with the max being 1020)and Figure \ref{fig:3vrutil} shows what the Percent True Utility would be at those points. Another advantage we see for Bandit MaxDiff $\epsilon$-diffuse TS approach is that on average it stops sooner that standard TS with no decrease in performance. Both Bandit MaxDiff TS stop much sooner and preform much better then fixed express.\\
+In Figure \ref{fig:3vr} we see the average PVR using the top 3 items on a log scale. Figures \ref{fig:3vrstop2} and \ref{fig:3vrstop5} show on which respondent the iterations' PVR would reach .02 and .05 respectively (with the max being 1020)and Figures \ref{fig:3vrutil2} and \ref{fig:3vrutil5} shows what the Percent True Utility would be at those points.\\
 \begin{table}
 \begin{center}
-\begin{tabular}{l | c | c | c}
+\begin{tabular}{l | c | c | c }
+
  & Fixed Express &  TS $\epsilon$=$\frac{1}{3}$ $\delta$=10  &TS $\epsilon$=0 $\delta$=1 \\
 \hline
-40 items&&&\\
-Mean Stop& 358.6&  190.4 &  201.8\\
-Mean PTU&.993 & .997 & .997 \\
+120 items&&&\\
+Mean Stop& 661.6 &  214.0 & 243.8 \\
+Mean PTU& .966 & .984 & .986 \\
+\hline
+300 items&&&\\
+Mean Stop& 1001.2 &  334.6 &  526.8\\
+Mean PTU& .904 & .970 & .980 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Mean respondent each algorithm would stop at and the mean percent true utility (PTU) for stopping when the PVR reaches .05}
+\label{table:stop5}
+\end{table}
+\begin{table}
+\begin{center}
+\begin{tabular}{l | c | c | c }
+ & Fixed Express &  TS $\epsilon$=$\frac{1}{3}$ $\delta$=10  &TS $\epsilon$=0 $\delta$=1  \\
 \hline
 120 items&&&\\
-Mean Stop& 980.8 &  440.6 &  606.0 \\
+Mean Stop&  980.8 &  440.6 &  606.0 \\
 Mean PTU& .976 & .997 & .996 \\
 \hline
 300 items&&&\\
 Mean Stop& 1020.0 &  674.2 &  929.4\\
-Mean PTU&.904 & .992 & .988 \\
+Mean PTU& .904 & .992 & .988 \\
 \hline
 \end{tabular}
 \end{center}
-\caption{Mean respondent each algorithm would stop at and the mean percent true utility (PTU) at that point when a stopping rule at PVR .02 is implemented}
-\label{table:stop}
+\caption{Mean respondent each algorithm would stop at and the mean percent true utility (PTU) for stopping when the PVR reaches .02}
+\label{table:stop2}
 \end{table}
-In Table \ref{table:stop} We see the means under different numbers of items. We see the benefits of using $\epsilon$-diffuse TS grow much larger as the number of items increases.
+In tables \ref{table:stop2} and \ref{table:stop5} We see the means of the when the iterations would stop and percent true utility at those points for 120 and 300 items.\\ Another advantage we see from this for Bandit MaxDiff $\epsilon$-diffuse TS approach is that on average it stops sooner that standard TS with almost no decrease in performance. This advantage grows with the number of items. Both Bandit MaxDiff TS stop much sooner and preform much better then fixed express. The choice between a .05 stopping rule or a .02 stopping rule is a trade-off between the having to survey extra respondents and getting the extra utility.
 \subsection{Asking for Bests instead of Best-Worst}
 Because a key assumption for using the Bandit MaxDiff approach is that the researcher is mainly interested in identifying the top few items, we wondered about the value of spending time asking respondents to identify the worst item within each MaxDiff set.  What would happen if we asked our robotic respondents only to select the best item within each set?  The results somewhat surprised us.  The value of asking respondents to indicate both best and worst within each set more than compensated for the 40\% additional effort we suppose these ``worst'' questions add to the total interview time when interviewing human respondents.
 In a five item set (A,B,C,D and E) there are 10 possible 2-way comparisons. If we assume A is preferred to B and B is preferred to C and so on, then asking about only the best item will let us know A$>$B, A$>$C, A$>$D and A$>$E (4/10 comparisons).  By asking about worsts as well, for only one additional question we also add B$>$E, C$>$E, and D$>$E (7/10 comparisons), leaving only the order relationship between B, C, and D unknown.
