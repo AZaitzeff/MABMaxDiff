@@ -152,7 +152,7 @@ Beyond efficiency gains, we put forward a framework that links conjoint methods 
 As adaptive conjoint methods began with aggregate adaptation and then progressed to individual-level adaptive, so we propose an aggregate adaptive approach. \\
 \section{Framework and literature}
 \subsection{Maximum Difference Scaling}
-\begin{figure}[!ht]
+\begin{figure}
 \caption{MaxDiff is becoming more popular over time with Sawtooth Software users}
 \includegraphics[width=0.5\textwidth]{plots/maxdiffpop}
 \label{fig:pop}
@@ -164,15 +164,15 @@ MaxDiff, while it is a distinct type of choice experiment, is closely related to
 \subsection{Studying More Items with MaxDiff: Survey of Market Research Practitioners}
 MaxDiff has proven so useful that market researchers increasingly find reasons to use MaxDiff for a large number of items.  How many is a large number of items?  In their 2007 paper, Hendrix and Drucker described ``large sets'' as about 40 to 60 items, proposing variants to MaxDiff called Augmented and Tailored MaxDiff to handle such large problems ~\cite{hendrix2007alternative}. In their 2012 paper, Wirth and Wolfrath also investigated variants to MaxDiff called Express and Sparse MaxDiff for handling what they described as ``very large sets'' of items ~\cite{wirth2012largeset}.  Very large to these authors meant potentially more than 100 items.  To support their findings, they conducted a study among synthetic robotic respondents with 120 items and a real study among humans with 60 items.\\
 For Hendrix and Drucker 40 to 60 items was large, for Wirth and Wolfrath 120 items was very large.  For this current paper, we're referring to huge numbers of items as potentially 300 or more. The motivation of our research is beyond academic curiosity, as marketing researchers are seeking such applications pushing MaxDiff further than it was perhaps ever intended. \\
-\begin{figure}[!ht]
+\begin{figure}
 \caption{Maximum Number of Items Studied via MaxDiff over Last 12 Months}
 \includegraphics[width=0.5\textwidth]{plots/maxnumstudy}\\
 N = ?(TO DO) Mean= 40, Median=30, Maximum=400
 \label{fig:max}
 \end{figure}
-In Sawtooth Software's 2015 Customer Feedback Survey, we asked respondents to tell us the largest number of items they had included in a MaxDiff study during the last 12 months (Figure \ref{fig:max}).  Nearly one-fifth of respondents indicated their firms had conducted a study with 51 or more items.  The maximum number of items studied was 400!\\
+In Sawtooth Software's 2015 Customer Feedback Survey, we asked respondents to tell us the largest number of items they had included in a MaxDiff study during the last 12 months (Figure \ref{fig:max}). Nearly one-fifth of respondents indicated their firms had conducted a study with 51 or more items.  The maximum number of items studied was 400!\\
 To some it may seem bizarre and overwhelming that some researchers are conducting MaxDiff studies with 81+ or even 400 items.  However, when we consider that individual MaxDiff items may actually represent conjoined elements that constitute a profile (say, a combination of packaging style, color, claims, and highlighted ingredients), then it can make much more sense to do 400-item studies.  If the profiles involve multiple highly interactive attributes that pose challenges for CBC, then MaxDiff with huge numbers of items could be a viable alternative (given the new approach we demonstrate further below).\\
-\begin{figure}[!ht]
+\begin{figure}
 \caption{Main Purpose for MaxDiff Study with 41+ Items}
 \includegraphics[width=0.5\textwidth]{plots/maxdiffpurpose}
 \label{fig:purpose}
@@ -409,7 +409,7 @@ Figure \ref{fig:10hit} shows the results for Top-10 hit rate for our 120-item Ma
 \end{subfigure}
 \label{fig:belief}
 \end{figure}
-Figures \ref{fig:per} and \ref{fig:belief} show between the 120th and 1020th respondent the rank 60 item gets almost no update from TS while TS has a large precision on rank 1 item, while Fixed Express updates them both equally as evidence to our claim why TS works well in this context, TS increases the precision a lot on the higher ranked items of those items while not learning the lower ranked items while Sparse Express spends its resources equally.
+Figures \ref{fig:per} and \ref{fig:belief} show between the 120th and 1020th respondent the rank 60 item gets almost no update from TS, while TS has a large precision on rank 1 item. Fixed Express on the other hand updates them both equally as evidence to our claim why TS works well in this context, TS increases the precision a lot on the higher ranked items of those items while not learning the lower ranked items while Sparse Express spends its resources equally.
 
 %\begin{figure}[!ht]
 %\caption{Distrubution of Final Utility}
@@ -612,6 +612,25 @@ As an example I took draws after respondent 100 in TS $\epsilon=.67$ $\delta=10$
 \end{subfigure}
 \end{figure}
 In Figure \ref{fig:3vr} we see the average PVR using the top 3 items on a log scale. Figures \ref{fig:3vrstop2} and \ref{fig:3vrstop5} show on which respondent the iterations' PVR would reach .02 and .05 respectively (with the max being 1020)and Figures \ref{fig:3vrutil2} and \ref{fig:3vrutil5} shows what the Percent True Utility would be at those points.\\
+
+\begin{table}
+\begin{center}
+\begin{tabular}{l | c | c | c }
+ & Fixed Express &  TS $\epsilon$=$\frac{1}{3}$ $\delta$=10  &TS $\epsilon$=0 $\delta$=1  \\
+\hline
+120 items&&&\\
+Mean Stop&  980.8 &  440.6 &  606.0 \\
+Mean PTU& .976 & .997 & .996 \\
+\hline
+300 items&&&\\
+Mean Stop& 1020.0 &  674.2 &  929.4\\
+Mean PTU& .904 & .992 & .988 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Mean respondent each algorithm would stop at and the mean percent true utility (PTU) for stopping when the PVR reaches .02}
+\label{table:stop2}
+\end{table}
 \begin{table}
 \begin{center}
 \begin{tabular}{l | c | c | c }
@@ -631,25 +650,7 @@ Mean PTU& .904 & .970 & .980 \\
 \caption{Mean respondent each algorithm would stop at and the mean percent true utility (PTU) for stopping when the PVR reaches .05}
 \label{table:stop5}
 \end{table}
-\begin{table}
-\begin{center}
-\begin{tabular}{l | c | c | c }
- & Fixed Express &  TS $\epsilon$=$\frac{1}{3}$ $\delta$=10  &TS $\epsilon$=0 $\delta$=1  \\
-\hline
-120 items&&&\\
-Mean Stop&  980.8 &  440.6 &  606.0 \\
-Mean PTU& .976 & .997 & .996 \\
-\hline
-300 items&&&\\
-Mean Stop& 1020.0 &  674.2 &  929.4\\
-Mean PTU& .904 & .992 & .988 \\
-\hline
-\end{tabular}
-\end{center}
-\caption{Mean respondent each algorithm would stop at and the mean percent true utility (PTU) for stopping when the PVR reaches .02}
-\label{table:stop2}
-\end{table}
-In tables \ref{table:stop2} and \ref{table:stop5} We see the means of the when the iterations would stop and percent true utility at those points for 120 and 300 items.\\ Another advantage we see from this for Bandit MaxDiff $\epsilon$-diffuse TS approach is that on average it stops sooner that standard TS with almost no decrease in performance. This advantage grows with the number of items. Both Bandit MaxDiff TS stop much sooner and preform much better then fixed express. The choice between a .05 stopping rule or a .02 stopping rule is a trade-off between the having to survey extra respondents and getting the extra utility.
+In tables \ref{table:stop2} and \ref{table:stop5} we see the means of the when the iterations would stop and percent true utility at those points for 120 and 300 items.\\ Another advantage we see from this for Bandit MaxDiff $\epsilon$-diffuse TS approach is that on average it stops sooner that standard TS with almost no decrease in performance. This advantage grows with the number of items. Both Bandit MaxDiff TS stop much sooner and preform much better then fixed express. The choice between a .05 stopping rule or a .02 stopping rule is a trade-off between the having to survey extra respondents and getting the extra utility.
 \subsection{Asking for Bests instead of Best-Worst}
 Because a key assumption for using the Bandit MaxDiff approach is that the researcher is mainly interested in identifying the top few items, we wondered about the value of spending time asking respondents to identify the worst item within each MaxDiff set.  What would happen if we asked our robotic respondents only to select the best item within each set?  The results somewhat surprised us.  The value of asking respondents to indicate both best and worst within each set more than compensated for the 40\% additional effort we suppose these ``worst'' questions add to the total interview time when interviewing human respondents.
 In a five item set (A,B,C,D and E) there are 10 possible 2-way comparisons. If we assume A is preferred to B and B is preferred to C and so on, then asking about only the best item will let us know A$>$B, A$>$C, A$>$D and A$>$E (4/10 comparisons).  By asking about worsts as well, for only one additional question we also add B$>$E, C$>$E, and D$>$E (7/10 comparisons), leaving only the order relationship between B, C, and D unknown.
