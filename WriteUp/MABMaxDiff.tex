@@ -3,8 +3,9 @@
 %% Mirko Janc, Ph.D., INFORMS, mirko.janc@informs.org
 %% ver. 0.95, December 2010
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[mksc,blindrev]{informs3} % current default for manuscript submission
-%\documentclass[mksc,nonblindrev]{informs3}
+%\documentclass[mksc,blindrev]{informs3} % current default for manuscript submission
+\documentclass[nonblindrev]{informs3}
+%\documentclass[a4paper,12pt]{article}
 
 %%\OneAndAHalfSpacedXI % current default line spacing
 \OneAndAHalfSpacedXII
@@ -26,6 +27,9 @@
  \def\bibhang{24pt}%
  \def\newblock{\ }%
  \def\BIBand{and}%
+
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
 
 
 %% Setup of theorem styles. Outcomment only one. 
@@ -70,14 +74,14 @@
 %\RUNAUTHOR{}
 
 % Title or shortened title suitable for running heads. Sample:
-% \RUNTITLE{Bundling Information Goods of Decreasing Value}
+% \RUNTITLE{}
 % Enter the (shortened) title:
-%\RUNTITLE{}
+\RUNTITLE{Bandit MaxDiff PRELIMINARY! PLEASE DO NOT DISTRIBUTE}
 
 % Full title. Sample:
 % \TITLE{Bundling Information Goods of Decreasing Value}
 % Enter the full title:
-%\TITLE{}
+\TITLE{Bandit MaxDiff: Large-scale adaptive MaxDiff with $\epsilon$-Diffuse Thompson Sampling \\ PRELIMINARY! DO NOT DISTRIBUTE}
 
 % Block of authors and their affiliations starts here:
 % NOTE: Authors with same affiliation, if the order of authors allows, 
@@ -85,7 +89,7 @@
 %   \EMAIL field can be repeated if more than one author
 \ARTICLEAUTHORS{%
 \AUTHOR{Eric Schwartz}
-\AFF{University of Michigan, \EMAIL{}, \URL{}}
+\AFF{University of Michigan, \EMAIL{ericmsch@umich.edu}, \URL{}}
 \AUTHOR{Kenneth Fairchild}
 \AFF{Sawtooth Software, \EMAIL{}, \URL{}}
 \AUTHOR{Bryan Orme}
@@ -96,7 +100,7 @@
 } % end of the block
 
 \ABSTRACT{%
-For large MaxDiff studies whose main purpose is identifying the top few items for the sample, a new adaptive approach called Bandit MaxDiff may increase efficiency fourfold over standard non-adaptive MaxDiff.  Bandit MaxDiff leverages information from previous respondents via aggregate logit and Thompson Sampling so later respondents receive designs that oversample the topmost items that are most likely to turn out to be the overall winners. 
+For large MaxDiff studies whose main purpose is identifying the top few items for the sample, a new adaptive approach called Bandit MaxDiff may increase efficiency fourfold over standard non-adaptive MaxDiff.  Bandit MaxDiff leverages information from previous respondents via aggregate logit and Thompson Sampling so later respondents receive designs that oversample the topmost items that are most likely to turn out to be the overall winners. Our approach applies beyond MaxDiff problems to a more general set of bandit problems. We propose a flexible algorithm, $\epsilon$-Diffuse Thompson Sampling (TS), which nests traditional TS. Blending ideas from $\epsilon$-greedy in machine learning and Bayesian approaches, this is a more robust version of TS, which a manager can control with tuning parameters. For instance, being less risk averse, one may drawn more items from diffuse posteriors, making the algorithm robust to changing environments, even extreme non-stationarity. We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. Beyond showing our approach outperforms better than current methods, we show under which conditions it performs even better than (larger problems) or just as well as existing methods (smaller problems).
 Keywords: Active learning, adaptive conjoint, multi-armed bandit, best-worst scaling, MaxDiff, Thompson Sampling % Enter your abstract
 }%
 
@@ -135,7 +139,7 @@ With that objective in mind, we propose a new adaptive choice experiment method.
 Our approach departs from traditional adaptive survey methods like adaptive conjoint analysis (ACA). They aim to improve the precision of each of the parameters; we estimate the best items more precisely. \\
 We propose a new adaptive method, combining MaxDiff and multi-armed bandit methods, as an example of an even broader framework for stated choice data collection. The focus of our research is a broader framework to align the data collection process with such managerial objectives. By aligning the two, we aim to improve efficiency and scalability for big data collection via choice experiments. We find we can ``get more for less,'' by improving precision using a smaller sample size compared to existing methods.\\
 We propose this framework more broadly but will demonstrate it with MaxDiff, as it is an increasingly popular and important choice experiment method. But we will consider the general choice-based conjoint case in our discussion section. \\
-UNDERLINED Our approach draws on state-of-the-art MAB algorithms in statistical machine learning called Follow The Perturbed Leader (FTPL) ~\cite{kalai2005efficient}. Recent theoretical advances prove that adding perturbations of Gumbel distributed noise leads to an optimal MAB strategy ~\cite{abernethy2015fighting}; ~\cite{kujala2005following}. The perturbation methods provide an intuitive randomization decision strategy, which is appropriate for our application, yet their connection to other approaches and application have are limited. Perturbation not only resolves the explore-exploit (learn-earn) tradeoff for the stochastic (iid) bandit setting, but it also does so in the adversarial setting, suggesting it an MAB strategy more robust to changes in the non-random changes in the environment. We shed light on this methodological link as it has consequences beyond our method.\\
+Our approach draws on state-of-the-art MAB algorithms in statistical machine learning called Follow The Perturbed Leader (FTPL) ~\cite{kalai2005efficient}. Recent theoretical advances prove that adding perturbations of Gumbel distributed noise leads to an optimal MAB strategy ~\cite{abernethy2015fighting}; ~\cite{kujala2005following}. The perturbation methods provide an intuitive randomization decision strategy, which is appropriate for our application, yet their connection to other approaches and application have are limited. Perturbation not only resolves the explore-exploit (learn-earn) tradeoff for the stochastic (iid) bandit setting, but it also does so in the adversarial setting, suggesting it an MAB strategy more robust to changes in the non-random changes in the environment. We shed light on this methodological link as it has consequences beyond our method.\\
 We contribute three ideas to the literature and practice. First, we frame choice task data collection as an earning-and-learning problem. During the process of data collection, we simultaneously balance the desire to learn preferences of all items and earn a reward towards achieving objective, by only serving questions the truly best subset of items. In this case, the objective is to identify the best set of items, for instance, the most desirable levels of attributes. The faster we identify the best items, the more we include them in questions, improving the precision of estimates. And if we need to reach a desired level of precision, we can do so faster, saving money in the form of number of respondents and time. 
 Multi-armed bandit problems appear in marketing experiments for online advertising ~\cite{schwartz2015customer} ~\cite{urban2013morphing} and website design ~\cite{hauser2009website}. One particular MAB method amenable to multi-variable parametric models is Thompson Sampling.\\
 While we use bandit algorithms, our approach differs from extant bandit applications in a number of ways. For a bandit problem the reward is observed immediately (click, acquisition, purchase). While we have immediate observations (choice), that is not our reward. Instead, our goal is to correctly identify the truly best items as precisely as possible. These are not evaluable in real-time. \\
@@ -143,13 +147,11 @@ While our problem is not a bandit problem exactly, it is a bandit-inspired probl
 Consider what would occur if the reward was whether an item is selected as best alternative, the arm's reward would be completely dependent on all of the other items presented in the set (e.g., was it presented alongside poor items). 
 Second, the need to optimize this process is greater for large-scale problems with extremely large number of possible attribute levels or items.  In settings with hundreds of items, there is greater opportunity cost of focusing on items that are not important, calling for a need to improve efficiency.\\
 Third, we propose an adaptive method for best-worst scaling. Existing adaptive methods have been largely limited to conjoint, adapting at both the aggregate level ~\cite{arora2001improving} and the individual level ~\cite{toubia2004polyhedral}. Yet best-worst methods, such as MaxDiff, have continued to emerge as important and commonly used in areas including marketing research and public health. We introduce a first step to make MaxDiff adaptive in a principled manner by using MAB methods. We accommodate an increasingly accepted method of solving multi-armed bandit problems, Thompson Sampling. We introduce two versions: MaxDiff - Thompson Sampling and its generalization MaxDiff $\epsilon$-diffuse Thompson Sampling.\\
-The rest of the paper is structured as follows. In the next section we introduce the illustrative problem of maximum difference scaling focusing on its use in practice with large numbers of items. We then briefly introduce the multi-armed bandit framework. After formalizing the discrete choice model of maxdiff analysis, we introduce our two algorithms that implement this method for Maxdiff Surveys. Then we present our empirical results in regular setting and then present variants of our main results.\\
+The $\epsilon$-Diffuse Thompson Sampling nests traditional TS. We combine ideas from $\epsilon$-greedy in machine learning and Bayesian approaches to produce a more robust version of TS,  which a manager can control with tuning parameters. For instance, if a manager wants to be extra conservative and maintaining more samples drawn from diffuse posteriors, she will make the algorithm robust to changing environments, even extreme non-stationarity. \\
 
-By analogy, our bandit adaptive proposal relates to existing adaptive conjoint just as M-efficiency criterion is to D-efficiency.  Unlike M-efficiency designs where the researcher decides the managerial weight of different factors a priori, we know which of the items should receive more weight. Instead, that is exactly what we want to learn actively. \\
+The rest of the paper is structured as follows. In the next section we introduce the illustrative problem of maximum difference scaling focusing on its use in practice with large numbers of items. We then briefly introduce the multi-armed bandit framework. After formalizing the discrete choice model of maxdiff analysis, we introduce our two algorithms that implement this method for Maxdiff Surveys. Then we present our empirical results in regular setting and then present variants of our main results. We implement the methods using MaxDiff survey implemented by Sawtooth Software with a large consumer packaged goods manufacturer. \\
 
-Beyond efficiency gains, we put forward a framework that links conjoint methods and multi-armed bandit methods. \\
 
-As adaptive conjoint methods began with aggregate adaptation and then progressed to individual-level adaptive, so we propose an aggregate adaptive approach. \\
 \section{Framework and literature}
 \subsection{Maximum Difference Scaling}
 \begin{figure}
@@ -167,7 +169,7 @@ For Hendrix and Drucker 40 to 60 items was large, for Wirth and Wolfrath 120 ite
 \begin{figure}
 \caption{Maximum Number of Items Studied via MaxDiff over Last 12 Months}
 \includegraphics[width=0.5\textwidth]{plots/maxnumstudy}\\
-N = ?(TO DO) Mean= 40, Median=30, Maximum=400
+N = ??, Mean= 40, Median=30, Maximum=400
 \label{fig:max}
 \end{figure}
 In Sawtooth Software's 2015 Customer Feedback Survey, we asked respondents to tell us the largest number of items they had included in a MaxDiff study during the last 12 months (Figure \ref{fig:max}). Nearly one-fifth of respondents indicated their firms had conducted a study with 51 or more items.  The maximum number of items studied was 400!\\
@@ -252,33 +254,39 @@ Since we are uncertain about the each parameter value, we continue collecting da
 &k \sim \text{multinomial}(w)\\
 &\argmax_k u_k^{(g)} u_k^{(g)} \sim p(u|D)
 \end{align*}
-Discuss relation to the Follow the regularized leader / perturbed leader 
+
+%Discuss relation to the Follow the regularized leader / perturbed leader 
+
 \subsection{Algorithm MaxDiff TS}
-\begin{itemize}
+\textbf{BEGIN:}
+\begin{enumerate}
 \item For respondents n =1,\ldots,initial
 \begin{enumerate}
-\item Act: select items for MaxDiff design
-\begin{itemize}
+\item \textbf{Act}: select items for MaxDiff design
+\begin{enumerate}
 \item Sample $L$ items from the population 
 \item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
-\end{itemize}
+\end{enumerate}
 \end{enumerate}
 \item For respondents n = initial + 1,\ldots, N
 \begin{enumerate}
-\item Estimate: update model $p(D|\theta)$
-\begin{itemize}
+\item \textbf{Estimate}: update model $p(D|\theta)$
+\begin{enumerate}
 \item Sample model parameters $u_1,\ldots,u_k \sim p(u|D)$
-\end{itemize}
-\item Value: rank items by utility
-\begin{itemize}
-\item Rank and take top $L$ subset $u^{(1)},u^{(2)}\ldots,u^{(L)}$
-\end{itemize}
-\item Act: select items for MaxDiff design
-\begin{itemize}
-\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
-\end{itemize}
 \end{enumerate}
-\end{itemize}
+\item \textbf{Value}: rank items by utility
+\begin{enumerate}
+\item Rank and take top $L$ subset $u^{(1)},u^{(2)}\ldots,u^{(L)}$
+\end{enumerate}
+\item \textbf{Act}: select items for MaxDiff design
+\begin{enumerate}
+\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\textbf{END ALGORITHM}
+
+
 We follow the algorithm Bandit MaxDiff-TS. After an initial number of respondents, we begin adapting. We update beliefs about the model parameters. We can draw from an exact or approximate posterior distribution. \footnote{In the case of the multinomial logit, we can use MCMC to obtain samples or, as we do in the empirical application, we can sample from asymptotic distribution via MLE implied by the estimated mean and standard errors.}\\
 From a single sample of parameter values, we rank the items by utility. We select the top $L$ items, and we generate a MaxDiff design of $J$ best-worst tasks, each with a choice set of $|S|$ items.  We use $L=30$, $J=18$, $|S|=5$ as a default since it is a standard number of items used in MaxDiff studies ~\cite{wirth2012largeset}. 
 While typical Bayesian or numerical integration methods call for large numbers of draws (or sufficient number) to achieve coverage of the full distribution of parameter values, our  approach relies on the variability of a single sample. There is value in the sample to sample differences in the value of parameters and their relative rank ordering. It allows  \\
@@ -292,35 +300,53 @@ Perhaps the natural parameter uncertainty is not enough or is perhaps too slow t
 The way the $\epsilon$-$\delta$ version hedges its bets on the best items intuitively. As in illustration, instead of sampling 30 items from TS, we use 20 of the items drawn using standard Thompson Sampling (L=30,$\epsilon$=1/3), and 10 of the items drawn using Thompson Sampling with a much more diffuse prior (variance of estimate multiplied by $\delta$=10).
 For e-d case, its density does not become a spike as quickly as it does without e-d. This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and $\delta$, the more exploration and slower the algorithm settles on its set of items. The epsilon comes from the popular epsilon-greedy.
 The e-d generalization is just like a two-component mixture model, which nests a pooled model without segments. As the epsilon is zero, the diffuse distribution is never used, so the algorithm collapses to regular TS. As $\delta$ is 1, the diffuse distribution is equivalent to the non-diffuse distribution. 
+
 \subsection{Algorithm MaxDiff epsilon-Diffuse TS}
-\begin{itemize}
-\item For respondents n =1,\ldots,initial
-\begin{enumerate}
-\item Act: select items for MaxDiff design
-\begin{itemize}
-\item Sample $L$ items from the population 
-\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
-\end{itemize}
-\end{enumerate}
-\item For respondents n = initial + 1,\ldots, N
-\begin{enumerate}
-\item Estimate: update model $p(D|\theta)$ to obtain population-level estimates, $\bar{u}$ and $\Sigma$.
-\begin{itemize}
-\item Diffuse TS: Sample model parameters from diffuse distribution, by using rescaled larger variance-covariance $\delta \Sigma$, with $\delta > 1$ \[ u_D \sim N(\bar{u},\delta \Sigma)\]
-\item Regular TS: Sample model parameters \[u_R \sim N(\bar{u},\Sigma)\]
-\end{itemize}
-\item Value: rank items by utility
-\begin{itemize}
-\item Take top $\epsilon L$ items ranked diffuse sample $u_D^{(1)},u_D^{(2)}\ldots,u_D^{(\epsilon L)}$
-\item Take top $(1-\epsilon)L$ items ranked regular sample $u_R^{(1)},u_R^{(2)}\ldots,u_R^{((1-\epsilon)L)}$
-\item Combine diffuse and regular samples into $L$ items. (Remove duplicates items. Take the next best unique item from the diffuse sample not already selected.)
-\end{itemize}
-\item Act: select items for MaxDiff design
-\begin{itemize}
-\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
-\end{itemize}
-\end{enumerate}
-\end{itemize}
+
+% \begin{algorithmic}
+% 	\If {$n \leq initial$}	  
+%	\State   
+% 	\Else
+% 	\If {$n \geq initial + 1$}		
+%	\State   
+% 	\EndIf
+% 	\EndIf
+% \end{algorithmic}    
+\textbf{BEGIN:}
+	\begin{enumerate}
+		\item   For respondents $n =1,\ldots,N_{initial}$
+		\begin{enumerate}
+			\item \textbf{Act}: select items for MaxDiff design
+			\begin{enumerate}
+				\item Sample $L$ items from the population 
+				\item Create MaxDiff questionnaire 
+				\item Survey next respondent with $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
+			\end{enumerate}
+		\end{enumerate}
+		\item For respondents $n = N_{initial} + 1,\ldots, N$
+		\begin{enumerate}
+			\item \textbf{Estimate}: update model $p(D|\theta)$ to obtain population-level estimates, $\bar{u}$ and $\Sigma$.
+			\begin{enumerate}
+				\item Diffuse TS: Sample model parameters from diffuse distribution, by using rescaled larger variance-covariance $\delta \Sigma$, with $\delta > 1$ \[ u_D \sim N(\bar{u},\delta \Sigma)\]
+				\item Regular TS: Sample model parameters \[u_R \sim N(\bar{u},\Sigma)\]
+			\end{enumerate}
+			\item \textbf{Value}: rank items by utility
+			\begin{enumerate}
+				\item Take top $\epsilon L$ items ranked diffuse sample $u_D^{(1)},u_D^{(2)}\ldots,u_D^{(\epsilon L)}$
+				\item Take top $(1-\epsilon)L$ items ranked regular sample $u_R^{(1)},u_R^{(2)}\ldots,u_R^{((1-\epsilon)L)}$
+				\item Combine diffuse and regular samples into $L$ items. (Remove duplicates items. Take the next best unique item from the diffuse sample not already selected.)
+			\end{enumerate}
+			\item \textbf{Act}: select items for MaxDiff design
+			\begin{enumerate}
+				\item Create MaxDiff questionnaire.
+				\item Survey next next respondent with $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
+			\end{enumerate}
+		\end{enumerate}
+	\end{enumerate}
+\textbf{END ALGORITHM}
+
+
+
 \subsection{Main Empirical Analysis}
 We compared our proposed bandit MaxDiff approaches to existing non-adaptive fixed MaxDiff design strategies using simulation based on inferred preferences from an actual MaxDiff survey. We used MaxDiff data from a survey conducted by Procter \& Gamble with Sawtooth Software. The study involved 981 respondents and 120 items from a sparse MaxDiff study. The subject matter and exact item text was hidden for confidentiality purposes. They provided us with the individual-level posterior mean utilities for all respondents and items, which were obtained via Markov Chain Monte Carlo sampling for a hierarchical Bayes (HB) logit model. We call those individual-level utilities the true HB utilities.  These HB utilities offered realistic patterns of preferences across the items and respondents for use in our respondent simulations.  Our simulated respondents mimicked the actual respondents' preferences, on average: to answer each new MaxDiff task, we perturbed those true HB utilities by iid Gumbel error.  \\
 For each sample of simulated respondents, we ran aggregate logit and compared the current rank order of the estimated aggregate item scores to the true rank order for the known true utilities.  We define hit rate to reflect how accurately we could recover the top few items as observed in the true preferences for the Procter \& Gamble dataset.  To stabilize the hit rate results (since there was a random component to the responses), we ran the simulations each 100 of times. \\
@@ -668,9 +694,13 @@ Our results suggest that if your main purpose in using large item lists in MaxDi
 Bandit MaxDiff leverages information from prior respondents to show more effective tradeoffs to later respondents (tending to oversample the stars, based on the Thompson Sampling mechanism).  Even in the face of diabolically imposed misinformed starts (horribly unrepresentative first responders), the Bandit MaxDiff approach with our 20/10 split is extremely robust and self-correcting.\\
 Although our simulations involve 120-item and 300-item tests, we expect that even greater efficiency gains than 4x (compared to standard Express MaxDiff designs) may occur with 500-item (or more) MaxDiff studies.  For studies using 40 respondents, our simulation showed a 2x advantage in efficiency over fixed MaxDiff designs. Though not as dramatic, this is still a sizable boost.\\
 Future research should test our findings using human respondents.  Using an adaptive process that focuses on comparing best items may result in a more cognitively difficult task than a standard level-balanced, near-orthogonal approach.  The greater expected within-set utility balance may lead to higher response error which may counteract some of the benefits of the Bandit adaptive approach.  However, based on previous research ~\cite{orme2006adaptive} that employed within-respondent adaptivity, the additional degree of difficulty that the Bandit adaptive approach could impose upon individual respondents (owing to utility balance) would probably not counteract the lion share of the benefits we've demonstrated using simulated respondents.\\
+
+This paper also introduces a framework that links conjoint methods and multi-armed bandit methods. Much like adaptive conjoint methods began with aggregate adaptation and then progressed to individual-level adaptive, so we propose an aggregate adaptive approach. But future could explore methods using fully heterogeneous models, and adapting within each individual. A partially pooled model will be useful here, as it is with other adaptive conjoint methods. \\
+
+Our method relates to existing adaptive conjoint just as M-efficiency criterion is to D-efficiency.  Unlike M-efficiency designs where the researcher decides the managerial weight of different factors a priori, we know which of the items should receive more weight. Instead, that is exactly what we want to learn actively. \\
+
+
 We should note that as of this article's publication date, Sawtooth Software does not offer Bandit MaxDiff as a commercial tool.  Sawtooth Software may perhaps one day soon offer Bandit MaxDiff as an option within its commercially available MaxDiff software.  As for the authors, we look forward to this possibility as we've been especially impressed by the potential cost savings and increased accuracy!
-
-
 
 
 
