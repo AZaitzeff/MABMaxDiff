@@ -222,54 +222,52 @@ For any pair of items, $x,y \in S$, we can write the joint probability that $x$ 
 \end{align*}
 To accommodate the standard utility structure, we let utility $u(z)=\log{(b(z))}$ Then each of the probabilities 
 \begin{align*}
-&B_X(x)=\frac{e^{u(x)}}{\sum_{z \in X} e^{u(z)}}\\
-&W_X(y)=\frac{e^{u(y)}}{\sum_{z \in X} e^{u(z)}}\\
-&WB_X(x,y)=\frac{e^{u(x)-u(y)}}{\sum_{r,s \in X, r\neq s} e^{u(r)-u(s)}}
+&B_S(x)=\frac{e^{u(x)}}{\sum_{z \in S} e^{u(z)}}\\
+&W_S(y)=\frac{e^{u(y)}}{\sum_{z \in S} e^{u(z)}}\\
+&WB_S(x,y)=\frac{e^{u(x)-u(y)}}{\sum_{r,s \in S, r\neq s} e^{u(r)-u(s)}}
 \end{align*}
 We can derive the same representation from the random utility model~\cite{marley2005some}. \\
 We can view best-worst choice as a generalization of the classic multinomial logit for the choice of the best only.\\
 \subsection{Estimation}
 From our perspective as researchers, all of the utilities are unknown. We can estimate the MaxDiff choice model in a variety of ways. One way to do this exactly is to enumerate all possible pairs of items $x$ and $y$ and then we describe their joint probability of being best and worst, which is the probability of being having the largest difference $BW_S(x,y)$. The pairwise approach scales quadratically in the number of items. We adopt an alternative approach, which reflects the literature and practice and is shown to be a near exact approximation ~\cite{cohen2003maximum}. This allows us to estimate the best model and worst model independently, without explicitly estimating the best-worst probability. 
-\begin{align*}
-&B_S(x)=Pr(B_x=\max_{z \in S}B_z)=\frac{1}{1+e^{X_B \theta+ e_B}}\\
-&W_S(y)=Pr(W_y=\max_{z \in S}W_z)=\frac{1}{1+e^{X_W \theta+ e_B}}
-\end{align*}
-We describe the data for any individual-task combination. Let $Y_{B_S}(z)$ be the binary choice variable, which equals 1 if the item is selected as best in the set $S$, and 0 otherwise. Then $Y_{W_S}(z)$ is the indicator of whether item $z \in S$ is selected as the worst. The design matrix $X_{B_S}$ (of size $|S|$-by-$K$) contains indicator variables taking on value of 1 for each item in the current set $S$ and 0 otherwise. To signal the item as worst, we set $X_{W_S}=-X_{B_S}$, so $X_{W_S}$ contains values of 0 or -1. Taken together, we express the model of the choice data as a multinomial logit with choice probabilities in vector notation as follows,
+We describe the data for any individual-task combination. Let $Y_{B_S}(z)$ be the binary choice variable, which equals 1 if the item is selected as best in the set $S$, and 0 otherwise. Then $Y_{W_S}(z)$ is the indicator of whether item $z \in S$ is selected as the worst. The design matrix $X_{B_S}$ (of size $|S|$-by-$N$) contains indicator variables taking on value of 1 for each item in the current set $S$ and 0 otherwise. To signal the item as worst, we set $X_{W_S}=-X_{B_S}$, so $X_{W_S}$ contains values of 0 or -1.  Taken together, we express the negative loglikihood of the choice data as a multinomial logit with choice probabilities in vector notation as follows,
 \[
-\begin{bmatrix}
-p_b\\
-p_w
-\end{bmatrix}
-=\logit^{-1}(\begin{bmatrix}X_B\\X_W\end{bmatrix}\theta+\begin{bmatrix}e_b\\e_w \end{bmatrix})
+-\frac{\exp{(\begin{bmatrix}Y_B\\Y_W\end{bmatrix}\theta)}}{\exp{(\begin{bmatrix}X_B\\X_W\end{bmatrix}\theta)}}
 \]
-The rows in this matrix representation represent every respondent-task-item combination, $N*J*|S|$, repeated twice.  The probability vectors represent the collection of all best and worst likelihoods for each item in each set for all respondents, $[p_b,p_w]=\{B_S(z),W_S(z)|\forall z \in S, \forall S \in MDD_i, \forall i\}$.
+The rows in this matrix representation represent every respondent-task-item combination, $N*J*|S|$, repeated twice.  
 The link between the models of best choice and worst choice is the parameter $\theta=\{\theta_1,\ldots,\theta_k \}$. This common parameter vector represents the overall utility of each item $1,\ldots,k$. For a more positive $\theta_k$, the item $k$ has a larger probability of being chosen as best; the more negative, the more likely the item will be chosen as worst.\\
 We clarify language about utility, which may diverge from conjoint language or language for multi-attribute profiles. Since $X$ is an indicator, the $\theta$ only represents the utility of item $k$ being included versus excluded. If $\theta_k > \theta_{k'}$, then we say item $k$ is ``more preferred,'' ``more important,'' or simply, ``better.''\\
 Due to the sparse nature of MaxDiff for huge numbers of items plus the desire for rapid real time updates, we decided to use aggregate MNL rather than a Bayesian approach.\\
+The loglikihood can be written in summation notation where $S_n$ denotes the nth set of choices as follows
+\[
+LL(\theta)=-\sum_{n=1}^N \sum_{x \in S_n} (Y_{B_{S_n}}(x)\log{\frac{e^{\theta_x}}{\sum_{z\in S_n} e^{\theta_z}}}+ Y_{W_{S_n}}(x)\log{\frac{e^{-\theta_x}}{\sum_{z\in S_n} e^{-\theta_z}}})
+\]
+In our work we find $\theta$ by minimizing the negative loglikihood using Newton-Rapson.
+
 \subsection{Adaptive MaxDiff}
-Since we are uncertain about the each parameter value, we continue collecting data. But we do not need to reduce that uncertainty equally for each one.  To translate our current beliefs about parameters into action, we use Thompson Sampling to select which items to present to the next respondent. 
+Since we are uncertain about the each parameter value, we continue collecting data. But we do not need to reduce that uncertainty equally for each one.  To translate our current beliefs about parameters into action, we use Thompson Sampling via Bayesian Boostrap. to select which items to present to the next respondent. We do this by a bayesian bootstrap. 
 \begin{align*}
-&w_k=\int_{\theta}Pr(u_k(\theta)=u^*(\theta)|D)p(\theta|D)d \theta\\
-&k \sim \text{multinomial}(w)\\
-&\argmax_k u_k^{(g)} u_k^{(g)} \sim p(u|D)
+&\beta_n \sim \text{exp}(1)\\
+&LL(\theta;\beta)=-\sum_{n=1}^N \beta_n\sum_{x \in S_n} (Y_{B_{S_n}}(x)\log{\frac{e^{\theta_x}}{\sum_{z\in S_n} e^{\theta_z}}}+ Y_{W_{S_n}}(x)\log{\frac{e^{-\theta_x}}{\sum_{z\in S_n} e^{-\theta_z}}})\\
+&\theta^*=\argmin_{\theta} LL(\theta;\beta)
 \end{align*}
+
 
 %Discuss relation to the Follow the regularized leader / perturbed leader 
 \begin{table}[ht]
 \caption{$O(w)$ on 24 slices of simulated data with $w=6$}
-\begin{tabular}{l|l}
+\begin{tabular}{p{5cm}|p{11cm}}
 Algorithm & Short Description \\
 \hline
 MaxDiff TS & Sample from the current posterior distribution and serve up the $L$ items with the highest sampled utility.\\
 MaxDiff $\epsilon$-Diffuse TS & Sample from the current posterior distribution serve up the $(1-\epsilon)L$ items with the highest sampled utility and sample from the current diffuse posterior distribution and serve up the $\epsilon L$ items with the highest sampled utility not in $(1-\epsilon)L$.\\
 $\epsilon$-greedy & Take the $(1-\epsilon)L$ with the current estimated $\theta$. Take the remaining $\epsilon L$ uniformily from the remaining items.\\
 $\epsilon$-Diffuse TS closest to the threshold & Take the $(1-\epsilon)L$ and  $\epsilon L$ items that have sampled utility closest to $\frac{\theta_k+\theta_{k+1}}{2}$.\\
-$\epsilon$-greedy closest to the threshold Take the $(1-\epsilon)L$ items that have estimated utility closest to $\frac{\theta_k+\theta_{k+1}}{2}$ and $\epsilon L$ uniformly from the remaining.\\
+$\epsilon$-greedy closest to the threshold & Take the $(1-\epsilon)L$ items that have estimated utility closest to $\frac{\theta_k+\theta_{k+1}}{2}$ and $\epsilon L$ uniformly from the remaining.\\
 Misclassification Minimization with random perturbation& Take the $L$ items that have most likely been misclassified (bottom items that should be top items and vice-versa). Add perturbation to the that probability.\\
 Greatest Uncertainty with random perturbation& Take the $L$ items whose probabilities of being a top item are closest to 50\%. Add perturbation to the that probability.\\
 
 \end{tabular}
-
 \end{table}
 
 \subsection{Algorithm MaxDiff TS}
@@ -315,7 +313,7 @@ Perhaps the natural parameter uncertainty is not enough or is perhaps too slow t
 The way the $\epsilon$-$\delta$ version hedges its bets on the best items intuitively. As in illustration, instead of sampling 30 items from TS, we use 20 of the items drawn using standard Thompson Sampling (L=30, $\epsilon$=1/3), and 10 of the items drawn using Thompson Sampling with a much more diffuse prior (variance of estimate multiplied by $\delta$=10).
 For $\epsilon$-$\delta$ case, its density does not become a spike as quickly as it does without $\epsilon$-$\delta$ . This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and $\delta$, the more exploration and slower the algorithm settles on its set of items. The epsilon comes from the popular $\epsilon$-greedy.
 The $\epsilon$-$\delta$  generalization is just like a two-component mixture model, which nests a pooled model without segments. As the epsilon is zero, the diffuse distribution is never used, so the algorithm collapses to regular TS. As $\delta$ is 1, the diffuse distribution is equivalent to the non-diffuse distribution.
-In ~\cite{toubia2007adaptive} a similar idea is used to avoid misclassifying an item that will not be sampled further. The author derived insight from genetic algorithms where ``decreasing the mutation rate over the number of iterations (or generations) leads to higher performance compared to a fixed mutation rate.'' This suggests sampling from a diffuse distribution gives benefit over uniform sampling over the remaining items as the variance of the diffuse distributions shrink with the number of respondents interviewed. It should be noted that in our application the $\epsilon$-greedy algorithm preformed on par the $\epsilon$-$\delta$ algorithm for $\epsilon=\frac{1}{3}$.
+In ~\cite{toubia2007adaptive} a similar idea is used to avoid misclassifying an item that will not be sampled further. The author derived insight from genetic algorithms where ``decreasing the mutation rate over the number of iterations (or generations) leads to higher performance compared to a fixed mutation rate.'' This suggests sampling from a diffuse distribution gives benefit over uniform sampling over the remaining items as the variance of the diffuse distributions shrink with the number of respondents interviewed.
 
 \subsection{Variant MaxDiff epsilon-Diffuse TS}
 
@@ -388,105 +386,57 @@ Hit rate is analogous to regret in a typical bandit problem. It measures how far
 \label{fig:util}
 \end{figure}
 The difficulty of identifying the truly best items is related to the differences among those top item utilities. With 120 items in the dataset, it shouldn't surprise us if the true preferences for the top 15 or so items were very close in terms of utility.  We certainly observed that with this dataset (Figure \ref{fig:util}).  Due to how tightly the top items in preferences clustered (there were no runaway winners), the hit rate measures we employed were quite discriminating between competing methods.\\
-Using bootstrap sampling (sampling with replacement), we simulated the process of collecting respondent data up to sample sizes of $N=1020$.  We considered the first 20 respondents to be the initial group, and all adaptive methods only begin after the 20th respondent. Each robotic respondent completed 18 choice sets, where each set included 5 items, which was viewed as fairly typical of larger MaxDiff studies in practice.
-The MaxDiff approaches we tested were the following. For our actual implementation of Bandit MaxDiff, we used Thompson Sampling to draw 30 of the 120 items for each respondent (tending to oversample the ``stars'' based on aggregate logit estimates from previous respondents).  As described earlier, we tested two different Bandit Maxdiff approaches:\\
+Using bootstrap sampling (sampling with replacement), we simulated the process of collecting respondent data up to sample sizes of $N=500$.  We considered the first 20 respondents to be the initial group, and all adaptive methods only begin after the 20th respondent. Each robotic respondent completed 12 choice sets, where each set included 5 items, which was viewed as fairly typical of larger MaxDiff studies in practice.
+The MaxDiff approaches we tested were the following. For our actual implementation of Bandit MaxDiff, we used Thompson Sampling to draw 20 of the 120 items for each respondent (tending to oversample the ``stars'' based on aggregate logit estimates from previous respondents).  As described earlier, we tested two different Bandit Maxdiff approaches:\\
+TO DO - maybe put new algorithmic ideas here
 Bandit MaxDiff TS: All 30 items drawn via standard Thompson Sampling.\\
-Bandit MaxDiff epsilon-diffuse TS: We begin with $\frac{1}{3}-\frac{2}{3}$ split ($\epsilon=\frac{1}{3}$, $\delta$=10). So 20 of the items drawn using standard Thompson Sampling; 10 of the items drawn using Thompson Sampling with a much more diffuse prior (standard errors multiplied by 10). We also tested a pair of existing fixed MaxDiff approaches.\\
-\textbf{Fixed Sparse MaxDiff}: we showed each item to each respondent an equal number of times (if possible).  With 120 items, 18 sets, and 5 items per set each item appeared on average $\frac{18*5}{120} = 0.75$ times per respondent. \\
-\textbf{Fixed Express MaxDiff}: we randomly drew 30 of the 120 items to show to each respondent.  Each item appeared $\frac{18*5}{30} = 3$ times per respondent.  Across respondents, each item appeared the same number of times. We primarily use Express MaxDiff as our base case.\\
+Bandit MaxDiff epsilon-diffuse TS: We begin with $\frac{1}{4}-\frac{3}{4}$ split ($\epsilon=\frac{1}{4}$, $\delta$=.25). So 20 of the items drawn using standard Thompson Sampling; 10 of the items drawn using Thompson Sampling with a much more diffuse prior (standard errors multiplied by 10). We also tested a pair of existing fixed MaxDiff approaches.\\
+\textbf{Fixed Express MaxDiff}: we randomly drew 20 of the 120 items to show to each respondent.  Each item appeared $\frac{12*5}{20} = 3$ times per respondent.  Across respondents, each item appeared the same number of times. We primarily use Express MaxDiff as our base case.\\
 
 \begin{figure}
 \caption{3 Hit Rate with 120 items}
-\includegraphics[width=1\textwidth]{plots/3hitrate120show3.pdf}
+\includegraphics[width=1\textwidth]{plots/hr120v20k3.pdf}
 \label{fig:3hit}
 \end{figure}
 \begin{figure}
 \caption{10 Hit Rate with 120 items}
-\includegraphics[width=1\textwidth]{plots/10hitrate120show3.pdf}
+\includegraphics[width=1\textwidth]{plots/hr120v20k10.pdf}
 \label{fig:10hit}
 \end{figure}
-Figure \ref{fig:3hit} shows the results for the 120-item dataset.  The X-axis indicates the number of cumulative respondents interviewed, and the Y-axis reports the hit rate obtained at each cumulative sample size.  For example, after the first 200 respondents, the Fixed Express Design obtains a hit rate of less than 60\% whereas both Bandit MaxDiff approaches achieve a hit rate of about 85\%.\\
-The key takeaway from Figure \ref{fig:3hit} is simple: Thompson Sampling is about 4x more efficient than the standard Fixed Express MaxDiff approach.
+\begin{figure}
+\caption{20 Hit Rate with 120 items}
+\includegraphics[width=1\textwidth]{plots/hr120v20k20.pdf}
+\label{fig:20hit}
+\end{figure}
+\begin{figure}
+\caption{40 Hit Rate with 120 items}
+\includegraphics[width=1\textwidth]{plots/hr120v20k40.pdf}
+\label{fig:40hit}
+\end{figure}
+Figures \ref{fig:3hit}, \ref{fig:10hit}, \ref{fig:20hit}, and \ref{fig:40hit} show the results for the 120-item dataset.  The X-axis indicates the number of cumulative respondents interviewed, and the Y-axis reports the hit rate obtained at each cumulative sample size.  For example, after the first 200 respondents, the Fixed Express Design obtains a hit rate of 60\% whereas the other approaches achieve a hit rate of about 80\%.\\
+The key takeaway from Figure \ref{fig:3hit} is simple: any adaptive method is about 4x more efficient than the standard Fixed Express MaxDiff approach.
 \begin{table}
 \begin{center}
-\begin{tabular}{l | c | c | c}
- Respondent& Fixed Express &  TS $\epsilon$=$\frac{1}{3}$ $\delta$=10  &TS $\epsilon$=0 $\delta$=1 \\
-\hline
-60&43&61.33&64.67\\
-100&51&72.67&71.67\\
-160&55.67&79.67&81.33 \\
-200&57.33&86.67&86\\
-260& 60&89.33&88.67\\
-300& 65&89.67&89.33\\
-360&68&91.67&90.33\\
-400& 69.33&92.67&92.33\\
-460&71&95&92.67 \\
-500& 74.33&95.67&93\\
-560&76&96.33&94\\
-600&74&96&94.67\\
-660& 77.33&96.67&95\\
-700& 77.33&97.33&94.67\\
-760&79.67&97.33&96.67\\
-800& 81.67&97&97.67\\
-860&83&97.33&97.67\\
-900&86.67&98&97.67 \\
-960&87.33&97&98.33\\
-1000& 87.67&97.67&98.67\\
-\hline
-\end{tabular}
+\begin{tabular}{llllllllll}
+\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSthres &  uncert \\ \hline    3 &          0.650 &   0.853 &        0.860 &   0.883 & 0.863 & 0.870 &    0.867 &   0.840 \\  10 &          0.825 &   0.880 &        0.902 &   0.907 & 0.923 & 0.912 &    0.911 &   0.901 \\  20 &          0.824 &   0.784 &        0.863 &   0.885 & 0.825 & 0.821 &    0.867 &   0.886 \\  40 &          0.857 &   NA &        0.884 &   0.908 & NA & NA &    0.896 &   0.897 \end{tabular}
 \end{center}
-\caption{Top 3 Hit Rate for Various Algorithms}
-\label{table:top3}
+\caption{Top k Hit Rate for Various Algorithms at the 260th Respondant}
+\label{table:at260}
 \end{table}
- We show in Table \ref{table:top3}. After about 160 respondents, we've obtained an 80\% hit rate; which we wouldn't achieve with traditional Express MaxDiff until about the 800th respondent.  As shown, we can accomplish with about 260 respondents what it takes 1000 respondents to do with Express MaxDiff.  Either comparison shows that you can obtain equally good hit rates using the adaptive Bandit MaxDiff methodology with $\frac{1}{4}$ the sample size.\\
+
+\begin{table}
+\begin{center}
+\begin{tabular}{llllllllll}
+\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSthres &  uncert \\\hline   3 &          0.780 &   0.950 &        0.933 &   0.950 & 0.940 & 0.947 &    0.963 &   0.943 \\  10 &          0.877 &   0.925 &        0.928 &   0.939 & 0.933 & 0.941 &    0.943 &   0.945 \\  20 &          0.862 &   0.827 &        0.914 &   0.928 & 0.863 & 0.864 &    0.913 &   0.919 \\  40 &          0.887 &   NA &        0.926 &   0.937 & NA & NA &    0.930 &   0.938 \end{tabular}
+\end{center}
+\caption{Top k Hit Rate for Various Algorithms at the 500th Respondant}
+\label{table:at500}
+\end{table}
+ We show in Table \ref{table:at500}. After about 160 respondents, we've obtained an 80\% hit rate; which we wouldn't achieve with traditional Express MaxDiff until about the 800th respondent.  As shown, we can accomplish with about 260 respondents what it takes 1000 respondents to do with Express MaxDiff.  Either comparison shows that you can obtain equally good hit rates using the adaptive Bandit MaxDiff methodology with $\frac{1}{4}$ the sample size.\\
 Figure \ref{fig:3hit} also shows the two Thompson Sampling approaches achieve nearly identical results. But we will show later this isn't the case if we use a misinformed start (Section Misinformed Start)\\
 Figure \ref{fig:10hit} shows the results for Top-10 hit rate for our 120-item MaxDiff, which is a broader measure of success that requires obtaining a high degree of precision for an even broader reach of items than the Top-3 hit rate.  The conclusions are fairly similar as with Figure \ref{fig:3hit}.  It takes about 400 respondents to accomplish with Bandit MaxDiff what we accomplish with 1000 respondents under the non-adaptive express MaxDiff approach. This is supported in Table \ref{table:top3}\\
-\subsection{Empirical Evidence of TS Focusing on Top Items}
-%\begin{figure}
-%\caption{Utility: Mean and 90\% Interval}
-%\includegraphics[width=1\textwidth]{plots/betavalconfidence.pdf}
-%\label{fig:utilcof}
-%\end{figure}
-\begin{figure}
-\caption{Precision}
-\includegraphics[width=1\textwidth]{plots/precision.pdf}
-\label{fig:per}
-\end{figure}
 
-\begin{figure}[!ht]
-\caption{Distrubution of Utility Belief Distribution}
-\begin{subfigure}{.5\textwidth}
-\caption{At 120th Respondent}
-\includegraphics[width=1\textwidth]{plots/beliefdistrBegin.pdf}
-\end{subfigure}
-\begin{subfigure}{.5\textwidth}
-\caption{At 1020th Respondent}
-\includegraphics[width=1\textwidth]{plots/beliefdistrEnd.pdf}
-\end{subfigure}
-\label{fig:belief}
-\end{figure}
-In figure \ref{fig:per} we have the average (over 100 trials) precision for the top ranked item and 60th ranked item given by Bandit MaxDiff TS and Fixed Express MaxDiff. Figure \ref{fig:belief} shows the average posterior distribution of the two items at the 120th and 1020th respondent. The take away is that between the 120th and 1020th respondent the rank 60th item gets almost no update from TS, while TS has a large precision on rank 1 item. Fixed Express on the other hand updates them both equally as evidence to our claim why TS works well in this context, TS increases the precision a lot on the higher ranked items of those items while not learning the lower ranked items while Sparse Express spends its resources equally.
 
-%\begin{figure}[!ht]
-%\caption{Distrubution of Final Utility}
-%\begin{subfigure}{.5\textwidth}
-%\caption{Rank 1 Item}
-%\includegraphics[width=1\textwidth]{plots/endbetadis1.pdf}
-%\end{subfigure}
-%\begin{subfigure}{.5\textwidth}
-%\caption{Rank 30 Item}
-%\includegraphics[width=1\textwidth]{plots/endbetadis30.pdf}
-%\end{subfigure}
-%\begin{subfigure}{.5\textwidth}
-%\caption{Rank 60 Item}
-%\includegraphics[width=1\textwidth]{plots/endbetadis60.pdf}
-%\end{subfigure}
-%\begin{subfigure}{.5\textwidth}
-%\caption{Rank 90 Item}
-%\includegraphics[width=1\textwidth]{plots/endbetadis90.pdf}
-%\end{subfigure}
-%\label{fig:end}
-%\end{figure}
 \section{Robustness tests}
 \subsection{Misinformed Starts (When Early Responders Are Horribly Non-Representative)}
 To this point, it seems like the adaptive Bandit MaxDiff approach using Thompson Sampling is the clear winner.  However, what would happen if the first 50 respondents we interviewed were actually not very representative of the average preferences for the sample?  What if we tried to throw Bandit MaxDiff off the scent?  In fact, let's consider a worst-case scenario: the first responders actually believe \textit{nearly the opposite} from the rest of the sample\\
@@ -500,30 +450,8 @@ Our diabolical simulation of a misinformed start is worse than anything you woul
 We illustrate the robustness in Figure \ref{fig:3hitmis}. First, the Bandit MaxDiff $\epsilon$-diffuse TS approach is much better in the face of misinformed starts than the standard Bandit MaxDiff TS approach.  The more diffuse prior on the 10 out of 30 items within the split allows us to continue investigating the value of some lesser chosen items with enough frequency among later respondents, even if the prior respondents seem to have generally rejected them.\\
 Second, even in the face of a misinformed start, the Bandit MaxDiff $\epsilon$-diffuse TS achieves equally good results as the standard Fixed Express MaxDiff without the misinformed start after 290 respondents. Finally, the conclusions were qualitatively similar when examining Top-10 hit rate.\\
 \subsection{Changing exploration parameters}
-\begin{table}
-\begin{center}
-\begin{tabular}{l | c | c | c | c | c }
- Respondent& TS $\epsilon$=0 $\delta$=1&  TS $\epsilon$=$\frac{1}{3}$ $\delta$=10  &TS $\epsilon$=$\frac{1}{3}$ $\delta$=20 & TS $\epsilon$=$\frac{1}{2}$ $\delta$=10 &TS $\epsilon$=$\frac{1}{2}$ $\delta$=20  \\
-\hline
-100	&	71.67	&	72.67	&	74	&	74.67	&	71.33	\\
-200	&	86	&	86.67	&	84.67	&	89.67	&	82.67	\\
-300	&	89.33	&	89.67	&	92.67	&	94	&	91.33	\\
-400	&	92.33	&	92.67	&	94	&	97.33	&	95.33	\\
-500	&	93	&	95.67	&	98.67	&	98.33	&	96.33	\\
-600	&	94.67	&	96	&	99.33	&	99	&	97.33	\\
-700	&	94.67	&	97.33	&	98.67	&	98.67	&	96.67	\\
-800	&	97.67	&	97	&	99	&	98.67	&	98.33	\\
-900	&	97.67	&	98	&	99	&	98.33	&	98.67	\\
-1000	&	98.67	&	97.67	&	98.67	&	99.33	&	98.33	\\
-\hline
-\end{tabular}
-\end{center}
-\caption{Top 3 Hit Rate for Various Tuning Parameters}
-\label{table:EDTS}
-\end{table}
 We introduced two tuning parameters -- $\epsilon$ and $\delta$ -- into an algorithm that previously had no such parameters explicitly guiding exploration. To understand the impact these exploration parameters have and each one's effect on the outcome, we have to test their values empirically. \\
-We run a simulation experiment with a 5-cell design 2($\epsilon$=$\frac{1}{3}$,$\frac{1}{2}$)-by-2($\delta$=10,20)+1($\epsilon$=0,$\delta$=1).  The standard TS has $\epsilon$=$0$ and $\delta$=$1$ and the Fixed Express MaxDiff is equivalent to $\epsilon$=1 and $\delta$=$\inf$, rendering any parameter distribution to be uninformative, as it is effectively uniform.\\
-Table \ref{table:EDTS} shows how these parameters can affect performance; these effects, however, are small. The best performing combinations are $\epsilon$=$\frac{1}{2}$, $\delta$=10 and $\epsilon$=$\frac{1}{3}$, $\delta$=20. This suggests there is an ``interior solution,'' as there are non-monotonic effects of the exploration parameters. There is a value of $\epsilon$, which makes $\epsilon$-$\delta$ TS better than TS, and the same is true for $\delta$. This pattern is consistent with empirical implementations of $\epsilon$-greedy strategies. In fact, the table shows the best performing algorithm tested uses only one exploration parameter set high, and the worst performing algorithm tested has both parameters set to their higher-exploration level.\\
+the Fixed Express MaxDiff is equivalent to $\epsilon$=1 and $\delta$=$0^+$, and greedy is equivalent to $\epsilon$=1 and $\delta$=$\infty$.  Our current resealts suggest there is an ``interior solution,'' as there are non-monotonic effects of the exploration parameters.
 \subsection{Effect of increasing number of items}
 \begin{table}
 \begin{center}
@@ -549,31 +477,10 @@ Table \ref{table:EDTS} shows how these parameters can affect performance; these 
 Would the benefits of Bandit MaxDiff we observed with 120 items continue for 300 items?  While we didn't have a dataset of utilities from human respondents on 300 items, we did our best to generate such a data set by leveraging the 120-item data set Procter \& Gamble shared with us.  To generate preferences across an additional set of 180 items, we randomly combined pairs of existing items according to a randomly distributed weighting scheme, with additional random variation added.  The result was a 300-item MaxDiff data set based on the original preferences of the 981 respondents.\\
 The advantages seen in the 120-item results are improved upon in the results with 300 items. Table \ref{table:300top3} shows the well-informed start results. The Bandit MaxDiff approach was 6x more efficient than the Fixed Express MaxDiff approach on the top-3 hit rate criterion.\\
 \subsection{What about a smaller set of 40 Items?}
-\begin{table}
-\begin{center}
-\begin{tabular}{l | c | c | c}
- Respondent& Fixed Express &  TS $\epsilon$=$\frac{1}{4}$ $\delta$=10  &TS $\epsilon$=0 $\delta$=1 \\
-\hline
-60	&	71.33	&	81	&	84.33	\\
-100	&	79.33	&	88	&	89.33\\
-160	&	86.33	&	93	&	93.33	\\
-200	&	91	&	95.67	&	94.67	\\
-260	&	92.67	&	96.33	&	96.33	\\
-300	&	94.33	&	96.67	&	97	\\
-360	&	94.67	&	98.33	&	98	\\
-400	&	94.33	&	98	&	98.33	\\
-460	&	94.67	&	99	&	99	\\
-500	&	95.33	&	99.33	&	98.33	\\
-\hline
-\end{tabular}
-\end{center}
-\caption{Top 3 Hit Rate for Various Algorithms with 40 items}
-\label{table:40top3}
-\end{table}
-Our Bandit model has a great advantage over fixed designs for very large numbers of items, but what happens if we have a more traditional ``large'' MaxDiff list of 40 items. Using a random 40-item subset from our original set of 120 items, we reran our simulations. For this smaller subset, we also reduced the number of tasks per respondent to 12 and we drew 20 items per respondent using TS rather than 30 items and used a 15/5 split between standard TS and diffuse TS.\\
+Our Bandit model has a great advantage over fixed designs for very large numbers of items, but what happens if we have a more traditional ``large'' MaxDiff list of 40 items. Using a random 40-item subset from our original set of 120 items, we reran our simulations. \\
 %By reducing the number of items to 40 and changing the number of tasks to 12, the fixed express design can now show each item an average of 1.5 times per respondent, which is much less sparse than in larger item cases.\\
-By reducing the number of items to 40 and changing the number of items drawn to 20, the Express MaxDiff design can now show each item to every other respondent on average, which is much more than in larger item cases.
-Nevertheless, our results for Bandit MaxDiff are still much better than traditional MaxDiff (Table \ref{table:40top3}). We see about a 2x efficiency gain compared to the Express MaxDiff. We also still see a tremendous advantage in the case of a misinformed start.
+By reducing the number of items to 40, the Express MaxDiff design can now show each item to every other respondent on average, which is much more than in larger item cases.
+Nevertheless, our results for Bandit MaxDiff are still better than traditional MaxDiff. We also still see a tremendous advantage in the case of a misinformed start.
 \subsection{Using True Utility as a Generalization of Hit-Rate}
 \begin{table}
 \begin{center}
@@ -604,13 +511,14 @@ One might like to differentiate between an algorithm puts the top 9 items and th
 \]
 This can be see as a generalization of Hit-Rate. It has the advantage of differentiating as in the case above though one loses the ability to easy interpret the result. In Table \ref{table:PTU} we show the PTU for various subsets of the data.
 \begin{figure}
-\caption{Percent True Utility of the Top 3 with 120 items}
-\includegraphics[width=1\textwidth]{plots/3util120show3.pdf}
-\label{fig:3util}
+\caption{Percent True Utility of the Top 20 with 120 items}
+\includegraphics[width=1\textwidth]{plots/PTU120v20k20.pdf}
+\label{fig:20util}
 \end{figure}
-In figure \ref{fig:3util} we see after 200 respondents TS on average is about .97 so from table \ref{table:PTU} we can deduce that usually TS has the top 2 items in the top 3 and trying to decide between the 3rd and 4th item. After 200 respondents Sparse Express is about .89 which means that on average after 200 iterations has top 5 items in its top 3. Compare that to before, where Sparse Express a 3 hit rate score of 0.58. Combined we know that Sparse Expressed finds which the tops items but has trouble distinguishing what is the correct ranking of those items.
+Recall that for $k=20$ using the hit rate metric that Fixed Express, TS, and $\epsilon$ diffuse TS were on par with each other.
+Using $k=20$ PTU, in Figure \ref{fig:20util} that $\epsilon$ diffuse TS has a slight edge over TS which are both better than Fixed Express. This means that both TS approaches put better ranked items in the top 20 then Fixed Express and our thus better even though the top 20 hit rate was about the same.
 \subsection{Using Regret as a Stopping Rule}
-From figure \ref{fig:3util} after 600 respondents TS finds the top 3 items most of the time. Thus it becomes inefficient to keep giving surveys after this point. In practice we do not know the True Utilities \textit{a priori} but we would still like to know when we should stop.\\
+From figure \ref{fig:20util} after 600 respondents TS finds the top 3 items most of the time. Thus it becomes inefficient to keep giving surveys after this point. In practice we do not know the True Utilities \textit{a priori} but we would still like to know when we should stop.\\
 Taken from~\cite{scott2015multi} and~\cite{scott2010modern} for MAB, The value remaining in the experiment is the posterior distribution of $\frac{\mu_{S^*}-\mu_{S}}{\mu_{S}}$ where $\mu_{S^*}$ is the largest value of the exponential weighted utility and $\mu_{S}$ is the exponential weighted utility of the set that is most likely to be optimal, denoted $S$. This is constructed as follows, take $n$ Monte Carlo draws from $p(\mu|y_t)$. Let $\mu_{S^*}^{m}$ be the max exponential weighted utility of draw $m$ and $\mu_{S}^{m}$ be the utility using the draw $m$ using the set $S$. Let $\Delta^{m}=\frac{\mu^m_{S^*}-\mu^m_{S}}{\mu^m_{S}}$.\\
 \begin{table}
 \begin{center}
@@ -728,7 +636,9 @@ While our problem is purely exploration, the nature of MaxDiff survey causes us 
 %at is considered in ~\cite{toubia2007adaptive}, but for a different type of survey. Instead of showing a series of items and ask respondents to pick the best and worst from a list, the survey shows the respondents one item and asked to rate it using the binary choice good or bad. With each query they get information on one item. As a result the authors show fewer items to each respondent. Similar to our approach, the authors devise adaptive approaches that use previous ratings to decide the what items to show the next respondent.  Unlike our approach, they sample items more that are likely to be misclassified by looking at items close to the threshold between top items and bottom items (not top items).\\
 %It is interesting to note that their best preforming solution is similar in spirit to our method of $\epsilon$-Diffuse TS. In implementation their method uses a beta distribution and can calculate their score directly instead of taking a sample. They then add noise from a normal distribution to each of the scores and show the top scoring items to the next respondent. Despite the differences, the similarity between their best method and is $\epsilon$-Diffuse TS striking.
 \subsection{What about Sparse MaxDiff vs. Express MaxDiff?}
-Wirth and Wolfrath compared non-adaptive Sparse MaxDiff and Express MaxDiff in their 2012 paper at the Sawtooth Software Conference ~\cite{wirth2012largeset}.  We compared the results using our simulation and found a modest edge in performance for Sparse MaxDiff (Sparse ending at 80\% for top 10 hit rate and express ending at 75\%).
+Wirth and Wolfrath compared non-adaptive Sparse MaxDiff and Express MaxDiff in their 2012 paper at the Sawtooth Software Conference ~\cite{wirth2012largeset}. 
+\textbf{Fixed Sparse MaxDiff}: we showed each item to each respondent an equal number of times (if possible).  With 120 items, 18 sets, and 5 items per set each item appeared on average $\frac{18*5}{120} = 0.75$ times per respondent. \\
+ We compared the results using our simulation and found a modest edge in performance for Express MaxDiff (Sparse ending at 85.6\% for top 10 hit rate and express ending at 87.7\%).
 \section{Conclusions and Future Research}
 Our results suggest that if your main purpose in using large item lists in MaxDiff is to identify the top items for the population (not individual-level estimates), then adaptive Bandit MaxDiff approaches can be 4x more efficient than standard Express MaxDiff designs.  You are potentially wasting 75 cents of each dollar spent on data collection by not using Bandit MaxDiff.\\
 Bandit MaxDiff leverages information from prior respondents to show more effective tradeoffs to later respondents (tending to oversample the stars, based on the Thompson Sampling mechanism).  Even in the face of diabolically imposed misinformed starts (horribly unrepresentative first responders), the Bandit MaxDiff approach with our 20/10 split is extremely robust and self-correcting.\\
