@@ -87,17 +87,18 @@
 % NOTE: Authors with same affiliation, if the order of authors allows, 
 %   should be entered in ONE field, separated by a comma. 
 %   \EMAIL field can be repeated if more than one author
-\ARTICLEAUTHORS{%
-\AUTHOR{Eric Schwartz}
-\AFF{University of Michigan, \EMAIL{ericmsch@umich.edu}, \URL{}}
-\AUTHOR{Kenneth Fairchild}
-\AFF{Sawtooth Software, \EMAIL{}, \URL{}}
-\AUTHOR{Bryan Orme}
-\AFF{Sawtooth Software, \EMAIL{}, \URL{}}
-\AUTHOR{Alexander Zaitzeff}
-\AFF{University of Michigan, \EMAIL{azaitzef@umich.edu}, \URL{}}
+
+%\ARTICLEAUTHORS{%
+%\AUTHOR{Eric Schwartz}
+%\AFF{University of Michigan, \EMAIL{ericmsch@umich.edu}, \URL{}}
+%\AUTHOR{Kenneth Fairchild}
+%\AFF{Sawtooth Software, \EMAIL{}, \URL{}}
+%\AUTHOR{Bryan Orme}
+%\AFF{Sawtooth Software, \EMAIL{}, \URL{}}
+%\AUTHOR{Alexander Zaitzeff}
+%\AFF{University of Michigan, \EMAIL{azaitzef@umich.edu}, \URL{}}
 % Enter all authors
-} % end of the block
+%} % end of the block
 
 \ABSTRACT{%
 For large MaxDiff studies whose main purpose is identifying the top few items for the sample, a new adaptive approach called Bandit MaxDiff may increase efficiency fourfold over standard non-adaptive MaxDiff.  Bandit MaxDiff leverages information from previous respondents via aggregate logit and Thompson Sampling so later respondents receive designs that oversample the topmost items that are most likely to turn out to be the overall winners. Our approach applies beyond MaxDiff problems to a more general set of bandit problems. We propose a flexible algorithm, $\epsilon$-Diffuse Thompson Sampling (TS), which nests traditional TS. Blending ideas from $\epsilon$-greedy in machine learning and Bayesian approaches, this is a more robust version of TS, which a manager can control with tuning parameters. For instance, being less risk averse, one may drawn more items from diffuse posteriors, making the algorithm robust to changing environments, even extreme non-stationarity. We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. Beyond showing our approach outperforms better than current methods, we show under which conditions it performs even better than (larger problems) or just as well as existing methods (smaller problems).
@@ -245,12 +246,37 @@ LL(\theta)=-\sum_{n=1}^N \sum_{x \in S_n} (Y_{B_{S_n}}(x)\log{\frac{e^{\theta_x}
 In our work we find $\theta$ by minimizing the negative loglikihood using Newton-Rapson.
 
 \subsection{Adaptive MaxDiff}
-Since we are uncertain about the each parameter value, we continue collecting data. But we do not need to reduce that uncertainty equally for each one.  To translate our current beliefs about parameters into action, we use Thompson Sampling via Bayesian Boostrap. to select which items to present to the next respondent. We do this by a bayesian bootstrap. 
+Since we are uncertain about the each parameter value, we continue collecting data. But we do not need to reduce that uncertainty equally for each one.  To translate our current beliefs about parameters into action, we use Thompson Sampling via Bayesian Boostrap. The following sections descirbe sampling scemes that use draws from the posterior to select which items to present to the next respondent. A draw $u$ is made in the following way.
 \begin{align*}
-&\beta_n \sim \text{exp}(1)\\
+&\beta_1,\beta_2,\ldots,\beta_N \sim \text{exp}(1)\\
 &LL(\theta;\beta)=-\sum_{n=1}^N \beta_n\sum_{x \in S_n} (Y_{B_{S_n}}(x)\log{\frac{e^{\theta_x}}{\sum_{z\in S_n} e^{\theta_z}}}+ Y_{W_{S_n}}(x)\log{\frac{e^{-\theta_x}}{\sum_{z\in S_n} e^{-\theta_z}}})\\
-&\theta^*=\argmin_{\theta} LL(\theta;\beta)
+&u=\argmin_{\theta} LL(\theta;\beta)
 \end{align*}
+
+Given a sampling scheme we serve up questions in the following way.
+
+\textbf{BEGIN:}
+\begin{enumerate}
+\item For respondents n =1,\ldots,initial
+\begin{enumerate}
+\item \textbf{Act}: select items for MaxDiff design
+\begin{enumerate}
+\item Sample $L$ items from the population 
+\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
+\end{enumerate}
+\end{enumerate}
+\item For respondents n = initial + 1,\ldots, N
+\begin{enumerate}
+\item \textbf{Draw}: Draw from the posterior via Bayesian Bootstap $u_1,\ldots,u_n$
+
+\item \textbf{Value}: Choose $L$ items by sampling rule
+\item \textbf{Act}: select items for MaxDiff design
+\begin{enumerate}
+\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\textbf{END ALGORITHM}
 
 
 %Discuss relation to the Follow the regularized leader / perturbed leader 
@@ -270,110 +296,44 @@ Greatest Uncertainty with random perturbation& Take the $L$ items whose probabil
 \end{tabular}
 \end{table}
 
-\subsection{Algorithm MaxDiff TS}
-\textbf{BEGIN:}
-\begin{enumerate}
-\item For respondents n =1,\ldots,initial
-\begin{enumerate}
-\item \textbf{Act}: select items for MaxDiff design
-\begin{enumerate}
-\item Sample $L$ items from the population 
-\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
-\end{enumerate}
-\end{enumerate}
-\item For respondents n = initial + 1,\ldots, N
-\begin{enumerate}
-\item \textbf{Estimate}: update model $p(D|\theta)$
-\begin{enumerate}
-\item Sample model parameters $u_1,\ldots,u_k \sim p(u|D)$
-\end{enumerate}
-\item \textbf{Value}: rank items by utility
-\begin{enumerate}
-\item Rank and take top $L$ subset $u^{(1)},u^{(2)}\ldots,u^{(L)}$
-\end{enumerate}
-\item \textbf{Act}: select items for MaxDiff design
-\begin{enumerate}
-\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
-\end{enumerate}
-\end{enumerate}
-\end{enumerate}
-\textbf{END ALGORITHM}
+\subsection{Adaptive Methods}
 
-
-We follow the algorithm Bandit MaxDiff-TS. After an initial number of respondents, we begin adapting. We update beliefs about the model parameters. We can draw from an exact or approximate posterior distribution. \footnote{In the case of the multinomial logit, we can use MCMC to obtain samples or, as we do in the empirical application, we can sample from asymptotic distribution via MLE implied by the estimated mean and standard errors.}\\
-From a single sample of parameter values, we rank the items by utility. We select the top $L$ items, and we generate a MaxDiff design of $J$ best-worst tasks, each with a choice set of $|S|$ items.  We use $L=30$, $J=18$, $|S|=5$ as a default since it is a standard number of items used in MaxDiff studies ~\cite{wirth2012largeset}. 
-While typical Bayesian or numerical integration methods call for large numbers of draws (or sufficient number) to achieve coverage of the full distribution of parameter values, our  approach relies on the variability of a single sample. There is value in the sample to sample differences in the value of parameters and their relative rank ordering. It allows  \\
+After an initial number of respondents, we begin adapting. We update beliefs about the model parameters. We can draw from an exact or approximate posterior distribution. \footnote{In the case of the multinomial logit, we can use MCMC to obtain samples, sample from asymptotic distribution via MLE implied by the estimated mean and standard errors, or as we do in the empirical application, use Bayesian bootstrapping.}\\
+From a single sample of parameter values, we rank the items by utility. We select the top $L$ items, and we generate a MaxDiff design of $J$ best-worst tasks, each with a choice set of $|S|$ items.  We use $L=20$, $J=12$, $|S|=5$ as a default since it is a standard number of items used in MaxDiff studies ~\cite{wirth2012largeset}. 
 The algorithm learns over time to intuitively achieve the goal of identifying the items with truly high utility with high precision. Early on, we still have substantial uncertainty. The independent samples will differ substantially in rank order of item utilities. This yields MaxDiff designs across respondents with less overlap in items. Later, the uncertainty is reduced most around the truly high-utility items. Across independent samples, the ranking of items will be highly correlated near the top of the ranking (but not near the bottom where uncertainty remains large). As a result, the top subset of $J$ items selected converges to the same group for each respondent. \\
-There are two practical issues we highlight. First, we want to avoid repeating extremely similar questions to the same respondent. A natural consequence of Thompson Sampling is convergence: as the sample size grows, items that are most preferred by the population will achieve high preference scores with smaller standard errors.  Without any additional restrictions, the same few items will eventually tend to be drawn into adjacent MaxDiff tasks for the same respondent, causing much annoyance due to the severe degree of item repetition.  Although this is statistically most efficient, it would drive human respondents mad.  To avoid this, we use Thompson Sampling to draw a fixed number of items (e.g., 20 or 30) to show each respondent.  Those draws of 30 items are shown to each respondent in a balanced, near-orthogonal design, leading to a palatably low degree of repetition of items across adjacent sets.  The attentive reader will notice that our approach is quite similar to Wirth's Express MaxDiff approach, except that the logic for selecting the 30 items for each respondent is adaptive, using Thompson Sampling, leveraging information from the previous respondents-focusing the most recent respondent's efforts on discriminating among items that already have been judged likely to be the stars.\\
-One issue this approach avoids is the respondent tiring out. Instead of trying to create a MaxDiff design with 120 items, which would lead to an unreasonable number of best-worst tasks per respondent, we use the smaller subset of 30.  We also avoid repetition. A particularly annoying alternative is to draw an independent Thompson sample ranking for each choice task for the same respondent. This results in very repetitive choice tasks as parameter estimates. \\
-The second practical issue with Thompson Sampling is robustness to changes overtime. On the one hand, there is built-in robustness. Recall the algorithm is stochastic and adapts continuously. If the early data leads the algorithm astray, then it will self-correct, eventually finding and converging to the truly best items. Suppose the early respondents made choices, by chance, leading us to believe certain items were the best when they were not. The respondents that immediately follow will start receiving these truly poor items. \\
+There is one practical issues we highlight. We want to avoid repeating extremely similar questions to the same respondent. A natural consequence of Thompson Sampling is convergence: as the sample size grows, items that are most preferred by the population will achieve high preference scores with smaller standard errors.  Without any additional restrictions, the same few items will eventually tend to be drawn into adjacent MaxDiff tasks for the same respondent, causing much annoyance due to the severe degree of item repetition.  Although this is statistically most efficient, it would drive human respondents mad.  To avoid this, we use Thompson Sampling to draw a fixed number of items (e.g., 20 or 30) to show each respondent.  Those draws of 20 items are shown to each respondent in a balanced, near-orthogonal design, leading to a palatably low degree of repetition of items across adjacent sets.  The attentive reader will notice that our approach is quite similar to Wirth's Express MaxDiff approach, except that the logic for selecting the 20 items for each respondent is adaptive, using Thompson Sampling, leveraging information from the previous respondents-focusing the most recent respondent's efforts on discriminating among items that already have been judged likely to be the stars.\\
+One issue this approach avoids is the respondent tiring out. Instead of trying to create a MaxDiff design with 120 items, which would lead to an unreasonable number of best-worst tasks per respondent, we use the smaller subset of 20.  We also avoid repetition. A particularly annoying alternative is to draw an independent Thompson samples ranking for each choice task for the same respondent. This results in very repetitive choice tasks as parameter estimates. \\
+
+
+\subsubsection{Algorithm MaxDiff TS}
+While typical Bayesian or numerical integration methods call for large numbers of draws (or sufficient number) to achieve coverage of the full distribution of parameter values, our  approach relies on the variability of a single sample. There is value in the sample to sample differences in the value of parameters and their relative rank ordering. It allows  \\
+One practical issue with Thompson Sampling is robustness to changes overtime. On the one hand, there is built-in robustness. Recall the algorithm is stochastic and adapts continuously. If the early data leads the algorithm astray, then it will self-correct, eventually finding and converging to the truly best items. Suppose the early respondents made choices, by chance, leading us to believe certain items were the best when they were not. The respondents that immediately follow will start receiving these truly poor items. \\
 However, as this continues, the uncertainty is reduced around these poor items to reveal there are many other items with probability of being better. By sampling from the joint belief distribution of item utilities, we will be less likely to draw those poor items. One concern is that such sampling could be too aggressive.\\
-\subsection{Algorithm MaxDiff $\epsilon$-Diffuse TS}
+
+\subsection{Variant MaxDiff $\epsilon$-Diffuse TS}
 Perhaps the natural parameter uncertainty is not enough or is perhaps too slow to adjust, so we propose an algorithm MaxDiff epsilon-diffuse TS, which has an extra layer of self-correction, making it more robust to non-stationarity or respondent self-selection. 
-The way the $\epsilon$-$\delta$ version hedges its bets on the best items intuitively. As in illustration, instead of sampling 30 items from TS, we use 20 of the items drawn using standard Thompson Sampling (L=30, $\epsilon$=1/3), and 10 of the items drawn using Thompson Sampling with a much more diffuse prior (variance of estimate multiplied by $\delta$=10).
+The way the $\epsilon$-$\delta$ version hedges its bets on the best items intuitively. As in illustration, instead of sampling 20 items from TS, we use 15 of the items drawn using standard Thompson Sampling (L=20, $\epsilon$=1/4), and 5 of the items drawn using Thompson Sampling with a much more diffuse prior (subsampling $\delta$=.25 of the data with replacement and drawing $u$ as a Bayes bootstrap of the subsampled data).
 For $\epsilon$-$\delta$ case, its density does not become a spike as quickly as it does without $\epsilon$-$\delta$ . This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and $\delta$, the more exploration and slower the algorithm settles on its set of items. The epsilon comes from the popular $\epsilon$-greedy.
 The $\epsilon$-$\delta$  generalization is just like a two-component mixture model, which nests a pooled model without segments. As the epsilon is zero, the diffuse distribution is never used, so the algorithm collapses to regular TS. As $\delta$ is 1, the diffuse distribution is equivalent to the non-diffuse distribution.
 In ~\cite{toubia2007adaptive} a similar idea is used to avoid misclassifying an item that will not be sampled further. The author derived insight from genetic algorithms where ``decreasing the mutation rate over the number of iterations (or generations) leads to higher performance compared to a fixed mutation rate.'' This suggests sampling from a diffuse distribution gives benefit over uniform sampling over the remaining items as the variance of the diffuse distributions shrink with the number of respondents interviewed.
 
-\subsection{Variant MaxDiff epsilon-Diffuse TS}
 
-% \begin{algorithmic}
-% 	\If {$n \leq initial$}	  
-%	\State   
-% 	\Else
-% 	\If {$n \geq initial + 1$}		
-%	\State   
-% 	\EndIf
-% 	\EndIf
-% \end{algorithmic}    
-\textbf{BEGIN:}
-	\begin{enumerate}
-		\item   For respondents $n =1,\ldots,N_{initial}$
-		\begin{enumerate}
-			\item \textbf{Act}: select items for MaxDiff design
-			\begin{enumerate}
-				\item Sample $L$ items from the population 
-				\item Create MaxDiff questionnaire 
-				\item Survey next respondent with $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
-			\end{enumerate}
-		\end{enumerate}
-		\item For respondents $n = N_{initial} + 1,\ldots, N$
-		\begin{enumerate}
-			\item \textbf{Estimate}: update model $p(D|\theta)$ to obtain population-level estimates, $\bar{u}$ and $\Sigma$.
-			\begin{enumerate}
-				\item Diffuse TS: Sample model parameters from diffuse distribution, by using rescaled larger variance-covariance $\delta \Sigma$, with $\delta > 1$ \[ u_D \sim N(\bar{u},\delta \Sigma)\]
-				\item Regular TS: Sample model parameters \[u_R \sim N(\bar{u},\Sigma)\]
-			\end{enumerate}
-			\item \textbf{Value}: rank items by utility
-			\begin{enumerate}
-				\item Take top $\epsilon L$ items ranked diffuse sample $u_D^{(1)},u_D^{(2)}\ldots,u_D^{(\epsilon L)}$
-				\item Take top $(1-\epsilon)L$ items ranked regular sample $u_R^{(1)},u_R^{(2)}\ldots,u_R^{((1-\epsilon)L)}$
-				\item Combine diffuse and regular samples into $L$ items. (Remove duplicates items. Take the next best unique item from the diffuse sample not already selected.)
-			\end{enumerate}
-			\item \textbf{Act}: select items for MaxDiff design
-			\begin{enumerate}
-				\item Create MaxDiff questionnaire.
-				\item Survey next next respondent with $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
-			\end{enumerate}
-		\end{enumerate}
-	\end{enumerate}
-\textbf{END ALGORITHM}
 
-\subsection{Algorithm $\epsilon$-greedy}
+\subsubsection{Algorithm $\epsilon$-greedy}
 Let $\beta$ be the current estimated parameters. Take the top $((1-\epsilon)L)$ and choose the remaining $(\epsilon L)$ uniformly from the remaining items.
 
-\subsection{Variant Closest to the Threshold}
+\subsubsection{Variant Closest to the Threshold}
 In ~\cite{toubia2007adaptive},  They introduce Closest to Threshold based on Bradlow and Wainer’s (1998) recommendation
 (``select ideas near the cutoff''). We also we do that to find the top $k$. Based on the estimated utilities calculate the cutoff $c=\frac{\theta_k+\theta_{k+1}}{2}$ then for a draw $u$ calculate a score $s_i=|c-u^i|$ for every item. Then take the $L$ items with the lowest score. Similarily as before we can define $\epsilon$  diffuse version where. We have two draws $u_R$ and $u^D$ and from those scores $s_R$ and $s_D$ and Combine diffuse and regular samples into $L$ items. (Remove duplicates items. Take the next best unique item from the diffuse sample not already selected.) You can also do the $\epsilon$ - greedy version where the scores are $s_i=|c-\beta^i|$ you take the $((1-\epsilon)L)$ lowest scores and the rest uniformly.
 
-\subsection{Algorithm Misclassification Minimization}
+\subsubsection{Algorithm Misclassification Minimization}
 Also taken from ~\cite{toubia2007adaptive}. You define a score, $s_i$ for each item as follows. If the $i$th item is estimated to be a bottom item the score is $s_i=\mathbb{P}(\text{item i is in the top k})$. If the $i$th  item is estimated to be in the top $k$ then the score is $s_i=\mathbb{P}(\text{item i is not in the top k})$. You can estimate this quanity by taking a large number of draws from the posterior distribution. You take the $L$ items with the highest score.
 
-\subsection{Algorithm Greatest Uncertianty}
+\subsubsection{Algorithm Greatest Uncertianty}
 You define the score, $s_i$ for each item as follows. $s_i=|.5-\mathbb{P}(\text{item i is in the top k})|$. You can estimate this quanity by taking a large number of draws from the posterior distribution. You take the $L$ items with the lowest score.
 
-\subsection{Variant Random Pertubation}
-Using bayes bootstrapping for estimating probabities required in Misclassification Minimization and Greatest Uncertianty takes a good deal of time. As an alternative you can estimate the scores once every $b$ people, Let us call $b$ the batch size. And then for each person perturb the scores by a normal vector with mean zero and varaince $c\frac{1}{n_i}$, Where $n_i$ is the number of questions that has had item $i$ and $c$ is some constant, we take it to be $frac{1}{10}$. Serve up the $L$ items accordingly.   
+\subsubsection{Variant Random Pertubation}
+Using bayes bootstrapping for estimating probabities required in Misclassification Minimization and Greatest Uncertianty takes a good deal of time. As an alternative you can estimate the scores once every $b$ people, Let us call $b$ the batch size. And then for each person perturb the scores by a normal vector with mean zero and varaince $c\frac{1}{n_i}$, Where $n_i$ is the number of questions that has had item $i$ and $c$ is some constant, we take it to be $\frac{1}{10}$. Serve up the $L$ items accordingly.   
 
 \subsection{Main Empirical Analysis}
 We compared our proposed bandit MaxDiff approaches to existing non-adaptive fixed MaxDiff design strategies using simulation based on inferred preferences from an actual MaxDiff survey. We used MaxDiff data from a survey conducted by Procter \& Gamble with Sawtooth Software. The study involved 981 respondents and 120 items from a sparse MaxDiff study. The subject matter and exact item text was hidden for confidentiality purposes. They provided us with the individual-level posterior mean utilities for all respondents and items, which were obtained via Markov Chain Monte Carlo sampling for a hierarchical Bayes (HB) logit model. We call those individual-level utilities the true HB utilities.  These HB utilities offered realistic patterns of preferences across the items and respondents for use in our respondent simulations.  Our simulated respondents mimicked the actual respondents' preferences, on average: to answer each new MaxDiff task, we perturbed those true HB utilities by iid Gumbel error.  \\
@@ -619,6 +579,9 @@ In a five item set (A,B,C,D and E) there are 10 possible 2-way comparisons. If w
 The case of asking for bests when all respondents have same preferences that turns into the marked-bandit problem in ~\cite{simchowitz2016best}. In that paper the authors give different algorithms for pulling the arms and upper and lower bounds on how many queries it takes to identify the top $k$ items with high probability. 
 \subsection{What about Double Adaptivity?}
 In 2006, one of the authors presented a paper on Adaptive MaxDiff that featured within-respondent adaptation ~\cite{orme2006adaptive} rather than what we have shown here in Bandit MaxDiff based on Thompson Sampling, which is an across-respondent adaptive approach.  For the within-respondent adaptive procedure, items that a respondent indicates are worst are dropped from further consideration by that same respondent through a round-robin tournament until eventually that respondent's best item is identified.  We thought adding this additional layer of within-respondent adaptivity on top of the Bandit MaxDiff approach could additionally lift its performance.  To our surprise, this double-adaptive approach actually performed worse than Bandit MaxDiff alone in terms of hit rates for the globally best 3 or 10 items for the sample.  After some head-scratching (and much code checking), we determined that the lack of improvement was due to degree of heterogeneity across the robotic respondents.  For example, if we are interviewing a respondent who doesn't agree much with the overall population regarding which are the top items, it is detrimental to allow that respondent to drop from further consideration (due to judging them worst) what actually are among the globally most preferred items.  It serves the greater good for each respondent to spend increased effort judging among the items that previous respondents on average have judged as potentially best.
+\subsection{Drawing from the Asymptotic Distribution (add MCMC?)}
+As an alternative to bayesian bootstraping to get draws from the posterior, one can sample from asymptotic distribution via MLE implied by the estimated mean and standard errors, sampling $u \sim N(\theta,H^{-1})$, where $\theta$ is the minimizer of the negative loglikehood and $H$ is the Hessian of the negative loglikehood evaluated at $\theta$. The sampling methods preformed about the same using draws from either bayesian bootstraping or the asymptotic distribution.
+
 \subsection{Other Sampling Schemes}
 %\subsection{Choosing Items to Minimize Misclassification}
 %\subsection{What about when $k$ is close to $L$?}
