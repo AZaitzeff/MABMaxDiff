@@ -338,7 +338,7 @@ Using bayes bootstrapping for estimating probabities required in Misclassificati
 \subsection{Main Empirical Analysis}
 We compared our proposed bandit MaxDiff approaches to existing non-adaptive fixed MaxDiff design strategies using simulation based on inferred preferences from an actual MaxDiff survey. We used MaxDiff data from a survey conducted by Procter \& Gamble with Sawtooth Software. The study involved 981 respondents and 120 items from a sparse MaxDiff study. The subject matter and exact item text was hidden for confidentiality purposes. They provided us with the individual-level posterior mean utilities for all respondents and items, which were obtained via Markov Chain Monte Carlo sampling for a hierarchical Bayes (HB) logit model. We call those individual-level utilities the true HB utilities.  These HB utilities offered realistic patterns of preferences across the items and respondents for use in our respondent simulations.  Our simulated respondents mimicked the actual respondents' preferences, on average: to answer each new MaxDiff task, we perturbed those true HB utilities by iid Gumbel error.  \\
 For each sample of simulated respondents, we ran aggregate logit and compared the current rank order of the estimated aggregate item scores to the true rank order for the known true utilities.  We define hit rate to reflect how accurately we could recover the top few items as observed in the true preferences for the Procter \& Gamble dataset.  To stabilize the hit rate results (since there was a random component to the responses), we ran the simulations each 100 of times. \\
-We used two hit rate measures.\\ \textbf{Top 3 hit rate}: what percent of the top 3 true items the estimated scores using robotic respondents identified.\\ \textbf{Top 10 hit rate}: what percent of the top 10 true items the estimated scores using robotic respondents identified.  For instance, if the estimated scores identified 7 of the true top 10 items (irrespective of order), the hit rate was 70\%.\\
+We used two hit rate measures.\\ \textbf{Top k hit rate}: what percent of the top k true items the estimated scores using robotic respondents identified. For instance, if k is 10 and if the estimated scores identified 7 of the true top 10 items (irrespective of order), the hit rate was 70\%
 Hit rate is analogous to regret in a typical bandit problem. It measures how far we are from always selecting the truly best arm for all time periods. Although it is not exactly an observed reward in the sense of the usual bandit setting (e.g., clicks, purchases), this serves as the measure of success, \textit{ex post}.\\
 \begin{figure}[!ht]
 \caption{Distrubution of True Utilities}
@@ -409,33 +409,27 @@ Our diabolical simulation of a misinformed start is worse than anything you woul
 \end{figure}
 We illustrate the robustness in Figure \ref{fig:3hitmis}. First, the Bandit MaxDiff $\epsilon$-diffuse TS approach is much better in the face of misinformed starts than the standard Bandit MaxDiff TS approach.  The more diffuse prior on the 10 out of 30 items within the split allows us to continue investigating the value of some lesser chosen items with enough frequency among later respondents, even if the prior respondents seem to have generally rejected them.\\
 Second, even in the face of a misinformed start, the Bandit MaxDiff $\epsilon$-diffuse TS achieves equally good results as the standard Fixed Express MaxDiff without the misinformed start after 290 respondents. Finally, the conclusions were qualitatively similar when examining Top-10 hit rate.\\
-\subsection{Changing exploration parameters}
-We introduced two tuning parameters -- $\epsilon$ and $\delta$ -- into an algorithm that previously had no such parameters explicitly guiding exploration. To understand the impact these exploration parameters have and each one's effect on the outcome, we have to test their values empirically. \\
-the Fixed Express MaxDiff is equivalent to $\epsilon$=1 and $\delta$=$0^+$, and greedy is equivalent to $\epsilon$=1 and $\delta$=$\infty$.  Our current resealts suggest there is an ``interior solution,'' as there are non-monotonic effects of the exploration parameters.
 \subsection{Effect of increasing number of items}
 \begin{table}
 \begin{center}
-\begin{tabular}{l | c | c | c}
- Respondent& Fixed Express &  TS $\epsilon$=$\frac{1}{3}$ $\delta$=10  &TS $\epsilon$=0 $\delta$=1 \\
-\hline
-100	&	22.33	&	44.33	&	47.67	\\
-200	&	31	&	70	&	67	\\	
-300	&	41.33	&	76	&	72	\\	
-400	&	42.67	&	79	&	78.33	\\	
-500	&	46.33	&	85.33	&	79.33	\\
-600	&	48	&	89.33	&	82	\\	
-700	&	53.67	&	88.67	&	85.67	\\
-800	&	54.67	&	90.67	&	86.33	\\
-900	&	55.67	&	91.33	&	88	\\
-1000	&	59	&	91.33	&	89	\\	
-\hline
-\end{tabular}
+\begin{tabular}{llllllllll}
+\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSthres &  uncert \\ \hline    10 &           0.47 &   0.290 &         0.32 &   0.650 & 0.65 & 0.730 &    0.670 &   0.620 \\  20 &           0.51 &   0.295 &         0.38 &   0.685 & 0.67 & 0.690 &    0.750 &   0.725 \\ 40 &           0.60 &   0.378 &         0.43 &   0.720 & 0.62 & 0.665 &    0.682 &   0.693 \end{tabular}
 \end{center}
-\caption{Top 3 Hit Rate for Various Algorithms with 300 items}
-\label{table:300top3}
+\caption{Top k Hit Rate for Various Algorithms at the 260th Respondant for the 300 item data set}
+\label{table:300at260}
 \end{table}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{llllllllll}
+\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSthres &  uncert \\\hline   10 &           0.77 &   0.770 &        0.820 &   0.880 & 0.850 & 0.890 &     0.86 &   0.870 \\  20 &           0.75 &   0.700 &        0.775 &   0.810 & 0.725 & 0.775 &     0.83 &   0.835 \\  40 &           0.82 &   0.773 &        0.795 &   0.815 & 0.727 & 0.788 &     0.84 &   0.810 \\\end{tabular}
+\end{center}
+\caption{Top k Hit Rate for Various Algorithms at the 500th Respondant for the 300 item data set}
+\label{table:300at500}
+\end{table}
+TO DO (the table is only 10 iterations).
 Would the benefits of Bandit MaxDiff we observed with 120 items continue for 300 items?  While we didn't have a dataset of utilities from human respondents on 300 items, we did our best to generate such a data set by leveraging the 120-item data set Procter \& Gamble shared with us.  To generate preferences across an additional set of 180 items, we randomly combined pairs of existing items according to a randomly distributed weighting scheme, with additional random variation added.  The result was a 300-item MaxDiff data set based on the original preferences of the 981 respondents.\\
-The advantages seen in the 120-item results are improved upon in the results with 300 items. Table \ref{table:300top3} shows the well-informed start results. The Bandit MaxDiff approach was 6x more efficient than the Fixed Express MaxDiff approach on the top-3 hit rate criterion.\\
+The advantages seen in the 120-item results are improved upon in the results with 300 items. Table \ref{table:300top3} shows the well-informed start results. The addaptive approaches show substatial gains over the Fixed Express MaxDiff approach on the top-10,20,40 hit rate criterion.\\
 \subsection{What about a smaller set of 40 Items?}
 Our Bandit model has a great advantage over fixed designs for very large numbers of items, but what happens if we have a more traditional ``large'' MaxDiff list of 40 items. Using a random 40-item subset from our original set of 120 items, we reran our simulations. \\
 %By reducing the number of items to 40 and changing the number of tasks to 12, the fixed express design can now show each item an average of 1.5 times per respondent, which is much less sparse than in larger item cases.\\
@@ -465,7 +459,7 @@ $S$& Percent True Utility \\
 \end{table}
 One might like to differentiate between an algorithm puts the top 9 items and the 11th item in the 10 top and one puts the top 9 items and the 40th item in the 10 top. A measure that differentiates the two is Percent True Utility (PTU). \\
 \textbf{Exponential Weighted Utility}: For a set $S$ the exponential weighted utility is \[\mu_S=\sum_{x \in S}b(x)=\sum_{x \in S}e^{u(x)}\]
-\textbf{Percent True Utility of the Top 3}: The Percent True Utility (PTU) is the exponential weighted true utility of the top 3 items that the robotic respondents identified over the maximum exponential weighted true utility that could be attained with 3 items. Mathematical if $\tilde{S}$ is the top 3 items and $S$ is the current 3 top items identified robotic respondents then PTU is 
+\textbf{Percent True Utility of the Top k}: The Percent True Utility (PTU) is the exponential weighted true utility of the top k items that the robotic respondents identified over the maximum exponential weighted true utility that could be attained with k items. Mathematical if $\tilde{S}$ is the top k items and $S$ is the current k top items identified robotic respondents then PTU is 
 \[
 \frac{\mu_S}{\mu_{\tilde{S}}}
 \]
