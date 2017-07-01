@@ -316,7 +316,8 @@ However, as this continues, the uncertainty is reduced around these poor items t
 Perhaps the natural parameter uncertainty is not enough or is perhaps too slow to adjust, so we propose an algorithm MaxDiff epsilon-diffuse TS, which has an extra layer of self-correction, making it more robust to non-stationarity or respondent self-selection. 
 The way the $\epsilon$-$\delta$ version hedges its bets on the best items intuitively. As in illustration, instead of sampling 20 items from TS, we use 15 of the items drawn using standard Thompson Sampling (L=20, $\epsilon$=1/4), and 5 of the items drawn using Thompson Sampling with a much more diffuse prior (subsampling $\delta$=.25 of the data with replacement and drawing $u$ as a Bayes bootstrap of the subsampled data).
 For $\epsilon$-$\delta$ case, its density does not become a spike as quickly as it does without $\epsilon$-$\delta$ . This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and $\delta$, the more exploration and slower the algorithm settles on its set of items. The epsilon comes from the popular $\epsilon$-greedy.
-The $\epsilon$-$\delta$  generalization is just like a two-component mixture model, which nests a pooled model without segments. As the epsilon is zero, the diffuse distribution is never used, so the algorithm collapses to regular TS. As $\delta$ is 1, the diffuse distribution is equivalent to the non-diffuse distribution.
+The $\epsilon$-$\delta$  generalization is just like a two-component mixture model, which nests a pooled model without segments. As the epsilon is zero, the diffuse distribution is never used, so the algorithm collapses to regular TS. As $\delta$ is 1, the diffuse distribution is equivalent to the non-diffuse distribution. For our empirical analysis we use $\epsilon=\frac{1}{4}$ and $\delta=\frac{1}{4}$. Also tested were $\epsilon=\frac{1}{2}$ and $\delta=\frac{1}{4}$ and $\epsilon=1$ and $\delta=\frac{1}{4}$ which performed on par with $\epsilon=\frac{1}{4}$ and $\delta=\frac{1}{4}$.\\
+TO DO put some where else  
 In ~\cite{toubia2007adaptive} a similar idea is used to avoid misclassifying an item that will not be sampled further. The author derived insight from genetic algorithms where ``decreasing the mutation rate over the number of iterations (or generations) leads to higher performance compared to a fixed mutation rate.'' This suggests sampling from a diffuse distribution gives benefit over uniform sampling over the remaining items as the variance of the diffuse distributions shrink with the number of respondents interviewed.
 
 
@@ -380,7 +381,7 @@ The key takeaway from Figure \ref{fig:3hit} is simple: any adaptive method is at
 \begin{tabular}{llllllllll}
 \hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline  3 &          0.650 &   0.853 &        0.860 &   0.883 & 0.863 & 0.873 &       0.850 &    0.893 &   0.840 \\  10 &          0.825 &   0.880 &        0.902 &   0.907 & 0.923 & 0.909 &       0.909 &    0.907 &   0.901 \\  20 &          0.824 &   0.784 &        0.863 &   0.885 & 0.825 & 0.820 &       0.869 &    0.879 &   0.886 \\  40 &          0.857 &   0.NA &        0.884 &   0.908 & NA & NA &       0.895 &    0.888 &   0.897\end{tabular}
 \end{center}
-\caption{Top k Hit Rate for Various Algorithms at the 260th Respondent}
+\caption{Top k Hit Rate for Various Algorithms at the 260th Respondent with 120 Items}
 \label{table:at260}
 \end{table}
 
@@ -389,7 +390,7 @@ The key takeaway from Figure \ref{fig:3hit} is simple: any adaptive method is at
 \begin{tabular}{llllllllll}
 \hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline   3 &          0.780 &   0.950 &        0.933 &   0.950 & 0.940 & 0.957 &       0.917 &    0.947 &   0.943 \\  10 &          0.877 &   0.925 &        0.928 &   0.939 & 0.933 & 0.952 &       0.940 &    0.947 &   0.945 \\  20 &          0.862 &   0.827 &        0.914 &   0.928 & 0.863 & 0.868 &       0.916 &    0.914 &   0.919 \\  40 &          0.887 &   NA &        0.926 &   0.937 & NA & NA &       0.929 &    0.927 &   0.938 \end{tabular}
 \end{center}
-\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent}
+\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent with 120 Items}
 \label{table:at500}
 \end{table}
  We show in Table \ref{table:at500}. After about 160 respondents, we've obtained an 80\% hit rate; which we wouldn't achieve with traditional Express MaxDiff until about the 800th respondent.  As shown, we can accomplish with about 260 respondents what it takes 1000 respondents to do with Express MaxDiff.  Either comparison shows that you can obtain equally good hit rates using the adaptive Bandit MaxDiff methodology with $\frac{1}{4}$ the sample size.\\
@@ -402,13 +403,15 @@ Figure \ref{fig:10hit} shows the results for Top-10 hit rate for our 120-item Ma
 To this point, it seems like the adaptive Bandit MaxDiff approach using Thompson Sampling is the clear winner.  However, what would happen if the first 50 respondents we interviewed were actually not very representative of the average preferences for the sample?  What if we tried to throw Bandit MaxDiff off the scent?  In fact, let's consider a worst-case scenario: the first responders actually believe \textit{nearly the opposite} from the rest of the sample\\
 For the simulations reported in Figure 6, the first 50 robotic respondents mimicked randomly drawn human vectors of utilities as before but were diabolically manipulated to behave as if the top 3 true items were actually nearly the worst in preference (we set the utilities for the top 3 true items for the population equal to the bottom 25th percentile utility item for each respondent).  After this misinformed start, the remaining respondents represented well-behaved respondents drawn using bootstrap sampling as before, with true individual-level preferences as given in the original dataset donated by Procter \& Gamble.\\
 Our diabolical simulation of a misinformed start is worse than anything you would realistically see in practice, so it is a strong test of the robustness of the Bandit MaxDiff approach. This suggests robustness to non-stationarity in preference or self-selection of respondents during the sampling window. We created 50 misinforming early responders because in practice we are never guaranteed that the first responders represent a fair and representative draw from the population.  In fact, depending on how rapidly we invite a panel of respondents to take the survey, the first 50 respondents may share some atypical characteristics (e.g. anxious and available to take the survey at your launch time).  It would be a bad thing if the Thompson Sampling approach performed well in simulations with well-behaved respondents, but fell apart under more realistic conditions. \\
-\begin{figure}
-\caption{3 Hit Rate with 120 items with Misinformed Start}
-\includegraphics[width=1\textwidth]{plots/3hitrate120show3mis.pdf}
-\label{fig:3hitmis}
-\end{figure}
-We illustrate the robustness in Figure \ref{fig:3hitmis}. First, the Bandit MaxDiff $\epsilon$-diffuse TS approach is much better in the face of misinformed starts than the standard Bandit MaxDiff TS approach.  The more diffuse prior on the 5 out of 20 items within the split allows us to continue investigating the value of some lesser chosen items with enough frequency among later respondents, even if the prior respondents seem to have generally rejected them.\\
-Second, even in the face of a misinformed start, the Bandit MaxDiff $\epsilon$-diffuse TS with and without thresholding, achieves equally good results as the standard Fixed Express MaxDiff without the misinformed start after 260 respondents and Greatest Uncertainty and Misclassification Minimization after 160 respondents. Finally, the conclusions were qualitatively similar when examining Top-10 hit rate.\\
+\begin{table}
+\begin{center}
+\begin{tabular}{llllllllll}
+\hline   Respondant &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert  \\ \hline    260 &   0.09 &   0.297 &  0.237 &   0.253 & 0.067 & 0.347 &  0.067 &    0.357 &   0.27 \\  500 &  0.247 &   0.57 &  0.49 &   	0.54 & 0.127 & 0.537 &       0.1 &    0.64 &   0.503  \end{tabular}
+\end{center}
+\caption{Top 3 Hit Rate for Various Algorithms at the 260th and 500th Respondent for the 120 item data set with Misinformed Start}
+\label{table:120mis}
+\end{table}
+We illustrate the robustness in Table \ref{table:120mis}. One critical point to note is that Bandit MaxDiff $\epsilon$-diffuse TS approach is much better in the face of misinformed starts than the standard Bandit MaxDiff TS approach.  The more diffuse prior on the 5 out of 20 items within the split allows us to continue investigating the value of some lesser chosen items with enough frequency among later respondents, even if the prior respondents seem to have generally rejected them.
 \subsection{Effect of increasing number of items}
 \begin{table}
 \begin{center}
@@ -452,6 +455,43 @@ Our Bandit model has a great advantage over fixed designs for very large numbers
 %By reducing the number of items to 40 and changing the number of tasks to 12, the fixed express design can now show each item an average of 1.5 times per respondent, which is much less sparse than in larger item cases.\\
 By reducing the number of items to 40, the Express MaxDiff design can now show each item to every other respondent on average, which is much more than in larger item cases.
 Nevertheless, our results for Adaptive MaxDiff are still better than traditional MaxDiff.
+
+\subsection{Simulated data sets}
+\begin{table}
+\begin{center}
+\begin{tabular}{llllllllll}
+\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline    10 &   0.212 &   	0.232 &   0.220 &   0.260 & 0.236 & 0.228 & 0.244 &    0.220 &   	0.244 \\  20 &  0.337 & 0.343 & 0.349 & 0.319 & 0.335 & 0.340 &  0.348 & 0.337 & 0.349 \end{tabular}
+\end{center}
+\caption{Top k Hit Rate for Various Algorithms at the 260th Respondent for the uncorrelated data set}
+\label{table:bad260}
+\end{table}
+\begin{table}
+\begin{center}
+\begin{tabular}{llllllllll}
+\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline    10 &  0.248 &   0.324	&0.308&	0.344 &0.318 & 0.268 & 	0.332	&0.296 &   0.320 \\  20 & 0.363	&0.399&	0.412& 	0.394 & 0.377&0.402 &  0.410&0.401 &   0.428 \end{tabular}
+\end{center}
+\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent for the uncorrelated data set}
+\label{table:bad500}
+\end{table}
+\begin{table}
+\begin{center}
+\begin{tabular}{llllllllll}
+\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline  10 & 0.772 &   0.878 & 0.884 & 0.888 & 0.870&0.892 & 	0.882&0.892 &   0.878 \\  20 &  0.874 &  0.862 &   0.922 &  0.929 & 0.875&0.904 &  	0.925&0.935 &  0.933 \end{tabular}
+\end{center}
+\caption{Top k Hit Rate for Various Algorithms at the 260th Respondent for the correlated data set}
+\label{table:nice260}
+\end{table}
+\begin{table}
+\begin{center}
+\begin{tabular}{llllllllll}
+\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline    10 & 0.846&0.922&0.924&0.932 & 	0.930&0.938 &   0.916&0.940 &   0.934 \\  20 & 0.902&0.895&0.954& 0.957& 0.896&0.927 & 0.947&0.961 & 0.963 \end{tabular}
+\end{center}
+\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent for the uncorrelated data set}
+\label{table:nice500}
+\end{table}
+To test to see if these results would generilize to other data sets.
+
+\section{True Utility and Stopping Conditions}
 \subsection{Using True Utility as a Generalization of Hit-Rate}
 \begin{table}
 \begin{center}
@@ -509,84 +549,40 @@ Draw 3 &4.81 & 5.23 & 5.04 &  3.96 &  4.17 & 4.37 &  3.58 & 2.99 \\
 \caption{Two histograms of $\Delta$. Left: After 100 iterations, the potential value remaining is .092. Right: After 220 iterations, the potential value remaining is .008}
 \label{fig:data}
 \end{figure}
-As an example I took draws after respondent 100 in TS $\epsilon=.33$ $\delta=10$ for 120 items see table \ref{table:data} for draws of exponential weighted utility of a single item. I put the columns in current rank order and only show the top 8 for convenience. Then $S$ is the set containing what is currently ranked as the first, second and third ranked item. Then $\mu^1_{S}=4.02+3.50+5.08=12.6$ and $\mu_{S^*}^{1}=5.08+4.41+4.16=13.65$ So $\Delta^{1}=\frac{13.65-12.6}{12.6}=.083$. Likewise $\Delta^{2}=\frac{12.6-12.39}{12.39}=.017$ and $\Delta^{3}=\frac{15.08-15.08}{15.08}=0$ (Note $\Delta^m=0$ when the $S$ contains the top utilities). The histogram of $\Delta$ after 100 iterations and 220 iterations is shown in figure \ref{fig:data}. \\
+As an example see table \ref{table:data} for draws of exponential weighted utility of a single item. I put the columns in current rank order and only show the top 8 for convenience. Then $S$ is the set containing what is currently ranked as the first, second and third ranked item. Then $\mu^1_{S}=4.02+3.50+5.08=12.6$ and $\mu_{S^*}^{1}=5.08+4.41+4.16=13.65$ So $\Delta^{1}=\frac{13.65-12.6}{12.6}=.083$. Likewise $\Delta^{2}=\frac{12.6-12.39}{12.39}=.017$ and $\Delta^{3}=\frac{15.08-15.08}{15.08}=0$ (Note $\Delta^m=0$ when the $S$ contains the top utilities). The histogram of $\Delta$ after 100 iterations and 220 iterations is shown in figure \ref{fig:data}. \\
  The `potential value remaining' (PVR) is the .95 quantile of the distribution $\Delta$. After 100 iterations the PVR was .092. Scott's way to interpret this number is ``we do not know what the utility of $S$ is, but whatever it is, a different set might beat it by as much as 9.2\%.''\\
- A good stopping rule is to stop when the PVR drops below a certain threshold, (We use .05 and .02). One advantage of this is it handles ties (two sets with close exponential weighted utility scores) really well. 
-\begin{figure}
-\caption{Potential Value Remaining of the Top 3 with 120 items on a semi log plot, the dashed lines are at .05 and .02}
-\includegraphics[width=1\textwidth]{plots/3vr120show3.pdf}
-\label{fig:3vr}
-\end{figure}
-\begin{figure}
-\caption{Histogram of When Iterations Would Stop and PTU Using a .02 Stopping Rule for Top 3 for 120 Items}
-\begin{subfigure}{.5\textwidth}
-\caption{On which Respondent does Iteration Stops}
-\includegraphics[width=1\textwidth]{plots/stop120items23.pdf}
-\label{fig:3vrstop2}
-\end{subfigure}
-\begin{subfigure}{.5\textwidth}
-\caption{Percent True Utility When Iteration Stops}
-\includegraphics[width=1\textwidth]{plots/util120items23.pdf}
-\label{fig:3vrutil2}
-\end{subfigure}
-\end{figure}
-\begin{figure}
-\caption{Histogram of When Iterations Would Stop and PTU Using a .05 Stopping Rule for Top 3 for 120 Items}
-\begin{subfigure}{.5\textwidth}
-\caption{On which Respondent does Iteration Stops}
-\includegraphics[width=1\textwidth]{plots/stop120items53.pdf}
-\label{fig:3vrstop5}
-\end{subfigure}
-\begin{subfigure}{.5\textwidth}
-\caption{Percent True Utility When Iteration Stops}
-\includegraphics[width=1\textwidth]{plots/util120items53.pdf}
-\label{fig:3vrutil5}
-\end{subfigure}
-\end{figure}
-Figure \ref{fig:3vr} shows the average PVR on a log scale. Figures \ref{fig:3vrstop2} and \ref{fig:3vrstop5} show on which respondent the iterations' PVR would reach .02 and .05 respectively (with the max being 1020)  and Figures \ref{fig:3vrutil2} and \ref{fig:3vrutil5} shows what the Percent True Utility would be at those points.\\
-\begin{table}
-\begin{center}
-\begin{tabular}{l | c | c | c }
- & Fixed Express &  TS $\epsilon$=$\frac{1}{3}$ $\delta$=10  &TS $\epsilon$=0 $\delta$=1  \\
-\hline
-120 items&&&\\
-Mean Stop&  980.8 &  440.6 &  606.0 \\
-Mean PTU& .976 & .997 & .996 \\
-\hline
-300 items&&&\\
-Mean Stop& 1020.0 &  674.2 &  929.4\\
-Mean PTU& .904 & .992 & .988 \\
-\hline
-\end{tabular}
-\end{center}
-\caption{Mean respondent each algorithm would stop at and the mean percent true utility (PTU) for stopping when the PVR reaches .02}
-\label{table:stop2}
-\end{table}
-\begin{table}
-\begin{center}
-\begin{tabular}{l | c | c | c }
 
- & Fixed Express &  TS $\epsilon$=$\frac{1}{3}$ $\delta$=10  &TS $\epsilon$=0 $\delta$=1 \\
-\hline
-120 items&&&\\
-Mean Stop& 661.6 &  214.0 & 243.8 \\
-Mean PTU& .966 & .984 & .986 \\
-\hline
-300 items&&&\\
-Mean Stop& 1001.2 &  334.6 &  526.8\\
-Mean PTU& .904 & .970 & .980 \\
-\hline
-\end{tabular}
+\begin{figure}
+\caption{Average stopping time with defferent thresholds}
+\includegraphics[width=1\textwidth]{plots/stoppingtimes.pdf}
+\label{fig:st}
+\end{figure}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{llllllllll}
+\hline    &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline  Avg ST  & 318 &   235 & 183 & 134 & 121 & 146 & 	TD &TD &   124 \\  Avg hr  &  0.854 &  0.88 & 0.852&0.848 & 0.846 & 	0.866 &TD&TD &  0.837 \end{tabular}
 \end{center}
-\caption{Mean respondent each algorithm would stop at and the mean percent true utility (PTU) for stopping when the PVR reaches .05}
-\label{table:stop5}
+\caption{Average Stopping Time and Average Hit Rate With a threshold of .02 PVR for top 10 items}
+\label{table:st2}
 \end{table}
-In tables \ref{table:stop2} and \ref{table:stop5} we see the means of the when the iterations would stop and percent true utility at those points for 120 and 300 items.\\ Another advantage we see from this for Bandit MaxDiff $\epsilon$-diffuse TS approach is that on average it stops sooner that standard TS with about the same performance. This advantage grows with the number of items. Both Bandit MaxDiff TS stop much sooner and preform much better then Fixed Express. The choice between a 0.05 stopping rule or a 0.02 stopping rule is a trade-off between the having to survey extra respondents and getting the extra utility.
+\begin{table}
+\begin{center}
+\begin{tabular}{llllllllll}
+\hline    &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline    Avg ST & 498 & 389 & 288 & 227 & 206 & 247 & TD &TD &  220 \\ Avg hr & 0.893 &0.918&0.902& 	0.911 & 0.907& 0.912 & TD&TD& 0.909\end{tabular}
+\end{center}
+\caption{Average Stopping Time and Average Hit Rate With a threshold of .05 PVR for top 10 items}
+\label{table:st5}
+\end{table}
+ A good stopping rule is to stop when the PVR drops below a certain threshold. See figure \ref{fig:st} for the average stopping time for different algorithms based on threshold for finding the top 10 items. Tables \ref{table:st2} and \ref{table:st5} show the average stopping time and average hit rate at those stopping time for threshold values 0.02 and 0.05. The trade-off is accuracy for how many respondants you survey. If you are using regret as a stoping rule keep in mind when choosing your threshold value, that in general higher $k$ gives smaller PVR values. \\ 
 %\subsection{Spearman (Rank Ordering) Correlation}
 %Both hit rate and percent true utility are invariant under the ordering of the $k$ items. As a final metric we looked at the Spearmen Correlation of the true top $k$. This measures how well the algorithm's ranking of the true top $k$ items matches with the truth. For example if the 
+\section{Other (TO DO Title)}
+\subsection{Changing Exploration Parameters}
+$\epsilon$-diffuse TS and Greatest Uncertainty with random pertubation and Misclassification Minimization with random pertubation all have parameters that can be changed. Greatest Uncertainty with random pertubation and Misclassification Minimization with random pertubation $c=\infty$ and $\epsilon$-diffuse TS with $\epsilon=1$ and $\delta=0$ are the same sampling scheme as fixed express.  $\epsilon$-diffuse TS with $\epsilon=0$ is regular TS. The trade-off is robustness against bad respondants against speed of converage.
 \subsection{Asking for Bests instead of Best-Worst}
 Because a key assumption for using the Bandit MaxDiff approach is that the researcher is mainly interested in identifying the top few items, we wondered about the value of spending time asking respondents to identify the worst item within each MaxDiff set.  What would happen if we asked our robotic respondents only to select the best item within each set?  The results somewhat surprised us.  The value of asking respondents to indicate both best and worst within each set more than compensated for the 40\% additional effort we suppose these ``worst'' questions add to the total interview time when interviewing human respondents.
-In a five item set (A,B,C,D and E) there are 10 possible 2-way comparisons. If we assume A is preferred to B and B is preferred to C and so on, then asking about only the best item will let us know A$>$B, A$>$C, A$>$D and A$>$E (4/10 comparisons).  By asking about worsts as well, for only one additional question we also add B$>$E, C$>$E, and D$>$E (7/10 comparisons), leaving only the order relationship between B, C, and D unknown.\\
+In a five item set (A,B,C,D and E) there are 10 possible 2-way comparisons. If we assume A is preferred to B and B is preferred to C and so on, then asking about only the best item will let us know A$>$B, A$>$C, A$>$D and A$>$E (4/10 comparisons).  By asking about worsts as well, for only one additional question we also add B$>$E, C$>$E, and D$>$E (7/10 comparisons), leaving only the order relationship between B, C, and D unknown.\\ 
 The case of asking for bests when all respondents have same preferences that turns into the marked-bandit problem in ~\cite{simchowitz2016best}. In that paper the authors give different algorithms for pulling the arms and upper and lower bounds on how many queries it takes to identify the top $k$ items with high probability. 
 \subsection{What about Double Adaptivity?}
 In 2006, one of the authors presented a paper on Adaptive MaxDiff that featured within-respondent adaptation ~\cite{orme2006adaptive} rather than what we have shown here in Bandit MaxDiff based on Thompson Sampling, which is an across-respondent adaptive approach.  For the within-respondent adaptive procedure, items that a respondent indicates are worst are dropped from further consideration by that same respondent through a round-robin tournament until eventually that respondent's best item is identified.  We thought adding this additional layer of within-respondent adaptivity on top of the Bandit MaxDiff approach could additionally lift its performance.  To our surprise, this double-adaptive approach actually performed worse than Bandit MaxDiff alone in terms of hit rates for the globally best 3 or 10 items for the sample.  After some head-scratching (and much code checking), we determined that the lack of improvement was due to degree of heterogeneity across the robotic respondents.  For example, if we are interviewing a respondent who doesn't agree much with the overall population regarding which are the top items, it is detrimental to allow that respondent to drop from further consideration (due to judging them worst) what actually are among the globally most preferred items.  It serves the greater good for each respondent to spend increased effort judging among the items that previous respondents on average have judged as potentially best.
