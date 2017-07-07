@@ -328,7 +328,7 @@ Let $\theta$ be the current estimated parameters. Take the $((1-\epsilon)L)$ ite
 
 \subsubsection{Variant Closest to the Threshold}
 In ~\cite{toubia2007adaptive},  They introduce Closest to Threshold based on Bradlow and Wainer’s (1998) recommendation
-(``select ideas near the cutoff''). We also will do that to find the top $k$. Based on the estimated utilities calculate the cutoff $c=\frac{\theta_k+\theta_{k+1}}{2}$ then for a draw $u$ calculate a score $s_i=|c-u^i|$ for every item. Then take the $L$ items with the lowest score. Similarly as before we can define $\epsilon$ diffuse version where. We have two draws $u_R$ and $u^D$ and from those scores $s_R$ and $s_D$ and Combine diffuse and regular samples into $L$ items. (Remove duplicates items. Take the next best unique item from the diffuse sample not already selected.) We will also test the $\epsilon$ - greedy version where the scores are $s_i=|c-\beta^i|$ you take the $((1-\epsilon)L)$ lowest scores and the rest uniformly.
+(``select ideas near the cutoff''). We also will do that to find the top $k$. For a draw $u$ calculate the cutoff $c=\frac{u_k+u_{k+1}}{2}$ a score $s_i=|c-u^i|$ for every item. Then take the $L$ items with the lowest score. Similarly as before we can define $\epsilon$ diffuse version where. We have two draws $u_R$ and $u^D$ and from those scores $s_R$ and $s_D$ and Combine diffuse and regular samples into $L$ items. (Remove duplicates items. Take the next best unique item from the diffuse sample not already selected.) We will also test the $\epsilon$ - greedy version where the scores are $s_i=|c-\beta^i|$ you take the $((1-\epsilon)L)$ lowest scores and the rest uniformly.
 
 \subsubsection{Algorithm Misclassification Minimization}
 Also taken from ~\cite{toubia2007adaptive}. You define a score, $s_i$ for each item as follows. If the $i$th item is estimated to be a bottom item the score is $s_i=\mathbb{P}(\text{item i is in the top k})$. If the $i$th  item is estimated to be in the top $k$ then the score is $s_i=\mathbb{P}(\text{item i is not in the top k})$. You can estimate this quantity by taking a large number of draws from the posterior distribution. You take the $L$ items with the highest score.
@@ -415,8 +415,8 @@ We illustrate the robustness in Table \ref{table:120mis}. One critical point to 
 \subsection{Effect of increasing number of items}
 \begin{table}
 \begin{center}
-\begin{tabular}{llllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSthres &  uncert \\ \hline    10 &           0.47 &   0.290 &         0.32 &   0.650 & 0.65 & 0.730 &    0.670 &   0.620 \\  20 &           0.51 &   0.295 &         0.38 &   0.685 & 0.67 & 0.690 &    0.750 &   0.725 \\ 40 &           0.60 &   0.378 &         0.43 &   0.720 & 0.62 & 0.665 &    0.682 &   0.693 \end{tabular}
+\begin{tabular}{lllllllllll}
+\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 & TSregthres & TSthres &  uncert \\ \hline 3&  0.597 & 0.640 &          0.307 &   0.593 &        0.477 &    0.543 &          0.537 &       0.647 &   0.580 \\ 10 & 0.630 & 0.662 &          0.462 &   0.612 &        0.540  &   0.682 &          0.576 &       0.674 &   0.694 \\ 20 & 0.606 & 0.658 &          0.550 &   0.599 &        0.593 &    NaN &          0.590 &       0.714 &     NaN \\ 40 & 0.525 & 0.625 &          0.617 &   0.572 &          NaN &  NaN &            NaN &         NaN &     NaN \end{tabular}
 \end{center}
 \caption{Top k Hit Rate for Various Algorithms at the 260th Respondent for the 300 item data set}
 \label{table:300at260}
@@ -424,8 +424,8 @@ We illustrate the robustness in Table \ref{table:120mis}. One critical point to 
 
 \begin{table}
 \begin{center}
-\begin{tabular}{llllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSthres &  uncert \\\hline   10 &           0.77 &   0.770 &        0.820 &   0.880 & 0.850 & 0.890 &     0.86 &   0.870 \\  20 &           0.75 &   0.700 &        0.775 &   0.810 & 0.725 & 0.775 &     0.83 &   0.835 \\  40 &           0.82 &   0.773 &        0.795 &   0.815 & 0.727 & 0.788 &     0.84 &   0.810 \\\end{tabular}
+\begin{tabular}{lllllllllll}
+\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 & TSregthres & TSthres &  uncert \\ \hline  3  & 0.720 & 0.793 &          0.387 &   0.763 &        0.747 &     0.773 &          0.617 &       0.800 &   0.777 \\ 10 & 0.702 & 0.784 &          0.578 &   0.759 &        0.718  &   0.794 &          0.626 &       0.792 &   0.792 \\20 & 0.673 & 0.764 &          0.676 &   0.718 &        0.764  &     NaN &          0.633 &       0.821 &     NaN \\ 40 & 0.575 & 0.696 &          0.717 &   0.649 &          NaN  &     NaN &            NaN &         NaN &     NaN \end{tabular}
 \end{center}
 \caption{Top k Hit Rate for Various Algorithms at the 500th Respondent for the 300 item data set}
 \label{table:300at500}
@@ -561,7 +561,7 @@ As an example see table \ref{table:data} for draws of exponential weighted utili
 \begin{table}
 \begin{center}
 \begin{tabular}{llllllllll}
-\hline    &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline  Avg ST  & 318 &   235 & 183 & 134 & 121 & 146 & 	TD &TD &   124 \\  Avg hr  &  0.854 &  0.88 & 0.852&0.848 & 0.846 & 	0.866 &TD&TD &  0.837 \end{tabular}
+\hline    &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline  Avg ST  & 318 &   235 & 183 & 134 & 121 & 146 & 	98 &	136 &   124 \\  Avg hr  &  0.854 &  0.88 & 0.852&0.848 & 0.846 & 	0.866 & 0.795 &0.857 &  0.837 \end{tabular}
 \end{center}
 \caption{Average Stopping Time and Average Hit Rate With a threshold of .02 PVR for top 10 items}
 \label{table:st2}
@@ -569,7 +569,7 @@ As an example see table \ref{table:data} for draws of exponential weighted utili
 \begin{table}
 \begin{center}
 \begin{tabular}{llllllllll}
-\hline    &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline    Avg ST & 498 & 389 & 288 & 227 & 206 & 247 & TD &TD &  220 \\ Avg hr & 0.893 &0.918&0.902& 	0.911 & 0.907& 0.912 & TD&TD& 0.909\end{tabular}
+\hline    &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline    Avg ST & 498 & 389 & 288 & 227 & 206 & 247 & 140 &223 &  220 \\ Avg hr & 0.893 &0.918&0.902& 	0.911 & 0.907& 0.912 & 0.822&0.911& 0.909\end{tabular}
 \end{center}
 \caption{Average Stopping Time and Average Hit Rate With a threshold of .05 PVR for top 10 items}
 \label{table:st5}
