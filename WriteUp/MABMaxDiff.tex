@@ -230,14 +230,14 @@ To accommodate the standard utility structure, we let utility $u(z)=\log{(b(z))}
 We can derive the same representation from the random utility model~\cite{marley2005some}. \\
 We can view best-worst choice as a generalization of the classic multinomial logit for the choice of the best only.\\
 \subsection{Estimation}
-From our perspective as researchers, all of the utilities are unknown. We can estimate the MaxDiff choice model in a variety of ways. One way to do this exactly is to enumerate all possible pairs of items $x$ and $y$ and then we describe their joint probability of being best and worst, which is the probability of being having the largest difference $BW_S(x,y)$. The pairwise approach scales quadratically in the number of items. We adopt an alternative approach, which reflects the literature and practice and is shown to be a near exact approximation ~\cite{cohen2003maximum}. This allows us to estimate the best model and worst model independently, without explicitly estimating the best-worst probability. 
+From our perspective as researchers, all of the utilities are unknown. We can estimate the MaxDiff choice model in a variety of ways. One way to do this exactly is to enumerate all possible pairs of items $x$ and $y$ and then we describe their joint probability of being best and worst, which is the probability of being having the largest difference $BW_S(x,y)$. The pairwise approach scales quadratically in the number of items. We adopt an alternative approach, which reflects the literature and practice and is shown to be a near exact approximation~\cite{cohen2003maximum}. This allows us to estimate the best model and worst model independently, without explicitly estimating the best-worst probability. 
 We describe the data for any individual-task combination. Let $Y_{B_S}(z)$ be the binary choice variable, which equals 1 if the item is selected as best in the set $S$, and 0 otherwise. Then $Y_{W_S}(z)$ is the indicator of whether item $z \in S$ is selected as the worst. The design matrix $X_{B_S}$ (of size $|S|$-by-$N$) contains indicator variables taking on value of 1 for each item in the current set $S$ and 0 otherwise. To signal the item as worst, we set $X_{W_S}=-X_{B_S}$, so $X_{W_S}$ contains values of 0 or -1.  Taken together, we express the negative likelihood of the choice data as a multinomial logit with choice probabilities in vector notation as follows,
 \[
 -\Pi\frac{\exp{(\begin{bmatrix}Y_B\\Y_W\end{bmatrix}\theta)}}{\exp{(\begin{bmatrix}X_B\\X_W\end{bmatrix}\theta)}}
 \]
 The rows in this matrix representation represent every respondent-task-item combination, $N*J*|S|$, repeated twice.  
-The link between the models of best choice and worst choice is the parameter $\theta=\{\theta_1,\ldots,\theta_k \}$. This common parameter vector represents the overall utility of each item $1,\ldots,k$. For a more positive $\theta_k$, the item $k$ has a larger probability of being chosen as best; the more negative, the more likely the item will be chosen as worst.\\
-We clarify language about utility, which may diverge from conjoint language or language for multi-attribute profiles. Since $X$ is an indicator, the $\theta$ only represents the utility of item $k$ being included versus excluded. If $\theta_k > \theta_{k'}$, then we say item $k$ is ``more preferred,'' ``more important,'' or simply, ``better.''\\
+The link between the models of best choice and worst choice is the parameter $\theta=\{\theta_1,\ldots,\theta_m \}$. This common parameter vector represents the overall utility of each item $1,\ldots,m$. For a more positive $\theta_i$, the item $i$ has a larger probability of being chosen as best; the more negative, the more likely the item will be chosen as worst.\\
+We clarify language about utility, which may diverge from conjoint language or language for multi-attribute profiles. Since $X$ is an indicator, the $\theta$ only represents the utility of item $i$ being included versus excluded. If $\theta_i > \theta_{i'}$, then we say item $i$ is ``more preferred,'' ``more important,'' or simply, ``better.''\\
 Due to the sparse nature of MaxDiff for huge numbers of items plus the desire for rapid real time updates, we decided to use aggregate MNL rather than a Bayesian approach.\\
 The log likelihood can be written in summation notation where $S_n$ denotes the nth set of choices as follows
 \[
@@ -246,42 +246,9 @@ LL(\theta)=-\sum_{n=1}^N \sum_{x \in S_n} (Y_{B_{S_n}}(x)\log{\frac{e^{\theta_x}
 In our work we find $\theta$ by minimizing the negative log likelihood using Newton-Rapson.
 
 \subsection{Adaptive MaxDiff}
-Since we are uncertain about the each parameter value, we continue collecting data. But we do not need to reduce that uncertainty equally for each one.  To translate our current beliefs about parameters into action, we use adaptive sampling schemes via Bayesian Boostrap. The following sections describe sampling schemes that use draws from the posterior to select which items to present to the next respondent. A draw $u$ is made in the following way.
-\begin{align*}
-&\beta_1,\beta_2,\ldots,\beta_N \sim \text{exp}(1)\\
-&LL(\theta;\beta)=-\sum_{n=1}^N \beta_n\sum_{x \in S_n} (Y_{B_{S_n}}(x)\log{\frac{e^{\theta_x}}{\sum_{z\in S_n} e^{\theta_z}}}+ Y_{W_{S_n}}(x)\log{\frac{e^{-\theta_x}}{\sum_{z\in S_n} e^{-\theta_z}}})\\
-&u=\argmin_{\theta} LL(\theta;\beta)
-\end{align*}
-
-Given a sampling scheme we serve up questions in the following way.
-
-\textbf{BEGIN:}
-\begin{enumerate}
-\item For respondents n =1,\ldots,initial
-\begin{enumerate}
-\item \textbf{Act}: select items for MaxDiff design
-\begin{enumerate}
-\item Sample $L$ items from the population 
-\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
-\end{enumerate}
-\end{enumerate}
-\item For respondents n = initial + 1,\ldots, N
-\begin{enumerate}
-\item \textbf{Draw}: Draw from the posterior via Bayesian Bootstap $u_1,\ldots,u_n$
-
-\item \textbf{Value}: Choose $L$ items by sampling rule
-\item \textbf{Act}: select items for MaxDiff design
-\begin{enumerate}
-\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
-\end{enumerate}
-\end{enumerate}
-\end{enumerate}
-\textbf{END ALGORITHM}
-
-
 %Discuss relation to the Follow the regularized leader / perturbed leader 
 \begin{table}[ht]
-\caption{Summary of Algorithms}
+\caption{Summary of Adaptive MaxDiff Algorithms}
 \begin{tabular}{p{5cm}|p{11cm}}
 Algorithm & Short Description \\
 \hline
@@ -298,12 +265,37 @@ Greatest Uncertainty with random perturbation& Take the $L$ items whose probabil
 \label{methods}
 \end{table}
 
-\subsection{Adaptive Methods}
+For each respondent we select $L$ items, and we generate a MaxDiff design of $J$ best-worst tasks, each with a choice set of $|S|$ items.  We use $L=20$, $J=12$, $|S|=5$ as a default since it is a standard number of items used in MaxDiff studies ~\cite{wirth2012largeset}. We begin by selecting the $L$ items uniformly. After an initial number of respondents, we are still uncertain about the each parameter value, so we continue collecting data. But we do not need to reduce that uncertainty equally for each one, so we begin adapting. To translate our current beliefs about parameters into action, we can draw from an exact or approximate posterior distribution and use an adaptive method, explained in detail in the following sections and summarized in table \ref{methods}, to decide what questions to show the next respondent. In the case of the multinomial logit, we can use MCMC to obtain samples, sample from asymptotic distribution via MLE implied by the estimated mean and standard errors, or as we do in the empirical application, use Bayesian bootstrapping. Using Bayesian Bootstrap a draw $u$ is made in the following way.
+\begin{align*}
+&\beta_1,\beta_2,\ldots,\beta_N \sim \text{exp}(1)\\
+&LL(\theta;\beta)=-\sum_{n=1}^N \beta_n\sum_{x \in S_n} (Y_{B_{S_n}}(x)\log{\frac{e^{\theta_x}}{\sum_{z\in S_n} e^{\theta_z}}}+ Y_{W_{S_n}}(x)\log{\frac{e^{-\theta_x}}{\sum_{z\in S_n} e^{-\theta_z}}})\\
+&u=\argmin_{\theta} LL(\theta;\beta)
+\end{align*}
 
-After an initial number of respondents, we begin adapting. We update beliefs about the model parameters. We can draw from an exact or approximate posterior distribution. \footnote{In the case of the multinomial logit, we can use MCMC to obtain samples, sample from asymptotic distribution via MLE implied by the estimated mean and standard errors, or as we do in the empirical application, use Bayesian bootstrapping.}\\
-From a single sample of parameter values, we rank according to some score. We select the top $L$ items, and we generate a MaxDiff design of $J$ best-worst tasks, each with a choice set of $|S|$ items.  We use $L=20$, $J=12$, $|S|=5$ as a default since it is a standard number of items used in MaxDiff studies ~\cite{wirth2012largeset}. 
-There is one practical issue we highlight. We want to avoid repeating extremely similar questions to the same respondent. A natural consequence of adaptive methods is convergence: as the sample size grows, certian items achieve high preference scores with smaller standard errors.  Without any additional restrictions, the same few items will eventually tend to be drawn into adjacent MaxDiff tasks for the same respondent, causing much annoyance due to the severe degree of item repetition.  Although this is statistically most efficient, it would drive human respondents mad.  To avoid this, after drawing a fixed number of items (e.g., 20 or 30) to show each respondent,  those draws of 20 items are shown to each respondent in a balanced, near-orthogonal design, leading to a palatable low degree of repetition of items across adjacent sets.  The attentive reader will notice that our approach is quite similar to Wirth's Express MaxDiff approach, except that the logic for selecting the 20 items for each respondent is adaptive leveraging information from the previous respondents-focusing the most recent respondent's efforts on discriminating among items that already have been judged likely to be the stars.\\
+The adaptive method then use these draws to decide the next $L$ items to show.
+There are two practical issue we highlight.
+First, We want to avoid repeating extremely similar questions to the same respondent. A natural consequence of adaptive methods is convergence: as the sample size grows, certain items achieve high preference scores with smaller standard errors.  Without any additional restrictions, the same few items will eventually tend to be drawn into adjacent MaxDiff tasks for the same respondent, causing much annoyance due to the severe degree of item repetition.  Although this is statistically most efficient, it would drive human respondents mad.  To avoid this, after drawing a fixed number of items (e.g., 20 or 30) to show each respondent,  those draws of 20 items are shown to each respondent in a balanced, near-orthogonal design, leading to a palatable low degree of repetition of items across adjacent sets.  The attentive reader will notice that our approach is quite similar to Wirth's Express MaxDiff approach, except that the logic for selecting the 20 items for each respondent is adaptive leveraging information from the previous respondents-focusing the most recent respondent's efforts on discriminating among items that already have been judged likely to be the stars.\\
 One issue this approach avoids is the respondent tiring out. Instead of trying to create a MaxDiff design with 120 items, which would lead to an unreasonable number of best-worst tasks per respondent, we use the smaller subset of 20.  We also avoid repetition. A particularly annoying alternative is to draw independent samples ranking each choice task for the same respondent. This results in very repetitive choice tasks as parameter estimates. \\
+The second is frequency of updating the data. If people are taking the survey sequentially then all the data from the previously respondents can be used to generate the surveys for the newcomer. Often this is not the case, as an alternative you can update the data once every $b$ people and decide the questions for the next $b$ people. We call $b$ the batch size and in our empirical analysis we let $b=20$.
+
+In summary, given a adaptive method we serve up questions in the following way
+
+\textbf{BEGIN:}
+\begin{enumerate}
+\item For respondents n =1,\ldots,initial
+\begin{enumerate}
+\item Sample $L$ items from the population 
+\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
+\end{enumerate}
+\item For respondents n = initial + 1,\ldots, N
+\begin{enumerate}
+\item Choose $L$ items by the choosen adaptive method using draws from the posterior
+\item Create and serve MaxDiff questionnaire to next respondent $J$ tasks of $|S|$ Qs=MDDesign($L$,$|S|$)
+\end{enumerate}
+\end{enumerate}
+\textbf{END ALGORITHM}
+
+
 
 
 \subsubsection{Algorithm MaxDiff TS}
@@ -313,7 +305,7 @@ One practical issue with Thompson Sampling is robustness to changes overtime. On
 
 However, as this continues, the uncertainty is reduced around these poor items to reveal there are many other items with probability of being better. By sampling from the joint belief distribution of item utilities, we will be less likely to draw those poor items. One concern is that such sampling could be too aggressive.\\
 
-\subsection{Variant MaxDiff $\epsilon$-Diffuse TS}
+\subsubsection{Variant MaxDiff $\epsilon$-Diffuse TS}
 Perhaps the natural parameter uncertainty is not enough or is perhaps too slow to adjust, so we propose an algorithm MaxDiff epsilon-diffuse TS, which has an extra layer of self-correction, making it more robust to non-stationarity or respondent self-selection. 
 The way the $\epsilon$-$\delta$ version hedges its bets on the best items intuitively. As in illustration, instead of sampling 20 items from TS, we use 15 of the items drawn using standard Thompson Sampling (L=20, $\epsilon$=1/4), and 5 of the items drawn using Thompson Sampling with a much more diffuse prior (subsampling $\delta$=.25 of the data with replacement and drawing $u$ as a Bayes bootstrap of the subsampled data).
 For $\epsilon$-$\delta$ case, its density does not become a spike as quickly as it does without $\epsilon$-$\delta$ . This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and the smaller the $\delta$, the more exploration and slower the algorithm settles on its set of items. The epsilon comes from the popular $\epsilon$-greedy.
@@ -336,8 +328,8 @@ Also taken from ~\cite{toubia2007adaptive}. You define a score, $s_i$ for each i
 You define the score, $s_i$ for each item as follows. $s_i=|.5-\mathbb{P}(\text{item i is in the top k})|$. You can estimate this quantity by taking a large number of draws from the posterior distribution. You take the $L$ items with the lowest score.
 
 \subsubsection{Variant Random Perturbation}
-Using Bayes bootstrapping for estimating probabilities required in Misclassification Minimization and Greatest Uncertainty takes a good deal of time. As an alternative you can estimate the scores once every $b$ people, Let us call $b$ the batch size. And then for each person perturb the scores by a normal vector with mean zero and variance $c\frac{1}{n_i}$, Where $n_i$ is the number of questions that has had item $i$ and $c$ is some constant, we take it to be $\frac{1}{10}$. Serve up the $L$ items accordingly.  
-In ~\cite{toubia2007adaptive}, this idea is used to avoid misclassifying an item that will not be sampled further. The author derived insight from genetic algorithms where ``decreasing the mutation rate over the number of iterations (or generations) leads to higher performance compared to a fixed mutation rate.'' This suggests that having the variance change over time will give better performance over a fixed variance.
+Using Bayes bootstrapping for estimating probabilities required in Misclassification Minimization and Greatest Uncertainty takes a good deal of time.  And then for each person perturb the scores by a normal vector with mean zero and variance $c\frac{1}{n_i}$, Where $n_i$ is the number of questions that has had item $i$ and $c$ is some constant, we take it to be $\frac{1}{10}$. Serve up the $L$ items accordingly. This method is good on its own as a way to add more variation in the items show to respondents.
+In ~\cite{toubia2007adaptive}, this idea is used to avoid misclassifying an item that will not be sampled further. The author derived insight from genetic algorithms where ``decreasing the mutation rate over the number of iterations (or generations) leads to higher performance compared to a fixed mutation rate.'' This suggests that having the variance change over time will give better performance over a fixed variance. 
 
 
 \subsection{Main Empirical Analysis}
@@ -484,10 +476,11 @@ Nevertheless, our results for Adaptive MaxDiff are still better than traditional
 \hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline    10 & 0.846&0.922&0.924&0.932 & 	0.930&0.938 &   0.916&0.940 &   0.934 \\  20 & 0.902&0.895&0.954& 0.957& 0.896&0.927 & 0.947&0.961 & 0.963 
 \end{tabular}
 \end{center}
-\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent for the uncorrelated data set}
+\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent for the correlated data set}
 \label{table:nice500}
 \end{table}
-To test to see if these results would generalize to other data sets we tested on two other types of data sets, The first, labeled the uncorrelated data set each respondants preference utility are sampled from a uniform distribution. So each respondant's preferences are uncorrelated with every other respondant (the worst possible enviroment). We take the top $k$ highest mean prefence scores across the respondants to be the top $k$ true items. The results are 
+To test to see if these results would generalize to other data sets we tested on two other types of data sets, The first, labeled the uncorrelated data set, each respondents preference utility for 100 are sampled from a uniform distribution. So each respondent's preferences are uncorrelated with every other respondent (the worst possible environment). We take the top $k$ highest mean preference scores across the respondents to be the top $k$ true items. The results are in tables \ref{table:bad260} and \ref{table:bad500}.\\
+The second, labeled the correlated data set, type of data set is we sample a $\theta_i$ from a uniform distribution for $i=1,\ldots,100$. Then each respondent preference utility is sampled from a normal distribution with mean $\theta_i$ and variance 1. The rankings for each respondent are highly correlated with each other. Once again we take the top $k$ highest mean preference scores across the respondents to be the top $k$ true items. The results are in tables \ref{table:good260} and \ref{table:good500}.\\ The take away is that our previous results generalize to other data sets.
 
 \section{True Utility and Stopping Conditions}
 \subsection{Using True Utility as a Generalization of Hit-Rate}
