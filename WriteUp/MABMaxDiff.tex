@@ -31,7 +31,7 @@
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
-
+\usepackage{subfig}
 
 %% Setup of theorem styles. Outcomment only one. 
 %% Preferred default is the first option.
@@ -46,6 +46,11 @@
 % In the reviewing and copyediting stage enter the manuscript number.
 %\MANUSCRIPTNO{} % When the article is logged in and DOI assigned to it,
                  %   this manuscript number is no longer necessary
+
+% to use for commends
+\newcommand{\alexander}[1]{\textcolor{blue}{\textbf{(alexander)} #1}}
+\newcommand{\eric}[1]{\textcolor{red}{\textbf{(eric)} #1}}
+
 
 %%%%%%%%%%%%%%%%
 \begin{document}
@@ -296,19 +301,20 @@ In summary, given a adaptive method we serve up questions in the following way
 
 
 \begin{algorithm}
-\label{Adaptive MaxDiff}
+\label{Adaptive MaxDiff Thompson Sampling: TS}
 \begin{algorithmic}[1]
+\State given: $K,L,J,S,b$
 \State Initialize first set of questions by sampling $L$ items uniformly
-\State Design MaxDiff questionnaire to next respondent $J$ tasks of  question =MDDesign($L,S$)
-\State Collect new data from respondents
-\State Bayesian Bootstrap sample of data
-\State Estimate model parameters
+\State Design MaxDiff questionnaire covering $L$ items with $J$ tasks of $S$ questions each, $\text{MDDesign}(L,S,J)$, to the next batch of $b$ respondents.
+\State Collect new data from respondents, currently with $n = b*t$ respondents
+\State Bayesian Bootstrap sample weight replacement using weights ($\alpha_1, ...., \alpha_n)\sim \text{expon}(1)$ obtaining some subset of $n$ previous respondents.
+\State Estimate model parameters. $\theta_t$. Obtain estimated utilities $u = (u_1,...,u_K)$.
 \State Choose $L$ items using draws from the empirical posterior
 \State Act Select next questions for respondents
 \end{algorithmic}
 \end{algorithm}
 
-$S=\#{s}$
+$S=\#\{\mathcal{S}\}$
 
 
 \begin{table}[ht]
@@ -372,20 +378,46 @@ From~\cite{toubia2007adaptive}, after calculating the scores for a respondent, y
 The reason for using a variance that decreases over time rather than a fixed variance can be found in ~\cite{toubia2007adaptive} where the author derived insight from genetic algorithms. This method avoids misclassifying an item that will not be sampled further.\\
 Additionally if you are using a batch size greater than one, Misclassification Minimization and Greatest Uncertainty would show the same items to all of the respondents. After getting scores that are the same for the next $b$ respondents adding the perturbation vector adds variety to the items shown. This is useful because using Bayes bootstrapping for estimating probabilities required in Misclassification Minimization and Greatest Uncertainty takes a good deal of time since you are optimizing the negative log likelihood a large number of times.
 
+
 \section{Main Empirical Analysis}
-We compared our proposed adaptive MaxDiff approaches to existing non-adaptive fixed MaxDiff design strategies using simulation based on inferred preferences from an actual MaxDiff survey. We used MaxDiff data from a survey conducted by Procter \& Gamble with Sawtooth Software. The study involved 981 respondents and 120 items from a sparse MaxDiff study. The subject matter and exact item text was hidden for confidentiality purposes. They provided us with the individual-level posterior mean utilities for all respondents and items, which were obtained via Markov Chain Monte Carlo sampling for a hierarchical Bayes (HB) logit model. We call those individual-level utilities the true HB utilities.  These HB utilities offered realistic patterns of preferences across the items and respondents for use in our respondent simulations.  Our simulated respondents mimicked the actual respondents' preferences, on average: to answer each new MaxDiff task, we perturbed those true HB utilities by iid Gumbel error.  \\
-For each sample of simulated respondents, we ran aggregate logit and compared the current rank order of the estimated aggregate item scores (mean) to the true rank order for the known true utilities.  We define hit rate to reflect how accurately we could recover the top few items as observed in the true preferences for the Procter \& Gamble dataset.  To stabilize the hit rate results (since there was a random component to the responses), we ran the simulations each 100 of times. \\
-\textbf{Top k hit rate}: What percent of the top k true items the estimated scores using robotic respondents identified. For instance, if k is 10 and if the estimated scores identified 7 of the true top 10 items (irrespective of order), the hit rate was 70\%. We use $k=3,10,20,40$.
-Hit rate is analogous to regret in a typical bandit problem. It measures how far we are from always selecting the truly best arm for all time periods. %Although it is not exactly an observed reward in the sense of the usual bandit setting (e.g., clicks, purchases), this serves as the measure of success, \textit{ex post}.\\
+We compared our proposed set of adaptive approaches to existing adaptive and non-adaptive strategies. We use simulated choice data based on inferred preferences from an actual MaxDiff survey.
+
+\subsection{Data}
+The data come from from a survey conducted by a Procter \& Gamble with Sawtooth Software. The study involved 981 respondents and 120 items. The subject matter and exact item text was hidden for confidentiality purposes. As is common in MaxDiff surveys, the items represented product features and benefits. The questions were came from a sparse MaxDiff study, so this was a fixed non-adaptive design, with balance across all items and respondents. 
+
+Instead of raw choice data, they provided us with the individual-level posterior mean utilities for all respondents and items, which were obtained via Markov Chain Monte Carlo sampling for a hierarchical Bayes (HB) logit model. We call those individual-level utilities the true HB utilities.  These HB utilities offered realistic patterns of preferences across the items and respondents and became our data-generating process for use in our respondent simulations.  Therefore Our simulated respondents mimicked the actual respondents' preferences, on average: to answer each new MaxDiff task, we perturbed those true HB utilities by iid Gumbel distributed error.  
+
+\subsection{Simulation Setup}
+To measure performance, we consider a range of metrics: the estimated rank order of items' utilities, the hit rate of whether the estimated top-ranked set of items is correct, the value of the utilities of that estimated top set, and the variability around the estimated utilities. We obtain these measures by comparing estimates to true values. For each batch of respondents, we ran aggregate logit and compare the current rank order of the estimated utilities to the true rank order for the known true utilities, which are the aggregate average across all respondents' true individual-level utilities. We ran the simulations 100 independent runs to obtain a distribution of measures. 
+
+Since we motivated the problem with identifying a top set of items, our primary performance measure is \textbf{top $k$ hit rate}.\textbf{Top $k$ hit rate}: What percent of the true top $k$ items appear in the estimated top $k$ set? For instance, for the top-10 hit rate, if the estimated scores identified 7 of the true top 10 items, irrespective of order, the hit rate was 70\%. We use $k=3,10,20,40$. 
+
+Hit rate is a natural consideration in an active learning problem. It evaluates the quality of the adaptive learning procedures with respect to the eventual decision. Hit rate is also related to regret in a typical multi-armed bandit problem. It reflects how far we are from always selecting the truly best set of arms for all time periods. Again, this is only related but not equivalent to a bandit setting, since it is not exactly an observed reward in the sense of the usual bandit setting (e.g., clicks, purchases). 
+
 \begin{figure}[!ht]
-\caption{Distrubution of True Utilities}
+\caption{True utilities of each item learn. The plot shows the rank ordering and values of the utilities on the logit scale for all 120 items, highlighting the top 10 (blue) and top 3 (red). These are the means for unobserved data-generating process.}
 \includegraphics[width=1\textwidth]{plots/utilscore.pdf}
-\label{fig:util}
+\label{fig:util} 
 \end{figure}
-The difficulty of identifying the truly best items is related to the differences among those top item utilities. With 120 items in the dataset, it shouldn't surprise us if the true preferences for the top 15 or so items were very close in terms of utility.  We certainly observed that with this dataset (Figure \ref{fig:util}).  Due to how tightly the top items in preferences clustered (there were no runaway winners), the hit rate measures we employed were quite discriminating between competing methods.\\
-Using bootstrap sampling (sampling with replacement), we simulated the process of collecting respondent data up to sample sizes of $N=500$.  We considered the first 20 respondents to be the initial group, and all adaptive methods only begin after the 20th respondent. Each robotic respondent completed 12 choice sets, where each set included 5 items ($L=20$, $J=12$, $|S|=5$).\\
-As described earlier, we tested the different adaptive Maxdiff approaches found in table \ref{methods}, with ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$) for $\epsilon$-diffuse methods, against an existing fixed MaxDiff approach:\\
-\textbf{Fixed Express MaxDiff}: we randomly drew 20 of the 120 items to show to each respondent.  Each item appeared $\frac{12*5}{20} = 3$ times per respondent.  Across respondents, each item appeared the same number of times. We primarily use Express MaxDiff as our base case.\\
+
+The difficulty of identifying the truly best items is related to the differences among those top item utilities (Figure \ref{fig:util}). With 120 items in the dataset, we observed the true preferences for the approximately the top 15 were close in terms of utility (within 1.0 on logit scale). There were no runaway winners. Due to how tightly the top items are clustered, the hit rate measures we employed were quite discriminating between competing methods.
+
+We describe the \emph{base setting}. We simulate the process of collecting survey data from $N=500$ respondents, in batches of $b=20$ respondents per period, using bootstrap sampling, with replacement from the original 981 individuals. We consider the first 20 respondents to be the initial group, which always received $L=20$ items uniformly selected for all methods. All adaptive methods only begin after the 20th respondent. Each simulated respondent completed $J=12$ choice sets (best-worst tasks), where each set included $S=5$ items.
+
+As described earlier, we tested the different adaptive approaches found in Table \ref{methods}. For our base settings, we use ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$) for $\epsilon-\delta$TS methods. The natural benchmark is the existing fixed MaxDiff approach.
+
+\textbf{Fixed Express MaxDiff}. We randomly drew $L=20$ of the $K=120$ items to show to each respondent.  Each item appeared $\frac{J*S}{L} = \frac{12*5}{20} = 3$ times per respondent.  Across respondents, each item also appeared the same number of times. 
+
+
+\begin{figure}%
+    \caption{Top k={3,10} Hit Rates for with 120 items}%
+    \label{fig:example}%
+    \centering
+    \subfloat[Top 3]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k3.pdf} }}%
+    \qquad
+    \subfloat[Top 10]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k10.pdf} }}%
+\end{figure}
+
 \begin{figure}
 \caption{3 Hit Rate with 120 items}
 \includegraphics[width=1\textwidth]{plots/hr120v20k3.pdf}
@@ -396,6 +428,10 @@ As described earlier, we tested the different adaptive Maxdiff approaches found 
 \includegraphics[width=1\textwidth]{plots/hr120v20k10.pdf}
 \label{fig:10hit}
 \end{figure}
+
+
+
+
 \begin{figure}
 \caption{20 Hit Rate with 120 items}
 \includegraphics[width=1\textwidth]{plots/hr120v20k20.pdf}
@@ -406,23 +442,51 @@ As described earlier, we tested the different adaptive Maxdiff approaches found 
 \includegraphics[width=1\textwidth]{plots/hr120v20k40.pdf}
 \label{fig:40hit}
 \end{figure}
+
+\eric{For tables, reorder columns: fixed\_express, greedy, greedy\_thres, TS, TSed, TS\_thres, TSed}
+
 \begin{table}
+\caption{Top k Hit Rate for Various Algorithms at the {260th, 500th} Respondent with 120 Items}
+\label{table:example}
+\begin{center}
+\begin{tabular}{llllllllll}
+\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline
+  3 &          0.650 &   0.853 &        0.860 &   0.883 & 0.863 & 0.873 &       0.850 &    \textbf{0.893} &   0.840 \\
+  10 &          0.825 &   0.880 &        0.902 &   0.907 & \textbf{0.923} & 0.909 &       0.909 &    0.907 &   0.901 \\
+  20 &          0.824 &   0.784 &        0.863 &   0.885 & 0.825 & 0.820 &       0.869 &    0.879 &   \textbf{0.886} \\  
+  40 &          0.857 &   NA &        0.884 &   \textbf{0.908} & NA & NA &       0.895 &    0.888 &   0.897\end{tabular}
+\begin{tabular}{llllllllll}
+\hline   
+k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\
+\hline
+   3 &          0.780 &   0.950 &        0.933 &   0.950 & 0.940 & \textbf{0.957} &       0.917 &    0.947 &   0.943 \\
+  10 &          0.877 &   0.925 &        0.928 &   0.939 & 0.933 & \textbf{0.952} &       0.940 &    0.947 &   0.945 \\  
+  20 &          0.862 &   0.827 &        0.914 &   \textbf{0.928} & 0.863 & 0.868 &       0.916 &    0.914 &   0.919 \\  
+  40 &          0.887 &   NA &        0.926 &   0.937 & NA & NA &       0.929 &    0.927 &   \textbf{0.938} \end{tabular}
+\end{center}
+\end{table}
+
+
+
+
+\begin{table}
+\caption{Top k Hit Rate for Various Algorithms at the 260th Respondent with 120 Items}
+\label{table:at260}
 \begin{center}
 \begin{tabular}{llllllllll}
 \hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline  3 &          0.650 &   0.853 &        0.860 &   0.883 & 0.863 & 0.873 &       0.850 &    0.893 &   0.840 \\  10 &          0.825 &   0.880 &        0.902 &   0.907 & 0.923 & 0.909 &       0.909 &    0.907 &   0.901 \\  20 &          0.824 &   0.784 &        0.863 &   0.885 & 0.825 & 0.820 &       0.869 &    0.879 &   0.886 \\  40 &          0.857 &   NA &        0.884 &   0.908 & NA & NA &       0.895 &    0.888 &   0.897\end{tabular}
 \end{center}
-\caption{Top k Hit Rate for Various Algorithms at the 260th Respondent with 120 Items}
-\label{table:at260}
 \end{table}
 
 \begin{table}
+\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent with 120 Items}
+\label{table:at500}
 \begin{center}
 \begin{tabular}{llllllllll}
 \hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline   3 &          0.780 &   0.950 &        0.933 &   0.950 & 0.940 & 0.957 &       0.917 &    0.947 &   0.943 \\  10 &          0.877 &   0.925 &        0.928 &   0.939 & 0.933 & 0.952 &       0.940 &    0.947 &   0.945 \\  20 &          0.862 &   0.827 &        0.914 &   0.928 & 0.863 & 0.868 &       0.916 &    0.914 &   0.919 \\  40 &          0.887 &   NA &        0.926 &   0.937 & NA & NA &       0.929 &    0.927 &   0.938 \end{tabular}
 \end{center}
-\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent with 120 Items}
-\label{table:at500}
 \end{table}
+
 Figures \ref{fig:3hit}, \ref{fig:10hit}, \ref{fig:20hit}, and \ref{fig:40hit} and tables \ref{table:at260} and \ref{table:at500} show the results for the 120-item dataset.  The X-axis indicates the number of cumulative respondents interviewed, and the Y-axis reports the hit rate obtained at each cumulative sample size.  For example, after the first 200 respondents, the Fixed Express Design obtains a top 3 hit rate of 60\% whereas the other approaches achieve a top 3 hit rate of about 80\%.\\
 The key takeaway from the data is simple: a good adaptive method is at least 3x more efficient than the standard Fixed Express MaxDiff approach under any value of $k$. The good adaptive methods being Greatest Uncertainty with random perturbations, Misclassification Minimization with random perturbations, $\epsilon$-diffuse Thompson sampling with thresholding, and $\epsilon$-greedy with thresholding under any choice of $k$ and $\epsilon$-diffuse Thompson Sampling  when $k<L$ and $\epsilon$-greedy when $k<<L$. 
 
