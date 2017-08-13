@@ -47,9 +47,35 @@
 %\MANUSCRIPTNO{} % When the article is logged in and DOI assigned to it,
                  %   this manuscript number is no longer necessary
 
-% to use for commends
+% to use for comments
 \newcommand{\alexander}[1]{\textcolor{blue}{\textbf{(alexander)} #1}}
 \newcommand{\eric}[1]{\textcolor{red}{\textbf{(eric)} #1}}
+% ==============
+% use for naming algorithms: easier to change later
+%
+\newcommand{\fixedexpress}[1]{\textit{express}} 
+
+% previously referred to as greedy
+% we need to global change: greedy -> \egreedy
+\newcommand{\egreedy}[1]{$\epsilon$-\textit{greedy}} 
+
+
+% previously referred to as greedythres
+% we need to global change: greedythres -> \egreedythres
+\newcommand{\egreedythres}[1]{$\epsilon$-\textit{greedythres}} 
+
+\newcommand{\mismin}[1]{\textit{max-misclass}} 
+
+\newcommand{\ts}[1]{\textit{TS} } 
+
+\newcommand{\edts}[1]{$\epsilon$-$\delta$-\textit{diffuse TS} } 
+
+% previously referred to as TSregthres
+\newcommand{\tsthres}[1]{\textit{TS-thres} } 
+
+% previously referred to as TSthres
+\newcommand{\edtsthres}[1]{$\epsilon$-$\delta$-\textit{thres} } 
+\newcommand{\uncert}[1]{\textit{max-uncert} } 
 
 
 %%%%%%%%%%%%%%%%
@@ -200,7 +226,8 @@ To some it may seem bizarre and overwhelming that some researchers are conductin
 \end{figure}
 We also asked Sawtooth Software customers what the main purpose was for that study with the reported maximum number of items.  For studies involving 41 or more items, the main reasons are displayed in Figure 3.\\
 For 42\% of these large MaxDiff studies, the main purpose was to identify the TOP item or TOP few items.  Our research shows that if this is the main goal, then traditional design strategies are very wasteful.  An adaptive approach using Thompson Sampling can be about 4x more efficient.  Without the Thompson Sampling approach, you are potentially wasting 75 cents of every dollar you are spending on MaxDiff data collection. \\
-The problem is that current MaxDiff approaches don't scale well to increasing the number of items.  More items require commensurately longer questionnaires, larger sample sizes, and larger data collection costs with more tired respondents.  If the researcher is concerned about obtaining robust individual-level estimates for all the items, then the current methodologies especially don't scale well to large lists of items.  Respondents just tire out with such long surveys.  In contrast, our approach employs an adaptive divide-and-conquer aggregate approach that leverages prior learning to create more efficient questionnaires and more precise aggregate score estimates. \\
+The problem is that current MaxDiff approaches don't scale well to increasing the number of items.  More items require commensurately longer questionnaires, larger sample sizes, and larger data collection costs with more tired respondents.  If the researcher is concerned about obtaining robust individual-level estimates for all the items, then the current methodologies especially don't scale well to large lists of items.  Respondents just tire out with such long surveys.  In contrast, our approach employs an adaptive divide-and-conquer aggregate approach that leverages prior learning to create more efficient questionnaires and more precise aggregate score estimates. 
+
 \subsection{Overview of approach: Bandit MaxDiff with Thompson Sampling}
 Thompson Sampling has been proposed as an efficient solution for solving the multi-armed bandit problem. Thompson Sampling involves allocating resources to an action in proportion to the probability that it is the best action~\cite{thompson1933likelihood}. Any bandit method must find an appropriate balance between exploring to gain information and exploiting that knowledge.\\
 On the one hand, we want to learn about the relative scores of a large number of items within a MaxDiff problem. On the other hand, we want to utilize what we have learned so far to focus our efforts on a targeted set of actions that will likely yield greater precision regarding the items of most interest to the researcher. While there are many methods to accomplish this, Thompson Sampling has proven very useful for these types of problems. For a marketing application of Thompson Sampling and a review of the literature, see Schwartz et al. (2016). \\
@@ -409,100 +436,148 @@ As described earlier, we tested the different adaptive approaches found in Table
 \textbf{Fixed Express MaxDiff}. We randomly drew $L=20$ of the $K=120$ items to show to each respondent.  Each item appeared $\frac{J*S}{L} = \frac{12*5}{20} = 3$ times per respondent.  Across respondents, each item also appeared the same number of times. 
 
 
+\subsection{Results: Greedy, Thompson Sampling (TS), $\epsilon-\delta$ TS vs Fixed Express}
+
+The first result shows adaptive methods, even simple ones, are better than static ones. But a simple greedy algorithm, which adapts, but does not explicitly incorporate learning, is not good enough. Table \ref{fig:simple_result} shows how TS improves substantially over greedy, and $\epsilon-\delta$ TS adds even more improvement in hit rate.
+
+For example, after the first 200 respondents, the Fixed Express Design obtains a top 3 hit rate of 60\% whereas the TS-based approaches achieve a top 3 hit rate of about 80\%. Practically, if a marketing researcher wants a hit rate of 80\%, for example, then these methods can achieve that with a smaller sample size. A good adaptive method is at least \emph{three times more efficient} than the standard Fixed Express MaxDiff approach. This holds for the different values tested in the basic setting. 
+
+\begin{figure}
+\caption{Adaptive vs Static: \ts and \edts improve hit rate. \eric{Only show \fixedexpress, \egreedy, \ts, \edts here for k=3,10}}
+\label{fig:simple_result}
+\end{figure}
+
+We will later show the performance gap between \ts and \edts widens dramatically when considering non-stationary settings, such as with a misinformed starts in Section \ref{sec:robust}. 
+
+However, we next examine the other proposed methods. Recall each algorithm selects $L=20$ items to serve to every respondent. But we examine hit rate for the top $k$ items, for $k = \{3,10,20,40\}$. 
+
+Figures \ref{fig:K120_L20_k3hit_k10hit} and \ref{fig:K120_L20_k3hit_k10hit} and Table \ref{table:at_260_500} show the results for the $K=120$-item dataset serving $L=20$ questions per respondent, where all methods were tested.
+
+We find performance depends on the hit rate measure relative to the number of items selected ($k$ vs $L$).
+For $k \ge L$ the better performers are Greatest Uncertainty with random perturbations (\uncert) and Misclassification Minimization with random perturbations (\mismin). Indeed these two methods also perform nearly as well as the other winners in the $k < L$ condition. But the $\epsilon$-diffuse Thompson sampling with thresholding (\edtsthres) and without thresholding (\edts) perform best when $k<L$. 
+
+But the differences among the other algorithms are more telling. We find that Thompson Sampling alone has its limits. It is not suited for this active learning problem, when there is little room for error, when we care about the hit rate for all items in the survey (the case $k=L=20$). While the \edts improves its performance for the other cases, that extra exploration does not direct resources toward the places that matter most: areas of high uncertainty at the decision boundary, not just near the top of the list and not scattered randomly.  
+
+Overall, a smaller $k$ makes the problem more challenging to do well earlier. Measuring a hit rate for the top 3 is a higher bar than the hit rate for 40.  
+
 \begin{figure}%
-    \caption{Top k={3,10} Hit Rates for with 120 items}%
-    \label{fig:example}%
-    \centering
+    \caption{Hit Rates for Top $k=\{3,10\}$ with 120 items. The cumulative hit rate obtained (y-axis) improves with the number of respondents interviewed (x-axis), but it does so at different rates for each algorithm. \eric{Please make y-axes the same across all k for the K120 L20 problem. }}%
+    \label{fig:K120_L20_k3hit_k10hit}%
+ 	\begin{center}
     \subfloat[Top 3]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k3.pdf} }}%
     \qquad
     \subfloat[Top 10]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k10.pdf} }}%
+	\end{center}
 \end{figure}
 
-\begin{figure}
-\caption{3 Hit Rate with 120 items}
-\includegraphics[width=1\textwidth]{plots/hr120v20k3.pdf}
-\label{fig:3hit}
-\end{figure}
-\begin{figure}
-\caption{10 Hit Rate with 120 items}
-\includegraphics[width=1\textwidth]{plots/hr120v20k10.pdf}
-\label{fig:10hit}
-\end{figure}
-
-
-
-
-\begin{figure}
-\caption{20 Hit Rate with 120 items}
-\includegraphics[width=1\textwidth]{plots/hr120v20k20.pdf}
-\label{fig:20hit}
-\end{figure}
-\begin{figure}
-\caption{40 Hit Rate with 120 items}
-\includegraphics[width=1\textwidth]{plots/hr120v20k40.pdf}
-\label{fig:40hit}
+\begin{figure}%
+    \caption{Hit Rates for Top $k=\{20,40\}$ with 120 items.\eric{Please make y-axes the same across all k for the K120 L20 problem.}}%
+    \label{fig:K120_L20_k20hit_k40hit}%
+ 	\begin{center}
+    \subfloat[Top 20]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k20.pdf} }}%
+    \qquad
+    \subfloat[Top 40]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k40.pdf} }}%
+    \end{center}
 \end{figure}
 
-\eric{For tables, reorder columns: fixed\_express, greedy, greedy\_thres, TS, TSed, TS\_thres, TSed}
+% \begin{figure}
+% \caption{3 Hit Rate with 120 items}
+% \includegraphics[width=1\textwidth]{plots/hr120v20k3.pdf}
+% \label{fig:3hit}
+% \end{figure}
+% \begin{figure}
+% \caption{10 Hit Rate with 120 items}
+% \includegraphics[width=1\textwidth]{plots/hr120v20k10.pdf}
+% \label{fig:10hit}
+% \end{figure}
+
+% \begin{figure}
+% \caption{20 Hit Rate with 120 items}
+% \includegraphics[width=1\textwidth]{plots/hr120v20k20.pdf}
+% \label{fig:20hit}
+% \end{figure}
+% \begin{figure}
+% \caption{40 Hit Rate with 120 items}
+% \includegraphics[width=1\textwidth]{plots/hr120v20k40.pdf}
+% \label{fig:40hit}
+% \end{figure}
+
+
+
 
 \begin{table}
-\caption{Top k Hit Rate for Various Algorithms at the {260th, 500th} Respondent with 120 Items}
-\label{table:example}
+\caption{Top k Hit Rate for Various Algorithms after the {260th, 500th} Respondent with 120 Items \eric{Check the values to make sure they correspond with the Figures. I'm looking at TSe4 and TSthres columns and see discrepancies with the figures.} \eric{And for tables, reorder columns: fixed\_express, greedy, greedy\_thres, TS, TSed, TS\_thres, TSed}
+ }
+\label{table:at_260_500}
 \begin{center}
 \begin{tabular}{llllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline
-  3 &          0.650 &   0.853 &        0.860 &   0.883 & 0.863 & 0.873 &       0.850 &    \textbf{0.893} &   0.840 \\
-  10 &          0.825 &   0.880 &        0.902 &   0.907 & \textbf{0.923} & 0.909 &       0.909 &    0.907 &   0.901 \\
-  20 &          0.824 &   0.784 &        0.863 &   0.885 & 0.825 & 0.820 &       0.869 &    0.879 &   \textbf{0.886} \\  
-  40 &          0.857 &   NA &        0.884 &   \textbf{0.908} & NA & NA &       0.895 &    0.888 &   0.897\end{tabular}
+\hline 
+\hline
+\multicolumn{10}{l}{(a) After 260 respondents}\\
+k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline
+  3 &          0.650 &   0.853 &        0.860 &   0.883 & 0.863 & 0.873 &       0.850 &    0.893 &   0.840 \\
+  10 &          0.825 &   0.880 &        0.902 &   0.907 & 0.923 & 0.909 &       0.909 &    0.907 &   0.901 \\
+  20 &          0.824 &   0.784 &        0.863 &   0.885 & 0.825 & 0.820 &       0.869 &    0.879 &   0.886 \\  
+  40 &          0.857 &   NA &        0.884 &   0.908 & NA & NA &       0.895 &    0.888 &   0.897 \\
+\hline
+\hline
+\end{tabular}
 \begin{tabular}{llllllllll}
-\hline   
+\multicolumn{10}{l}{(b) After 500 respondents}\\
 k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\
 \hline
    3 &          0.780 &   0.950 &        0.933 &   0.950 & 0.940 & \textbf{0.957} &       0.917 &    0.947 &   0.943 \\
   10 &          0.877 &   0.925 &        0.928 &   0.939 & 0.933 & \textbf{0.952} &       0.940 &    0.947 &   0.945 \\  
   20 &          0.862 &   0.827 &        0.914 &   \textbf{0.928} & 0.863 & 0.868 &       0.916 &    0.914 &   0.919 \\  
-  40 &          0.887 &   NA &        0.926 &   0.937 & NA & NA &       0.929 &    0.927 &   \textbf{0.938} \end{tabular}
+  40 &          0.887 &   NA &        0.926 &   0.937 & NA & NA &       0.929 &    0.927 &   \textbf{0.938} \\
+\hline 
+\hline
+\end{tabular}
 \end{center}
 \end{table}
 
 
 
 
-\begin{table}
-\caption{Top k Hit Rate for Various Algorithms at the 260th Respondent with 120 Items}
-\label{table:at260}
-\begin{center}
-\begin{tabular}{llllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline  3 &          0.650 &   0.853 &        0.860 &   0.883 & 0.863 & 0.873 &       0.850 &    0.893 &   0.840 \\  10 &          0.825 &   0.880 &        0.902 &   0.907 & 0.923 & 0.909 &       0.909 &    0.907 &   0.901 \\  20 &          0.824 &   0.784 &        0.863 &   0.885 & 0.825 & 0.820 &       0.869 &    0.879 &   0.886 \\  40 &          0.857 &   NA &        0.884 &   0.908 & NA & NA &       0.895 &    0.888 &   0.897\end{tabular}
-\end{center}
-\end{table}
+% \begin{table}
+% \caption{Top k Hit Rate for Various Algorithms at the 260th Respondent with 120 Items}
+% \label{table:at260}
+% \begin{center}
+% \begin{tabular}{llllllllll}
+% \hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline  3 &          0.650 &   0.853 &        0.860 &   0.883 & 0.863 & 0.873 &       0.850 &    0.893 &   0.840 \\  10 &          0.825 &   0.880 &        0.902 &   0.907 & 0.923 & 0.909 &       0.909 &    0.907 &   0.901 \\  20 &          0.824 &   0.784 &        0.863 &   0.885 & 0.825 & 0.820 &       0.869 &    0.879 &   0.886 \\  40 &          0.857 &   NA &        0.884 &   0.908 & NA & NA &       0.895 &    0.888 &   0.897\end{tabular}
+% \end{center}
+% \end{table}
 
-\begin{table}
-\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent with 120 Items}
-\label{table:at500}
-\begin{center}
-\begin{tabular}{llllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline   3 &          0.780 &   0.950 &        0.933 &   0.950 & 0.940 & 0.957 &       0.917 &    0.947 &   0.943 \\  10 &          0.877 &   0.925 &        0.928 &   0.939 & 0.933 & 0.952 &       0.940 &    0.947 &   0.945 \\  20 &          0.862 &   0.827 &        0.914 &   0.928 & 0.863 & 0.868 &       0.916 &    0.914 &   0.919 \\  40 &          0.887 &   NA &        0.926 &   0.937 & NA & NA &       0.929 &    0.927 &   0.938 \end{tabular}
-\end{center}
-\end{table}
-
-Figures \ref{fig:3hit}, \ref{fig:10hit}, \ref{fig:20hit}, and \ref{fig:40hit} and tables \ref{table:at260} and \ref{table:at500} show the results for the 120-item dataset.  The X-axis indicates the number of cumulative respondents interviewed, and the Y-axis reports the hit rate obtained at each cumulative sample size.  For example, after the first 200 respondents, the Fixed Express Design obtains a top 3 hit rate of 60\% whereas the other approaches achieve a top 3 hit rate of about 80\%.\\
-The key takeaway from the data is simple: a good adaptive method is at least 3x more efficient than the standard Fixed Express MaxDiff approach under any value of $k$. The good adaptive methods being Greatest Uncertainty with random perturbations, Misclassification Minimization with random perturbations, $\epsilon$-diffuse Thompson sampling with thresholding, and $\epsilon$-greedy with thresholding under any choice of $k$ and $\epsilon$-diffuse Thompson Sampling  when $k<L$ and $\epsilon$-greedy when $k<<L$. 
+% \begin{table}
+% \caption{Top k Hit Rate for Various Algorithms at the 500th Respondent with 120 Items}
+% \label{table:at500}
+% \begin{center}
+% \begin{tabular}{llllllllll}
+% \hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline   3 &          0.780 &   0.950 &        0.933 &   0.950 & 0.940 & 0.957 &       0.917 &    0.947 &   0.943 \\  10 &          0.877 &   0.925 &        0.928 &   0.939 & 0.933 & 0.952 &       0.940 &    0.947 &   0.945 \\  20 &          0.862 &   0.827 &        0.914 &   0.928 & 0.863 & 0.868 &       0.916 &    0.914 &   0.919 \\  40 &          0.887 &   NA &        0.926 &   0.937 & NA & NA &       0.929 &    0.927 &   0.938 \end{tabular}
+% \end{center}
+% \end{table}
 
 
-\section{Robustness tests}
+
+
+
+
+\section{Robustness tests} \label{sec:robust}
+
 \subsection{Misinformed Starts (When Early Responders Are Horribly Non-Representative)}
-\begin{table}
-\begin{center}
-\begin{tabular}{llllllllll}
-\hline   Resp &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert  \\ \hline    260 &   0.09 &   0.297 &  0.237 &   0.253 & 0.067 & 0.347 &  0.067 &    0.357 &   0.27 \\  500 &  0.247 &   0.57 &  0.49 &   	0.54 & 0.127 & 0.537 &       0.1 &    0.64 &   0.503  \end{tabular}
-\end{center}
-\caption{Top 3 Hit Rate for Various Algorithms at the 260th and 500th Respondent for the 120 item data set with Misinformed Start}
-\label{table:120mis}
-\end{table}
+
 What would happen if the first 50 respondents we interviewed were actually not very representative of the average preferences for the sample?  What if we tried to throw Adaptive MaxDiff off the scent?  In fact, let's consider a worst-case scenario: the first responders actually believe \textit{nearly the opposite} from the rest of the sample\\
 For the simulations reported in table \ref{table:120mis}, the first 50 robotic respondents mimicked randomly drawn human vectors of utilities as before but were diabolically manipulated to behave as if the top 3 true items were actually nearly the worst in preference (we set the utilities for the top 3 true items for the population equal to the bottom 25th percentile utility item for each respondent).  After this misinformed start, the remaining respondents represented well-behaved respondents drawn using bootstrap sampling as before, with true individual-level preferences as given in the original dataset donated by Procter \& Gamble.\\
+
+\begin{table}
+\begin{tabular}{llllllllll}
+\hline   Resp &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert  \\ \hline    260 &   0.09 &   0.297 &  0.237 &   0.253 & 0.067 & 0.347 &  0.067 &    0.357 &   0.27 \\  500 &  0.247 &   0.57 &  0.49 &   	0.54 & 0.127 & 0.537 &       0.1 &    0.64 &   0.503  \end{tabular}
+\begin{center}
+\caption{Top 3 Hit Rate for Various Algorithms at the 260th and 500th Respondent for the 120 item data set with Misinformed Start}
+\label{table:120mis}
+\end{center}
+\end{table}
+
 Our diabolical simulation of a misinformed start is worse than anything you would realistically see in practice, so it is a strong test of the robustness of the Adaptive MaxDiff approach. This suggests robustness to non-stationarity in preference or self-selection of respondents during the sampling window. We created 50 misinforming early responders because in practice we are never guaranteed that the first responders represent a fair and representative draw from the population.  In fact, depending on how rapidly we invite a panel of respondents to take the survey, the first 50 respondents may share some atypical characteristics (e.g. anxious and available to take the survey at your launch time).  It would be a bad thing if our adaptive approaches performed well in simulations with well-behaved respondents, but fell apart under more realistic conditions. \\
 
 We illustrate the robustness in Table \ref{table:120mis}. One critical point to note is that the standard Bandit MaxDiff TS approaches preform worst than Fixed Express MaxDiff under Misinformed Starts.  The extra randomness Bandit MaxDiff $\epsilon$-diffuse TS approach as well as in the other methods  is essential in allowing them to continue investigating the value of some lesser chosen items with enough frequency among later respondents, even if the prior respondents seem to have generally rejected them.
@@ -587,8 +662,7 @@ Nevertheless, our results for Adaptive MaxDiff are still better than traditional
 We created two types of simulated preferences to see if these results would generalize to other data sets. The first, labeled the uncorrelated data set, each respondents preference utility for 100 items are sampled from a uniform distribution. So each respondent's preferences are uncorrelated with every other respondent (the worst possible environment). We take the top $k$ highest mean preference scores across the respondents to be the top $k$ true items. The results are in tables \ref{table:bad260} and \ref{table:bad500}.\\
 The second, labeled the correlated data set, we sample a $\theta_i$ from a uniform distribution for $i=1,\ldots,100$. Then each respondent preference utility is sampled from a normal distribution with mean $\theta_i$ and variance 1. The rankings for each respondent are highly correlated with each other. Once again we take the top $k$ highest mean preference scores across the respondents to be the top $k$ true items. The results are in tables \ref{table:good260} and \ref{table:good500}.\\ The take away is that our previous results generalize to other data sets.
 
-\section{True Utility and Stopping Conditions}
-\subsection{Using True Utility as a Generalization of Hit-Rate}
+\section{Alternative Performance Measure: Using True Utility as a Generalization of Hit-Rate}
 \begin{table}
 \begin{center}
 \begin{tabular}{c | c }
@@ -624,14 +698,18 @@ This can be see as a generalization of Hit-Rate. It has the advantage of differe
 \end{figure}
 Recall that for $k=20$ using the hit rate metric that Fixed Express, TS, and $\epsilon$ diffuse TS were on par with each other.
 Using $k=20$ PTU, in figure \ref{fig:20util} we see that $\epsilon$ diffuse TS has a slight edge over TS which is better than Fixed Express. This means that both TS approaches put better ranked items in the top 20 then Fixed Express. In this wider consideration the methods are better than Fixed Express even though the top 20 hit rate was about the same.
-\subsection{Using Regret as a Stopping Rule}
+
+
+\section{Stopping Rules: Posterior Distribution Regret and Value Remaining}
 Almost all of the results show diminishing results as we give more surveys. Thus it becomes inefficient to keep giving surveys after a certain point. In practice we do not know this point \textit{a priori} but we would still like to know when we should stop.\\
 Adapted from~\cite{scott2015multi} and~\cite{scott2010modern} for MAB, The value remaining in the experiment is the posterior distribution of $\frac{\mu_{S^*}-\mu_{S}}{\mu_{S}}$ where $\mu_{S^*}$ is the largest value of the exponential weighted utility and $\mu_{S}$ is the exponential weighted utility of the set that is most likely to be optimal, denoted $S$. This is constructed as follows, take $n$ Bayes Bootstrap draws from the posterior. Let $\mu_{S^*}^{m}$ be the max exponential weighted utility of draw $m$ and $\mu_{S}^{m}$ be the utility using the draw $m$ using the set $S$. Let $\Delta^{m}=\frac{\mu^m_{S^*}-\mu^m_{S}}{\mu^m_{S}}$.\\
 \begin{table}
 \begin{center}
 \begin{tabular}{l | c c c c c c c c}
-Current & 1st &  2nd  &  3rd  &  4th &  5th & 6th & 7th &  8th \\
+& \multicolumn{8}{c}{Current belief: rank order of items by utility} \\
+& 1st &  2nd  &  3rd  &  4th &  5th & 6th & 7th &  8th \\
 \hline
+% \multicolumn{9}{l}{Posterior draws of utility} \\
 Draw 1 & 4.02 &  3.50 &  5.08 & 4.16&  4.22 & 4.41 & 3.65 &  3.27 \\
 Draw 2 &4.18 & 4.72 & 3.49 & 3.48 & 3.63 & 3.60 & 3.56 &  3.70 \\
 Draw 3 &4.81 & 5.23 & 5.04 &  3.96 &  4.17 & 4.37 &  3.58 & 2.99 \\ 
@@ -640,6 +718,7 @@ Draw 3 &4.81 & 5.23 & 5.04 &  3.96 &  4.17 & 4.37 &  3.58 & 2.99 \\
 \caption{Draws of the exponential utility of the items after 100 iterations}
 \label{table:data}
 \end{table}
+
 \begin{figure}
 \includegraphics[width=1\linewidth]{plots/valremhist.pdf}
 \caption{Two histograms of $\Delta$. Left: After 100 iterations, the potential value remaining is .092. Right: After 220 iterations, the potential value remaining is .008}
