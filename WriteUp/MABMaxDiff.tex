@@ -53,29 +53,29 @@
 % ==============
 % use for naming algorithms: easier to change later
 %
-\newcommand{\fixedexpress}[1]{\textit{express}} 
+\newcommand{\fixedexpress}{\textbf{express}} 
 
 % previously referred to as greedy
 % we need to global change: greedy -> \egreedy
-\newcommand{\egreedy}[1]{$\epsilon$-\textit{greedy}} 
+\newcommand{\egreedy}{$\epsilon$-\textbf{greedy}} 
 
 
 % previously referred to as greedythres
 % we need to global change: greedythres -> \egreedythres
-\newcommand{\egreedythres}[1]{$\epsilon$-\textit{greedythres}} 
+\newcommand{\egreedythres}{$\epsilon$-\textbf{greedythres}} 
 
-\newcommand{\mismin}[1]{\textit{max-misclass}} 
+\newcommand{\mismin}{\textbf{max-misclass}} 
 
-\newcommand{\ts}[1]{\textit{TS} } 
+\newcommand{\ts}{\textbf{TS} } 
 
-\newcommand{\edts}[1]{$\epsilon$-$\delta$-\textit{diffuse TS} } 
+\newcommand{\edts}{$\epsilon$-$\delta$-\textbf{diffuse TS} } 
 
 % previously referred to as TSregthres
-\newcommand{\tsthres}[1]{\textit{TS-thres} } 
+\newcommand{\tsthres}{\textbf{TS-thres} } 
 
 % previously referred to as TSthres
-\newcommand{\edtsthres}[1]{$\epsilon$-$\delta$-\textit{thres} } 
-\newcommand{\uncert}[1]{\textit{max-uncert} } 
+\newcommand{\edtsthres}{$\epsilon$-$\delta$-\textbf{TS-thres} } 
+\newcommand{\uncert}{\textbf{max-uncert} } 
 
 
 %%%%%%%%%%%%%%%%
@@ -344,6 +344,14 @@ In summary, given a adaptive method we serve up questions in the following way
 $S=\#\{\mathcal{S}\}$
 
 
+We briefly describe to simple benchmarks before moving on to describe the more sophisticated proposed methods. 
+
+\subsubsection{Fixed Express MaxDiff}. We uniformly randomly drew $L$ of $K$ items (without replacement) to show to each respondent.  This achieves balance across items and respondents. For instance, in a problem with $L=20$ of the $K=120$, then each item appears $\frac{J*S}{L} = \frac{12*5}{20} = 3$ times per respondent, on average.
+
+\subsubsection{Algorithm $\epsilon$-greedy}
+As a baseline for the adaptive methods will we test the $\epsilon$-greedy. Let $\theta$ be the current estimated parameters. Take the $(1-\epsilon)L$ items with the greatest $\theta$ value and choose the remaining $\epsilon L$ uniformly from the remaining items. For our empirical analysis we use $\epsilon=\frac{1}{4}$ but tested others. Note that greedy alone $\epsilon=0$ would always serve the top $L$ items with the highest estimated average utility to the next respondents.
+
+
 \begin{table}[ht]
 \caption{Summary of Adaptive MaxDiff Algorithms}
 \begin{tabular}{p{5cm}|p{11cm}}
@@ -364,23 +372,56 @@ Greatest Uncertainty with random perturbation& Take the $L$ items whose probabil
 
 
 
-\subsubsection{Algorithm-MaxDiff TS}
-While typical Bayesian or numerical integration methods call for large numbers of draws (or sufficient number) to achieve coverage of the full distribution of parameter values, this  approach relies on the variability of a single sample. There is value in the sample to sample differences in the value of parameters and their relative rank ordering.  \\
-The algorithm learn over time to intuitively achieve the goal of identifying the items with truly high utility with high precision. Early on, we still have substantial uncertainty. The independent samples will differ substantially in rank order of item utilities. This yields MaxDiff designs across respondents with less overlap in items. Later, the uncertainty is reduced most around the truly high-utility items. Across independent samples, the ranking of items will be highly correlated near the top of the ranking (but not near the bottom where uncertainty remains large). As a result, the top subset of $J$ items selected converges to the same group for each respondent. \\
-One practical issue with Thompson Sampling is robustness to changes overtime. On the one hand, there is built-in robustness. Recall the algorithm is stochastic and adapts continuously. If the early data leads the algorithm astray, then it will self-correct, eventually finding and converging to the truly best items. Suppose the early respondents made choices, by chance, leading us to believe certain items were the best when they were not. The respondents that immediately follow will start receiving these truly poor items. However, as this continues, the uncertainty is reduced around these poor items to reveal there are many other items with probability of being better. By sampling from the joint belief distribution of item utilities, we will be less likely to draw those poor items. One concern is that such sampling could be too aggressive.\\
+\subsubsection{Algorithm MaxDiff TS}
+
+While typical Bayesian or numerical integration methods call for large numbers of draws (or sufficient number) to achieve coverage of the full distribution of parameter values, this  approach relies on the variability of a single sample. There is value in the sample to sample differences in the value of parameters and their relative rank ordering.  
+
+The algorithm learn over time to intuitively achieve the goal of identifying the items with truly high utility with high precision. Early on, we still have substantial uncertainty. The independent samples will differ substantially in rank order of item utilities. This yields MaxDiff designs across respondents with less overlap in items. Later, the uncertainty is reduced most around the truly high-utility items. Across independent samples, the ranking of items will be highly correlated near the top of the ranking (but not near the bottom where uncertainty remains large). As a result, the top subset of $J$ items selected converges to the same group for each respondent. 
+
+One practical issue with Thompson Sampling is robustness to changes overtime. On the one hand, there is built-in robustness. Recall the algorithm is stochastic and adapts continuously. If the early data leads the algorithm astray, then it will self-correct, eventually finding and converging to the truly best items. Suppose the early respondents made choices, by chance, leading us to believe certain items were the best when they were not. The respondents that immediately follow will start receiving these truly poor items. However, as this continues, the uncertainty is reduced around these poor items to reveal there are many other items with probability of being better. By sampling from the joint belief distribution of item utilities, we will be less likely to draw those poor items. One concern is that such sampling could be too aggressive.
+
+\begin{figure}
+\caption{MaxDiff TS Illustration}
+\label{fig:illustrate_ts}
+	\begin{center}
+    \subfloat[Early]{{\includegraphics[width=.4\textwidth]{plots/beliefdistrBegin.pdf} }}%
+    \qquad
+    \subfloat[Late]{{\includegraphics[width=.4\textwidth]{plots/beliefdistrEnd.pdf} }}%
+    \end{center}
+\end{figure}
 
 
 
 \subsubsection{Variant-MaxDiff exploration-diffuse ($\epsilon$-$\delta$) TS}
 \textbf{Key: Distinguish Point Estimate vs. Bayesian Bootstrap. With point estimate $\delta$ is directly variation inflation factor for the estimator. But with Bayesian Bootstrap, $\delta$ is a percentage of the data, indirectly inflating the estimator's variance.}
-Perhaps the natural parameter uncertainty is not enough or is perhaps too slow to adjust, so we propose an algorithm MaxDiff epsilon-diffuse TS, which has an extra layer of self-correction, making it more robust to non-stationarity or respondent self-selection. 
-The way the $\epsilon$-$\delta$ version hedges its bets on the best items intuitively. As in illustration, instead of sampling 20 items from TS, we use 15 of the items drawn using standard Thompson Sampling (L=20, $\epsilon$=1/4), and 5 of the items drawn using Thompson Sampling with a much more diffuse prior (subsampling $\delta$=.25 of the data with replacement and drawing $u$ as a Bayes bootstrap of the subsampled data).
-For $\epsilon$-$\delta$ case, its density does not become a spike as quickly as it does without $\epsilon$-$\delta$ . This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and the smaller the $\delta$, the more exploration and slower the algorithm settles on its set of items. The epsilon comes from the popular $\epsilon$-greedy.
-The $\epsilon$-$\delta$  generalization is just like a two-component mixture model, which nests a pooled model without segments. As the epsilon is zero, the diffuse distribution is never used, so the algorithm collapses to regular TS. As $\delta$ is 1, the diffuse distribution is equivalent to the non-diffuse distribution. For our empirical analysis we use ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). Also tested were ($\epsilon=\frac{1}{2}$, $\delta=\frac{1}{4}$) and ($\epsilon=1$, $\delta=\frac{1}{4}$) which performed on par with ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). Our recomended ranges for the parameters are $\frac{1}{5}\leq \epsilon \leq \frac{1}{2}$, $\frac{1}{4}\leq \delta \leq \frac{1}{2}$.\\
+Perhaps the natural parameter uncertainty is not enough or is perhaps too slow to adjust, so we propose an algorithm MaxDiff epsilon-diffuse TS, which has an extra layer of self-correction, making it more robust to non-stationarity or respondent self-selection. The epsilon comes from the popular $\epsilon$-greedy, which mixes greedy with uniform sampling. But instead of being greedy for $1-\epsilon$ samples, this algorithm, follows regular Thompson Sampling. And on $\epsilon$ samples, it does not necessarily sample items uniformly, but it does explore more than regular Thompson Sampling, by drawing parameters a more diffuse posterior distribution, where the variance inflation is controlled by $\delta$.
 
-\subsubsection{Algorithm $\epsilon$-greedy}
-As a baseline for the adaptive methods will we test the $\epsilon$-greedy.
-Let $\theta$ be the current estimated parameters. Take the $(1-\epsilon)L$ items with the greatest $\theta$ value and choose the remaining $\epsilon L$ uniformly from the remaining items. For our empirical analysis we use $\epsilon=\frac{1}{4}$.
+The \edts is a generalized version of \ts, which directs nests regular \ts. This is analogous to the way a two-component mixture model nests a pooled model without segments. As the $\epsilon \to 0$, the diffuse distribution is never used, so the algorithm collapses to regular \ts. As $\delta \to 1$, the diffuse distribution becomes equivalent to the regular (non-diffuse) distribution.
+
+The \edts version intuitively hedges its bets on the best items .  As in illustration, instead of sampling 20 items all from \ts, we only sample 15 of 20 items using standard \ts (hence, $L=20$, $\epsilon=1/4$), and the remaining 5 of 20 items are drawn using \ts with a much more diffuse prior (subsampling $\delta$=.25 of the data with replacement and drawing $u$ as a Bayes bootstrap of the subsampled data). 
+
+Figure \ref{fig:illustrating_edts} illustrates how \edts differs from \ts. 
+
+\begin{figure}
+\caption{ Illustration of \ts v \edts for two items at two points in time. \eric{Show a 4 plots in a 2x2 in this figure. Show the \fixedexpress, \ts, \edts belief distributions and show the underlying diffuse distribution that is one component of \edts. Show this for 1st ranked item (top row of plots) and 60th ranked item (bottom row) to show . Show for early beliefs after respondent 40 (left column of plots) and late beliefs after respondent 500 (right) show learning.} }
+\label{fig:illustrating_edts}
+ 	\begin{center}
+    \subfloat[Early, 1st rank]{{\includegraphics[width=.4\textwidth]{plots/beliefdistrBegin.pdf} }}%
+    \qquad
+    \subfloat[Late, 1st rank]{{\includegraphics[width=.4\textwidth]{plots/beliefdistrEnd.pdf} }}%
+    \qquad
+    \subfloat[Early, 60th rank]{{\includegraphics[width=.4\textwidth]{plots/endbetadis30.pdf} }}%
+    \qquad
+    \subfloat[Late, 60th rank]{{\includegraphics[width=.4\textwidth]{plots/endbetadis90.pdf} }}%
+    \end{center}
+\end{figure}
+
+
+For $\epsilon$-$\delta$ case, its density does not become a spike as quickly as it does without $\epsilon$-$\delta$ . This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and the smaller the $\delta$, the more exploration and slower the algorithm settles on its set of items. 
+
+We show how \edts performance varies with different values of $\epsilon$ and $\delta$ in Section \ref{sec:empirical_main}.  For our empirical analysis, we use ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). Also tested were ($\epsilon=\frac{1}{2}$, $\delta=\frac{1}{4}$) and ($\epsilon=1$, $\delta=\frac{1}{4}$) which performed on par with ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). Our recommended ranges for the parameters are $\frac{1}{5}\leq \epsilon \leq \frac{1}{2}$, $\frac{1}{4}\leq \delta \leq \frac{1}{2}$.\\
+\eric{What range did we actually test? Where did we get $\epsilon = 1/5$? Did we test $\delta < 1/4$ ever?}
+
 
 \subsubsection{Variant Closest to the Threshold}
 In~\cite{toubia2007adaptive}, they introduce Closest to Threshold based on Bradlow and Wainer’s (1998) recommendation
@@ -406,7 +447,8 @@ The reason for using a variance that decreases over time rather than a fixed var
 Additionally if you are using a batch size greater than one, Misclassification Minimization and Greatest Uncertainty would show the same items to all of the respondents. After getting scores that are the same for the next $b$ respondents adding the perturbation vector adds variety to the items shown. This is useful because using Bayes bootstrapping for estimating probabilities required in Misclassification Minimization and Greatest Uncertainty takes a good deal of time since you are optimizing the negative log likelihood a large number of times.
 
 
-\section{Main Empirical Analysis}
+\section{Empirical Analysis: Main Results}
+\label{sec:empirical_main}
 We compared our proposed set of adaptive approaches to existing adaptive and non-adaptive strategies. We use simulated choice data based on inferred preferences from an actual MaxDiff survey.
 
 \subsection{Data}
@@ -433,32 +475,44 @@ We describe the \emph{base setting}. We simulate the process of collecting surve
 
 As described earlier, we tested the different adaptive approaches found in Table \ref{methods}. For our base settings, we use ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$) for $\epsilon-\delta$TS methods. The natural benchmark is the existing fixed MaxDiff approach.
 
-\textbf{Fixed Express MaxDiff}. We randomly drew $L=20$ of the $K=120$ items to show to each respondent.  Each item appeared $\frac{J*S}{L} = \frac{12*5}{20} = 3$ times per respondent.  Across respondents, each item also appeared the same number of times. 
-
 
 \subsection{Results: Greedy, Thompson Sampling (TS), $\epsilon-\delta$ TS vs Fixed Express}
 
 The first result shows adaptive methods, even simple ones, are better than static ones. But a simple greedy algorithm, which adapts, but does not explicitly incorporate learning, is not good enough. Table \ref{fig:simple_result} shows how TS improves substantially over greedy, and $\epsilon-\delta$ TS adds even more improvement in hit rate.
 
+\begin{figure}
+\caption{Adaptive vs Static: \ts and \edts improve hit rate. \eric{Only show \fixedexpress, \egreedy, \ts, \edts here for k=3, K=120, L=20. Performance is hit rate over respondents. This is a placeholder plot.} }
+\label{fig:simple_result}
+\begin{center}
+	\includegraphics[width=.8]{plots/3hitrate120show3.pdf}
+\end{center}
+\end{figure}
+
 For example, after the first 200 respondents, the Fixed Express Design obtains a top 3 hit rate of 60\% whereas the TS-based approaches achieve a top 3 hit rate of about 80\%. Practically, if a marketing researcher wants a hit rate of 80\%, for example, then these methods can achieve that with a smaller sample size. A good adaptive method is at least \emph{three times more efficient} than the standard Fixed Express MaxDiff approach. This holds for the different values tested in the basic setting. 
 
+Figure \ref{fig:effects_epsilon_delta} shows the way the $\epsilon$ and $\delta$ affect the performance. 
+
 \begin{figure}
-\caption{Adaptive vs Static: \ts and \edts improve hit rate. \eric{Only show \fixedexpress, \egreedy, \ts, \edts here for k=3,10}}
-\label{fig:simple_result}
+\caption{How \edts varies with $\epsilon$ and $\delta$. \eric{Show typical plot of hit rate over respondents. Show many \edts versions: eps = 1/2 (left) and eps = 1/4 (right), with multiple lines in each plot, delta = 1/2 (one color) and delta = 1/4 (another color). And in each of the plots also show regular \ts (eps=0,delta=1). The plots below are just placeholders.} }
+\label{fig:effects_epsilon_delta}
+ 	\begin{center}
+    \subfloat[$\epsilon=1/2$]{{\includegraphics[width=.4\textwidth]{plots/10hitrate120show3.pdf} }}%
+    \qquad
+    \subfloat[$\epsilon=1/4$]{{\includegraphics[width=.4\textwidth]{plots/10hitrate120show3.pdf} }}%
+    \end{center}
 \end{figure}
+
 
 We will later show the performance gap between \ts and \edts widens dramatically when considering non-stationary settings, such as with a misinformed starts in Section \ref{sec:robust}. 
 
-However, we next examine the other proposed methods. Recall each algorithm selects $L=20$ items to serve to every respondent. But we examine hit rate for the top $k$ items, for $k = \{3,10,20,40\}$. 
+
+\subsection{Results: Thresholding, Uncertainty reduction (\uncert), Misclassification (\mismin) }
+
+However, we next examine the other proposed methods. Recall each algorithm selects $L=20$ items to serve to every respondent. But we examine hit rate for the top $k$ items, for $k = \{3,10,20,40\}$. Overall, a smaller $k$ makes the problem more challenging to do well earlier, since a hit rate for the top 3 out of 120 is a higher bar than the hit rate for 40 out of 120, especially in light of the distribution of true utility values (Figure \ref{fig:util}).  
+
 
 Figures \ref{fig:K120_L20_k3hit_k10hit} and \ref{fig:K120_L20_k3hit_k10hit} and Table \ref{table:at_260_500} show the results for the $K=120$-item dataset serving $L=20$ questions per respondent, where all methods were tested.
 
-We find performance depends on the hit rate measure relative to the number of items selected ($k$ vs $L$).
-For $k \ge L$ the better performers are Greatest Uncertainty with random perturbations (\uncert) and Misclassification Minimization with random perturbations (\mismin). Indeed these two methods also perform nearly as well as the other winners in the $k < L$ condition. But the $\epsilon$-diffuse Thompson sampling with thresholding (\edtsthres) and without thresholding (\edts) perform best when $k<L$. 
-
-But the differences among the other algorithms are more telling. We find that Thompson Sampling alone has its limits. It is not suited for this active learning problem, when there is little room for error, when we care about the hit rate for all items in the survey (the case $k=L=20$). While the \edts improves its performance for the other cases, that extra exploration does not direct resources toward the places that matter most: areas of high uncertainty at the decision boundary, not just near the top of the list and not scattered randomly.  
-
-Overall, a smaller $k$ makes the problem more challenging to do well earlier. Measuring a hit rate for the top 3 is a higher bar than the hit rate for 40.  
 
 \begin{figure}%
     \caption{Hit Rates for Top $k=\{3,10\}$ with 120 items. The cumulative hit rate obtained (y-axis) improves with the number of respondents interviewed (x-axis), but it does so at different rates for each algorithm. \eric{Please make y-axes the same across all k for the K120 L20 problem. }}%
@@ -558,8 +612,15 @@ k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregt
 % \end{table}
 
 
+We find performance depends on the hit rate measure relative to the number of items selected ($k$ vs $L$).
+For $k \ge L$ the better performers are Greatest Uncertainty with random perturbations (\uncert) and Misclassification Minimization with random perturbations (\mismin). Indeed these two methods also perform nearly as well as the other winners in the $k < L$ condition. But the $\epsilon$-diffuse Thompson sampling with thresholding (\edtsthres) and without thresholding (\edts) perform best when $k<L$. 
+
+But the differences among the other algorithms are also telling. We find that Thompson Sampling (\ts) alone has its limits. It is constructed to select the best items (and eventually, only the best item), so it can do quite well if we only care about identifying a small number of items (the cases $k=3,10$). But is not suited for the active learning problem generally, especially when being evaluated on identifying a larger top set, for instance, when we care about the hit rate for all items in the survey (the case $k=L=20$). While the \edts adds exploration to improve its performance for the other cases, that extra exploration does not direct resources toward the places that matter most in this active learning problem: the areas of high uncertainty at the decision boundary, not just near the top of the list and not scattered randomly.  
+
+Therefore, why do the threshold-based policies, \edtsthres, \uncert and \mismin, outperform those without thresholds? \eric{Add plots highlighting these differences under a few conditions}
 
 
+\eric{Add a Takeaway from each section beginning here.} In conclusion, \textbf{we find ... }
 
 
 \section{Robustness tests} \label{sec:robust}
