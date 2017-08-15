@@ -108,32 +108,39 @@
 % Title or shortened title suitable for running heads. Sample:
 % \RUNTITLE{}
 % Enter the (shortened) title:
-\RUNTITLE{Bandit MaxDiff PRELIMINARY! PLEASE DO NOT DISTRIBUTE}
+\RUNTITLE{Active Learning for MaxDiff and Idea Screening PRELIMINARY! PLEASE DO NOT DISTRIBUTE}
 
 % Full title. Sample:
 % \TITLE{Bundling Information Goods of Decreasing Value}
 % Enter the full title:
-\TITLE{Bandit MaxDiff: Large-scale adaptive MaxDiff with $\epsilon$-Diffuse Thompson Sampling \\ PRELIMINARY! DO NOT DISTRIBUTE}
+\TITLE{Active Learning for Choice Experiments: \\ Applications to Large-scale Adaptive MaxDiff \\
+and Idea Screening \\
+PRELIMINARY! DO NOT DISTRIBUTE
+}
 
 % Block of authors and their affiliations starts here:
 % NOTE: Authors with same affiliation, if the order of authors allows, 
 %   should be entered in ONE field, separated by a comma. 
 %   \EMAIL field can be repeated if more than one author
 
-%\ARTICLEAUTHORS{%
-%\AUTHOR{Eric Schwartz}
-%\AFF{University of Michigan, \EMAIL{ericmsch@umich.edu}, \URL{}}
-%\AUTHOR{Kenneth Fairchild}
-%\AFF{Sawtooth Software, \EMAIL{}, \URL{}}
-%\AUTHOR{Bryan Orme}
-%\AFF{Sawtooth Software, \EMAIL{}, \URL{}}
-%\AUTHOR{Alexander Zaitzeff}
-%\AFF{University of Michigan, \EMAIL{azaitzef@umich.edu}, \URL{}}
-% Enter all authors
-%} % end of the block
+\ARTICLEAUTHORS{%
+\AUTHOR{Eric Schwartz}
+\AFF{University of Michigan, \EMAIL{ericmsch@umich.edu}, \URL{}}
+\AUTHOR{Alexander Zaitzeff}
+\AFF{University of Michigan, \EMAIL{azaitzef@umich.edu}, \URL{}}
+\AUTHOR{Kenneth Fairchild}
+\AFF{Sawtooth Software, \EMAIL{}, \URL{}}
+\AUTHOR{Bryan Orme}
+\AFF{Sawtooth Software, \EMAIL{}, \URL{}}
+
+Based on an earlier 2015 Sawtooth Conference Paper \\ with Kenneth Fairchild, Bryan Orme, Eric Schwartz.
+} % end of the block
+
+
+
 
 \ABSTRACT{%
-For large MaxDiff studies whose main purpose is identifying the top few items for the sample, a new adaptive approach called Adaptive MaxDiff may increase efficiency fourfold over standard non-adaptive MaxDiff.  Adaptive MaxDiff leverages information from previous respondents via aggregate logit and Thompson Sampling so later respondents receive designs that oversample the topmost items that are most likely to turn out to be the overall winners. Our approach applies beyond MaxDiff problems to a more general set of bandit problems. We propose a flexible algorithm, $\epsilon$-Diffuse Thompson Sampling (TS), which nests traditional TS. Blending ideas from $\epsilon$-greedy in machine learning and Bayesian approaches, this is a more robust version of TS, which a manager can control with tuning parameters. For instance, being less risk averse, one may drawn more items from diffuse posteriors, making the algorithm robust to changing environments, even extreme non-stationarity. We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. Beyond showing our approach outperforms better than current methods, we show under which conditions it performs even better than (larger problems) or just as well as existing methods (smaller problems).
+\textbf{Outdated Abstract, see Introduction.} For large MaxDiff studies whose main purpose is identifying the top few items for the sample, a new adaptive approach called Adaptive MaxDiff may increase efficiency fourfold over standard non-adaptive MaxDiff.  Adaptive MaxDiff leverages information from previous respondents via aggregate logit and Thompson Sampling so later respondents receive designs that oversample the topmost items that are most likely to turn out to be the overall winners. Our approach applies beyond MaxDiff problems to a more general set of bandit problems. We propose a flexible algorithm, $\epsilon$-Diffuse Thompson Sampling (TS), which nests traditional TS. Blending ideas from $\epsilon$-greedy in machine learning and Bayesian approaches, this is a more robust version of TS, which a manager can control with tuning parameters. For instance, being less risk averse, one may drawn more items from diffuse posteriors, making the algorithm robust to changing environments, even extreme non-stationarity. We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. Beyond showing our approach outperforms better than current methods, we show under which conditions it performs even better than (larger problems) or just as well as existing methods (smaller problems).
 }% % Enter your abstract
 
 % Sample
@@ -161,8 +168,9 @@ For large MaxDiff studies whose main purpose is identifying the top few items fo
 % Text of your paper here
 \section{Introduction}
 
-Firms collect more customer data than ever. While much of that is behavioral data (e.g., purchases, clicks, visits, etc.), the online market research relies on surveys (e.g., preference measurement) at an increasingly large scale. And as firms push preference measurement methods into a larger scale, market researchers seek to collect data more efficiently -- more . \\
-One common managerial decision driving such data collection is to select which are most preferred among a large set of hundreds of possible items. For instance, consider these illustrative managerial decisions: \\
+Firms collect more customer data than ever. While much of that is behavioral data (e.g., purchases, clicks, visits, etc.), the online market research relies on surveys (e.g., preference measurement) at an increasingly large scale. And as firms push preference measurement methods into a larger scale, market researchers seek to collect data more efficiently -- more information gained per respondent used.  
+
+One common managerial decision driving such data collection is to select which are most preferred among a large set of hundreds of possible items. For instance, consider these illustrative managerial decisions: 
 \begin{enumerate}
 	\item \emph{Idea screening.} Technology companies have long invited consumers to provide ideas for new products and improvements. Automotive companies Complex products, such as, self-driving cars are may contain hundreds of novel features and are sold with different add-ons, which are bundles of features. So consumer surveys could reveal how the best features are preferred, to help the firm decide which features can be included in different models. 
 	\item \emph{Marketing communications.} Consumer packaged goods companies use marketing research, after the products are developed, to decide which consumer benefits they should emphasize. Out of hundreds of potential benefits, they have to select a small number of them for messages.
@@ -180,7 +188,6 @@ We propose novel methods to address the problem setting that stated choice data 
 While we propose this framework broadly, we demonstrate empirically with MaxDiff, as it is an increasingly popular and important choice experiment method. The idea screening problem is sufficiently similar. But we will consider the general choice-based conjoint case in our discussion section. \\
 
 Our approach draws on state-of-the-art active learning and multi-armed bandit algorithms in statistical machine learning. 
-
 
 We contribute three ideas to the literature and practice. First, we frame choice task data collection as an earning-and-learning problem. During the process of data collection, we simultaneously balance the desire to learn preferences of all items and earn a reward towards achieving objective, by only serving questions the truly best subset of items. In this case, the objective is to identify the best set of items, for instance, the most desirable levels of attributes. The faster we identify the best items, the more we include them in questions, improving the precision of estimates. And if we need to reach a desired level of precision, we can do so faster, saving money in the form of number of respondents and time. 
 
@@ -201,9 +208,10 @@ The rest of the paper is structured as follows. In the next section we introduce
 \section{Framework and literature}
 \subsection{Maximum Difference Scaling}
 \begin{figure}
-\caption{MaxDiff is becoming more popular over time with Sawtooth Software users}
+\caption{MaxDiff is becoming more popular over time with Sawtooth Software users} \label{fig:pop}
+\begin{center}
 \includegraphics[width=0.5\textwidth]{plots/maxdiffpop}
-\label{fig:pop}
+\end{center}
 \end{figure}
 MaxDiff, Maximum Difference Scaling, is a preference measurement and item scaling method.  In a MaxDiff questionnaire the researcher asks respondents for their best and worst item out of a set, then repeats this choice task. Initially proposed by~\cite{louviere1991best}, MaxDiff was first released as a software system in 2004 by Sawtooth Software, a top marketing research software company in North America. Since its release its popularity increased steadily with penetration of the technique now reaching 68\% of all Sawtooth users in 2015 (Figure \ref{fig:pop}). \\
 MaxDiff offers benefits over alternative methods. MaxDiff provides more discrimination among items and between respondents on the items than traditional rating scales~\cite{cohen2004s}. Besides enhanced discrimination, it avoids the scale use bias so problematic with traditional ratings scales (CITE).\\
@@ -212,17 +220,19 @@ MaxDiff, while it is a distinct type of choice experiment, is closely related to
 MaxDiff has proven so useful that market researchers increasingly find reasons to use MaxDiff for a large number of items.  How many is a large number of items?  In their 2007 paper, Hendrix and Drucker described ``large sets'' as about 40 to 60 items, proposing variants to MaxDiff called Augmented and Tailored MaxDiff to handle such large problems~\cite{hendrix2007alternative}. In their 2012 paper, Wirth and Wolfrath also investigated variants to MaxDiff called Express and Sparse MaxDiff for handling what they described as ``very large sets'' of items~\cite{wirth2012largeset}.  Very large to these authors meant potentially more than 100 items.  To support their findings, they conducted a study among synthetic robotic respondents with 120 items and a real study among humans with 60 items.\\
 For Hendrix and Drucker 40 to 60 items was large, for Wirth and Wolfrath 120 items was very large.  For this current paper, we're referring to huge numbers of items as potentially 300 or more. The motivation of our research is beyond academic curiosity, as marketing researchers are seeking such applications pushing MaxDiff further than it was perhaps ever intended. \\
 \begin{figure}
-\caption{Maximum Number of Items Studied via MaxDiff during 2015}
-\includegraphics[width=0.7\textwidth]{plots/maxnumstudy}\\
-N = ??, Mean= 40, Median=30, Maximum=400
+\caption{Maximum Number of Items Studied via MaxDiff during 2015. N = ??, Mean= 40, Median=30, Maximum=400}
 \label{fig:max}
+\begin{center} 
+\includegraphics[width=0.7\textwidth]{plots/maxnumstudy}
+\end{center}
 \end{figure}
 In Sawtooth Software's 2015 Customer Feedback Survey, we asked respondents to tell us the largest number of items they had included in a MaxDiff study during the last 12 months (Figure \ref{fig:max}). Nearly one-fifth of respondents indicated their firms had conducted a study with 51 or more items.  The maximum number of items studied was 400!\\
 To some it may seem bizarre and overwhelming that some researchers are conducting MaxDiff studies with 81+ or even 400 items.  However, when we consider that individual MaxDiff items may actually represent conjoined elements that constitute a profile (say, a combination of packaging style, color, claims, and highlighted ingredients), then it can make much more sense to do 400-item studies.  If the profiles involve multiple highly interactive attributes that pose challenges for CBC, then MaxDiff with huge numbers of items could be a viable alternative (given the new approach we demonstrate further below).\\
 \begin{figure}
-\caption{Main Purpose for MaxDiff Study with 41+ Items}
-\includegraphics[width=0.5\textwidth]{plots/maxdiffpurpose}
+\caption{Main Purpose for MaxDiff Study with 41+ Items} 
 \label{fig:purpose}
+\begin{center} \includegraphics[width=0.5\textwidth]{plots/maxdiffpurpose}
+\end{center}
 \end{figure}
 We also asked Sawtooth Software customers what the main purpose was for that study with the reported maximum number of items.  For studies involving 41 or more items, the main reasons are displayed in Figure 3.\\
 For 42\% of these large MaxDiff studies, the main purpose was to identify the TOP item or TOP few items.  Our research shows that if this is the main goal, then traditional design strategies are very wasteful.  An adaptive approach using Thompson Sampling can be about 4x more efficient.  Without the Thompson Sampling approach, you are potentially wasting 75 cents of every dollar you are spending on MaxDiff data collection. \\
