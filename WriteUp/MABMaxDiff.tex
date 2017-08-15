@@ -191,7 +191,7 @@ Our approach draws on state-of-the-art active learning and multi-armed bandit al
 
 We contribute three ideas to the literature and practice. First, we frame choice task data collection as an earning-and-learning problem. During the process of data collection, we simultaneously balance the desire to learn preferences of all items and earn a reward towards achieving objective, by only serving questions the truly best subset of items. In this case, the objective is to identify the best set of items, for instance, the most desirable levels of attributes. The faster we identify the best items, the more we include them in questions, improving the precision of estimates. And if we need to reach a desired level of precision, we can do so faster, saving money in the form of number of respondents and time. 
 
-\textbf{The preceding paragraph needs to be changed. We are not doing any earning just learning Pure exploration}
+%{The preceding paragraph needs to be changed. We are not doing any earning just learning Pure exploration}
 
 Multi-armed bandit problems appear in marketing experiments for online advertising~\cite{schwartz2015customer},~\cite{urban2013morphing} and website design~\cite{hauser2009website}. One particular MAB method amenable to multi-variable parametric models is Thompson Sampling.\\
 While we use bandit algorithms, our approach differs from extant bandit applications in a number of ways. For a bandit problem the reward is observed immediately (click, acquisition, purchase). While we have immediate observations (choice), that is not our reward. Instead, our goal is to correctly identify the truly best items as precisely as possible. These are not evaluable in real-time. \\
