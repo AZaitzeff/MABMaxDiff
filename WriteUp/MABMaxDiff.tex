@@ -439,12 +439,12 @@ The algorithm learn over time to intuitively achieve the goal of identifying the
 One practical issue with Thompson Sampling is robustness to changes overtime. On the one hand, there is built-in robustness. Recall the algorithm is stochastic and adapts continuously. If the early data leads the algorithm astray, then it will self-correct, eventually finding and converging to the truly best items. Suppose the early respondents made choices, by chance, leading us to believe certain items were the best when they were not. The respondents that immediately follow will start receiving these truly poor items. However, as this continues, the uncertainty is reduced around these poor items to reveal there are many other items with probability of being better. By sampling from the joint belief distribution of item utilities, we will be less likely to draw those poor items. One concern is that such sampling could be too aggressive.
 
 \begin{figure}
-\caption{MaxDiff TS Illustration \eric{AZ will do this using the updated version of \ts with Bayesian Bootstrapping} }
+\caption{MaxDiff TS Illustration \eric{AZ will do this using the updated version of \ts with Bayesian Bootstrapping}\alexander{to ES: Feedback} }
 \label{fig:illustrate_ts}
 	\begin{center}
-    \subfloat[Early]{{\includegraphics[width=.4\textwidth]{plots/beliefdistrBegin.pdf} }}%
+    \subfloat[Early]{{\includegraphics[width=.4\textwidth]{plots/utildis60.pdf} }}%
     \qquad
-    \subfloat[Late]{{\includegraphics[width=.4\textwidth]{plots/beliefdistrEnd.pdf} }}%
+    \subfloat[Late]{{\includegraphics[width=.4\textwidth]{plots/utildis300.pdf} }}%
     \end{center}
 \end{figure}
 
@@ -461,23 +461,31 @@ The \edts version intuitively hedges its bets on the best items .  As in illustr
 Figure \ref{fig:illustrating_edts} illustrates how \edts differs from \ts. 
 
 \begin{figure}
-\caption{ Illustration of \ts v \edts for two items at two points in time. \eric{Show a 4 plots in a 2x2 in this figure. Show the \ts, \edts belief distributions and show the underlying diffuse distribution that is one component of \edts. If it looks good, include \fixedexpress too, but don't worry. Show this for 1st ranked item (top row of plots) and 60th ranked item (bottom row) to show . Show for early beliefs after respondent 40 (left column of plots) and late beliefs after respondent 500 (right) show learning. If it looks good for respondent 40, great; otherwise, find earlier or a little later respondents where this is illustrative.} }
+\caption{ Illustration of \ts v \edts for two items at two points in time. \eric{Show a 4 plots in a 2x2 in this figure. Show the \ts, \edts belief distributions and show the underlying diffuse distribution that is one component of \edts. If it looks good, include \fixedexpress too, but don't worry. Show this for 1st ranked item (top row of plots) and 60th ranked item (bottom row) to show . Show for early beliefs after respondent 40 (left column of plots) and late beliefs after respondent 500 (right) show learning. If it looks good for respondent 40, great; otherwise, find earlier or a little later respondents where this is illustrative.}\alexander{to ES: Feedback, I did resp 60} }
 \label{fig:illustrating_edts}
  	\begin{center}
-    \subfloat[Early, 1st rank]{{\includegraphics[width=.4\textwidth]{plots/beliefdistrBegin.pdf} }}%
+    \subfloat[Early, 1st rank]{{\includegraphics[width=.4\textwidth]{plots/utildifdis600.pdf} }}%
     \qquad
-    \subfloat[Late, 1st rank]{{\includegraphics[width=.4\textwidth]{plots/beliefdistrEnd.pdf} }}%
+    \subfloat[Late, 1st rank]{{\includegraphics[width=.4\textwidth]{plots/utildifdis3000.pdf} }}%
     \qquad
-    \subfloat[Early, 60th rank]{{\includegraphics[width=.4\textwidth]{plots/endbetadis30.pdf} }}%
+    \subfloat[Early, 60th rank]{{\includegraphics[width=.4\textwidth]{plots/utildifdis6060.pdf} }}%
     \qquad
-    \subfloat[Late, 60th rank]{{\includegraphics[width=.4\textwidth]{plots/endbetadis90.pdf} }}%
+    \subfloat[Late, 60th rank]{{\includegraphics[width=.4\textwidth]{plots/utildifdis30060.pdf} }}%
     \end{center}
 \end{figure}
 
 
 For $\epsilon$-$\delta$ case, its density does not become a spike as quickly as it does without $\epsilon$-$\delta$ . This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and the smaller the $\delta$, the more exploration and slower the algorithm settles on its set of items. 
 
-We show how \edts performance varies with different values of $\epsilon$ and $\delta$ in Section \ref{sec:empirical_main}. \eric{ AZ will re-run tests on \edts for different combinations of values of $\epsilon=1/2,1/4,0$ and $\delta=1,1/2,1/4,nearly 0 effectively uniform)$, almost do the whole crossproduct except avoid redundancies.}  For our empirical analysis, we use ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). Also tested were ($\epsilon=\frac{1}{2}$, $\delta=\frac{1}{4}$) and ($\epsilon=1$, $\delta=\frac{1}{4}$) which performed on par with ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). Our recommended ranges for the parameters are $\frac{1}{5}\leq \epsilon \leq \frac{1}{2}$, $\frac{1}{4}\leq \delta \leq \frac{1}{2}$.\\
+\begin{figure}[!ht]
+\caption{Respondent-by-item counts}
+\includegraphics[width=1\textwidth]{plots/hr120v20k10ed.pdf}
+\label{fig:ed}
+\end{figure}
+
+We show how \edts performance varies with different values of $\epsilon$ and $\delta$ in Section \ref{sec:empirical_main}. \eric{ AZ will re-run tests on \edts for different combinations of values of $\epsilon=1/2,1/4,0$ and $\delta=1,1/2,1/4,nearly 0 effectively uniform)$, almost do the whole crossproduct except avoid redundancies.} \alexander{to ES: Which ones do you want to keep? see figure \ref{fig:ed}}  For our empirical analysis, we use ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). Also tested were ($\epsilon=\frac{1}{2}$, $\delta=\frac{1}{4}$) and ($\epsilon=1$, $\delta=\frac{1}{4}$) which performed on par with ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). Our recommended ranges for the parameters are $\frac{1}{5}\leq \epsilon \leq \frac{1}{2}$, $\frac{1}{4}\leq \delta \leq \frac{1}{2}$.\\
+
+
 
 \subsubsection{Variant Closest to the Threshold}
 In~\cite{toubia2007adaptive}, they introduce Closest to Threshold based on Bradlow and Wainer’s (1998) recommendation
