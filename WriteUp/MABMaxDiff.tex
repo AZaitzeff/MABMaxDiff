@@ -545,10 +545,10 @@ As described earlier, we tested the different adaptive approaches found in Table
 The first result shows adaptive methods, even simple ones, are better than static ones. But a simple greedy algorithm, which adapts, but does not explicitly incorporate learning, is not good enough. Table \ref{fig:simple_result} shows how TS improves substantially over greedy, and $\epsilon-\delta$ TS adds even more improvement in hit rate.
 
 \begin{figure}
-\caption{Adaptive vs Static: \ts and \edts improve hit rate. \eric{Only show \fixedexpress, \egreedy, \ts, \edts here for k=3, K=120, L=20. Performance is hit rate over respondents. This is a placeholder plot.} }
+\caption{Adaptive vs Static: \ts and \edts improve hit rate. \eric{Only show \fixedexpress, \egreedy, \ts, \edts here for k=3, K=120, L=20. Performance is hit rate over respondents. This is a placeholder plot.}\alexander{DONE} }
 \label{fig:simple_result}
 \begin{center}
-	\includegraphics[width=.8\textwidth]{plots/3hitrate120show3.pdf}
+	\includegraphics[width=.8\textwidth]{plots/hr120v20k3.pdf}
 \end{center}
 \end{figure}
 
@@ -560,9 +560,9 @@ Figure \ref{fig:effects_epsilon_delta} shows the way the $\epsilon$ and $\delta$
 \caption{How \edts varies with $\epsilon$ and $\delta$. \eric{Show typical plot of hit rate over respondents. Show many \edts versions: eps = 1/2 (left) and eps = 1/4 (right), with multiple lines in each plot, delta = 1/2 (one color) and delta = 1/4 (another color). And in each of the plots also show regular \ts (eps=0,delta=1). The plots below are just placeholders.} }
 \label{fig:effects_epsilon_delta}
  	\begin{center}
-    \subfloat[$\epsilon=1/2$]{{\includegraphics[width=.4\textwidth]{plots/10hitrate120show3.pdf} }}%
+    \subfloat[$\epsilon=1/2$]{{\includegraphics[width=.4\textwidth]{plots/hr120v20k10e2.pdf} }}%
     \qquad
-    \subfloat[$\epsilon=1/4$]{{\includegraphics[width=.4\textwidth]{plots/10hitrate120show3.pdf} }}%
+    \subfloat[$\epsilon=1/4$]{{\includegraphics[width=.4\textwidth]{plots/hr120v20k10e4.pdf} }}%
     \end{center}
 \end{figure}
 
