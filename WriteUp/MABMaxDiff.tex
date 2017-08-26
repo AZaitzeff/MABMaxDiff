@@ -661,7 +661,7 @@ Figures \ref{fig:K120_L20_k3hit_k10hit} and \ref{fig:K120_L20_k3hit_k10hit} and 
 
 
 \begin{table}
-\caption{Top k Hit Rate for Various Algorithms after the {260th, 500th} Respondent with 120 Items \eric{Check the values to make sure they correspond with the Figures. I'm looking at TSe4 and TSthres columns and see discrepancies with the figures.} \eric{And for tables, reorder columns: fixed\_express, greedy, greedy\_thres, TS, TSed, TS\_thres, TSed}
+\caption{Top k Hit Rate for Various Algorithms after the {260th, 500th} Respondent with 120 Items \eric{Check the values to make sure they correspond with the Figures. I'm looking at TSe4 and TSthres columns and see discrepancies with the figures.} \eric{And for tables, reorder columns: fixed\_express, greedy, greedy\_thres, TS, TSed, TS\_thres, TSed}\alexander{create shorter labels}
  }
 \label{table:at_260_500}
 \begin{center}
@@ -669,22 +669,22 @@ Figures \ref{fig:K120_L20_k3hit_k10hit} and \ref{fig:K120_L20_k3hit_k10hit} and 
 \hline 
 \hline
 \multicolumn{10}{l}{(a) After 260 respondents}\\
-k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\ \hline
-  3 &          0.650 &   0.853 &        0.860 &   0.883 & 0.863 & 0.873 &       0.850 &    0.893 &   0.840 \\
-  10 &          0.825 &   0.880 &        0.902 &   0.907 & 0.923 & 0.909 &       0.909 &    0.907 &   0.901 \\
-  20 &          0.824 &   0.784 &        0.863 &   0.885 & 0.825 & 0.820 &       0.869 &    0.879 &   0.886 \\  
-  40 &          0.857 &   NA &        0.884 &   0.908 & NA & NA &       0.895 &    0.888 &   0.897 \\
+k &  \fixedexpress&\egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert \\ \hline
+  3 & 0.65 &   0.85 &  0.86 &   0.86 & 0.87 & 0.78 & 0.86 &    0.88 &   0.84 \\
+  10 &  0.83 &   0.88 & 0.90 &   0.92 & 0.91 & 0.87 & 0.92 &    0.91 &   0.90 \\
+  20 & 0.82 & 0.78 &  0.86 & 0.83 & 0.82 & 0.86 & 0.88 &  0.88 &   0.89 \\  
+  40 &  0.86 &   NA &  0.88 &  NA & NA & 0.89 & 0.90 &  0.91 &   0.90 \\
 \hline
 \hline
 \end{tabular}
 \begin{tabular}{llllllllll}
 \multicolumn{10}{l}{(b) After 500 respondents}\\
-k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\
+k &  \fixedexpress&\egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert  \\
 \hline
-   3 &          0.780 &   0.950 &        0.933 &   0.950 & 0.940 & \textbf{0.957} &       0.917 &    0.947 &   0.943 \\
-  10 &          0.877 &   0.925 &        0.928 &   0.939 & 0.933 & \textbf{0.952} &       0.940 &    0.947 &   0.945 \\  
-  20 &          0.862 &   0.827 &        0.914 &   \textbf{0.928} & 0.863 & 0.868 &       0.916 &    0.914 &   0.919 \\  
-  40 &          0.887 &   NA &        0.926 &   0.937 & NA & NA &       0.929 &    0.927 &   \textbf{0.938} \\
+   3 & 0.78 &   0.95 & 0.93 & 0.94 & 0.96 & 0.83 & 0.97 &    0.95 &   0.94 \\
+  10 &  0.88 &   0.93 &  0.93 &   0.93 & 0.95 & 0.89 & 0.95 &    0.94 &   0.95 \\  
+  20 &  0.86 &   0.83 & 0.91 &  0.86 & 0.87 & 0.89 & 0.92 &  0.93 &   0.92 \\ 
+  40 &  0.89 &   NA & 0.93 & NA & NA & 0.92 &  0.94 & 0.94 & 0.94 \\
 \hline 
 \hline
 \end{tabular}
@@ -733,7 +733,8 @@ For the simulations reported in table \ref{table:120mis}, the first 50 robotic r
 
 \begin{table}
 \begin{tabular}{llllllllll}
-\hline   Resp &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert  \\ \hline    260 &   0.09 &   0.297 &  0.237 &   0.253 & 0.067 & 0.347 &  0.067 &    0.357 &   0.27 \\  500 &  0.247 &   0.57 &  0.49 &   	0.54 & 0.127 & 0.537 &       0.1 &    0.64 &   0.503  \end{tabular}
+\hline   Resp &  \fixedexpress&\egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert   \\ \hline    260 &   0.09 &   0.30 & 0.24 & 0.07  & 0.35 & 0.07 &  0.36 & 0.25 &   0.27 \\
+  500 &  0.25 &   0.57 &  0.49 &  0.13 & 0.54 &   0.1 &    0.64 & 0.54 &  0.50  \end{tabular}
 \begin{center}
 \caption{Top 3 Hit Rate for Various Algorithms at the 260th and 500th Respondent for the 120 item data set with Misinformed Start}
 \label{table:120mis}
@@ -748,7 +749,11 @@ We illustrate the robustness in Table \ref{table:120mis}. One critical point to 
 \begin{table}
 \begin{center}
 \begin{tabular}{lllllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 & TSregthres & TSthres &  uncert \\ \hline 3&   0.307 &   0.593 &        0.477 &   0.543 &  0.597 & 0.640 & 0.537 &       0.647 &   0.580 \\ 10 &          0.462 &   0.612 &        0.540 &   0.682  & 0.630 & 0.662   & 0.576 &       0.674  &   0.694 \\ 20 & 0.550 &   0.599 &        0.593 &   0.722 &   0.606 & 0.658 &      0.590 &       0.714 &   0.719\\ 40 & 0.617 &   NA &        0.616 &   0.705 &    NA & NA &    0.638 &       0.702 &    0.721 \end{tabular}
+\hline   k &  \fixedexpress & \egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert \\ \hline 
+3&   0.31 &   0.59 & 0.48 & 0.60 &  0.64 & 0.54 & 0.65 & 0.54 &   0.58 \\ 
+10 & 0.46 &   0.61 & 0.54 & 0.63  & 0.66 & 0.58 & 0.68 & 0.68  &   0.69 \\ 
+20 & 0.55 &   0.60 & 0.59 &  0.61 & 0.66 & 0.59 & 0.71 &       0.72 &   0.72\\ 
+40 & 0.62 &   NA & 0.62 & NA &  NA & 0.64 & 0.70 & 0.71 & 0.72 \end{tabular}
 \end{center}
 \caption{Top k Hit Rate for Various Algorithms at the 260th Respondent for the 300 item data set}
 \label{table:300at260}
@@ -757,7 +762,11 @@ We illustrate the robustness in Table \ref{table:120mis}. One critical point to 
 \begin{table}
 \begin{center}
 \begin{tabular}{lllllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 & TSregthres & TSthres &  uncert \\ \hline  3 & 0.387 &   0.763 &        0.747 &   0.773 &         0.720 & 0.793 &  0.617 &       0.800 &   0.777 \\ 10 &  0.578 &   0.759 &        0.718 &   0.794 &    0.702 & 0.784 &  0.626 &       0.792 &   0.792\\20 & 0.676 &   0.718 &        0.764 &   0.842 &     0.673 & 0.764 &     0.633 &       0.821 &    0.846 \\ 40 & 0.717 &   NA &        0.751 &   0.813 &     NA & NA &     0.693 &       0.799 &    0.828 \end{tabular}
+\hline   k &  \fixedexpress & \egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert  \\ \hline  
+3 & 0.39 &  0.76 & 0.75 & 0.72 & 0.79 & 0.61 &  0.80 &  0.77 &0.78 \\
+10 &  0.58 &   0.76 & 0.72 & 0.70 & 0.78 & 0.63 & 0.79 & 0.79 &   0.79\\
+20 & 0.68 & 0.72 & 0.76 & 0.67 & 0.76 &  0.63 & 0.82 & 0.84 &    0.85 \\ 
+40 & 0.72 &   NA & 0.75 & NA & NA & 0.69 & 0.80 &0.81 & 0.83 \end{tabular}
 \end{center}
 \caption{Top k Hit Rate for Various Algorithms at the 500th Respondent for the 300 item data set}
 \label{table:300at500}
@@ -768,7 +777,7 @@ The advantages seen in the 120-item results are improved upon in the results wit
 \begin{table}
 \begin{center}
 \begin{tabular}{llllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert  \\ \hline    3 &          0.897 &   0.973 &        0.970 &   0.940 & 0.973 & 0.973 &       0.973 &    0.960 &   0.943 \\  10 &          0.869 &   0.897 &        0.912 &   0.907 & 0.926 & 0.905 &       0.930 &    0.911 &   0.916  \end{tabular}
+\hline   k &  \fixedexpress & \egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert  \\ \hline  3 & 0.90 & 0.97 &  0.97 &  0.97 & 0.97 & 0.97 &  0.96 & 0.94 &  0.94 \\  10 & 0.87 & 0.90 & 0.91 &  0.93 & 0.91 & 0.91 & 0.91 & 0.91 &  0.92  \end{tabular}
 \end{center}
 \caption{Top k Hit Rate for Various Algorithms at the 260th Respondent for the 40 item data set}
 \label{table:40at260}
@@ -777,7 +786,8 @@ The advantages seen in the 120-item results are improved upon in the results wit
 \begin{table}
 \begin{center}
 \begin{tabular}{llllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline    3 &          0.930 &   0.990 &        0.990 &   0.983 & 0.990 & 0.987 &       1.000 &    0.997 &   0.990 \\  10 &          0.903 &   0.919 &        0.933 &   0.925 & 0.936 & 0.936 &       0.941 &    0.930 &   0.932 \end{tabular}
+\hline   k &  \fixedexpress & \egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert \\ \hline    
+3 & 0.93 & 0.99 & 0.99 & 0.99 & 0.99 & 0.98 & 0.98 & 0.98 &  0.99 \\  10 & 0.90 &   0.92 &  0.93  & 0.94 & 0.94 & 0.93 &    0.92 & 0.93 &  0.93 \end{tabular}
 \end{center}
 \caption{Top k Hit Rate for Various Algorithms at the 500th Respondent for the 40 item data set}
 \label{table:40at500}
