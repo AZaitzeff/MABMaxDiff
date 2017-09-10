@@ -369,11 +369,11 @@ The rows in this matrix representation represent every respondent-task-item comb
 The link between the models of best choice and worst choice is the parameter $\theta=\{\theta_1,\ldots,\theta_m \}$. This common parameter vector represents the overall utility of each item $1,\ldots,m$. For a more positive $\theta_i$, the item $i$ has a larger probability of being chosen as best; the more negative, the more likely the item will be chosen as worst.\\
 We clarify language about utility, which may diverge from conjoint language or language for multi-attribute profiles. Since $X$ is an indicator, the $\theta$ only represents the utility of item $i$ being included versus excluded. If $\theta_i > \theta_{i'}$, then we say item $i$ is ``more preferred,'' ``more important,'' or simply, ``better.''\\
 Due to the sparse nature of MaxDiff for huge numbers of items plus the desire for rapid real time updates, we decided to use aggregate MNL rather than a Bayesian approach.\\
-The log likelihood can be written in summation notation where $S_n$ denotes the nth set of choices as follows
+The log-likelihood can be written in summation notation where $S_n$ denotes the nth set of choices as follows
 \[
 LL(\theta)=-\sum_{n=1}^N \sum_{x \in S_n} (Y_{B_{S_n}}(x)\log{\frac{e^{\theta_x}}{\sum_{z\in S_n} e^{\theta_z}}}+ Y_{W_{S_n}}(x)\log{\frac{e^{-\theta_x}}{\sum_{z\in S_n} e^{-\theta_z}}})
 \]
-In our work we find $\theta$ by minimizing the negative log likelihood using Newton-Rapson.
+In our work we find $\theta$ by minimizing the negative log-likelihood using Newton-Rapson.
 
 \section{Adaptive MaxDiff}
 
@@ -531,7 +531,7 @@ You define the score, $s_i$ for each item as follows. $s_i=|.5-\mathbb{P}(\text{
 \subsubsection{Variant Random Perturbation}
 From~\cite{toubia2007adaptive}, after calculating the scores for a respondent, you perturb the scores by a normal vector with mean zero and variance $c\frac{1}{n_i}$, Where $n_i$ is the number of questions that has had item $i$ and $c$ is some constant, we take it to be $\frac{1}{10}$ (also tested ws $c=\frac{1}{2}$ which preformed similar). Using the pertubed scores Serve up the $L$ items accordingly. Our recommended range for the parameter is $.01 \leq c \leq 1$\\
 The reason for using a variance that decreases over time rather than a fixed variance can be found in ~\cite{toubia2007adaptive} where the author derived insight from genetic algorithms. This method avoids misclassifying an item that will not be sampled further.\\
-Additionally if you are using a batch size greater than one, Misclassification Minimization and Greatest Uncertainty would show the same items to all of the respondents. After getting scores that are the same for the next $b$ respondents adding the perturbation vector adds variety to the items shown. This is useful because using Bayes bootstrapping for estimating probabilities required in Misclassification Minimization and Greatest Uncertainty takes a good deal of time since you are optimizing the negative log likelihood a large number of times.
+Additionally if you are using a batch size greater than one, Misclassification Minimization and Greatest Uncertainty would show the same items to all of the respondents. After getting scores that are the same for the next $b$ respondents adding the perturbation vector adds variety to the items shown. This is useful because using Bayes bootstrapping for estimating probabilities required in Misclassification Minimization and Greatest Uncertainty takes a good deal of time since you are optimizing the negative log-likelihood a large number of times.
 
 
 \section{Empirical Analysis: Main Results}
@@ -951,7 +951,7 @@ Draw 3 &4.81 & 5.23 & 5.04 &  3.96 &  4.17 & 4.37 &  3.58 & 2.99 \\
 As an example see table \ref{table:data} for draws of exponential weighted utility of a single item. I put the columns in current rank order and only show the top 8 for convenience. Then $S$ is the set containing what is currently ranked as the first, second and third ranked item. Then $\mu^1_{S}=4.02+3.50+5.08=12.6$ and $\mu_{S^*}^{1}=5.08+4.41+4.16=13.65$ So $\Delta^{1}=\frac{13.65-12.6}{12.6}=.083$. Likewise $\Delta^{2}=\frac{12.6-12.39}{12.39}=.017$ and $\Delta^{3}=\frac{15.08-15.08}{15.08}=0$ (Note $\Delta^m=0$ when the $S$ contains the top utilities). The histogram of $\Delta$ after 100 iterations and 220 iterations is shown in figure \ref{fig:data}. \\
 The `potential value remaining' (PVR) is the 95 quantile of the distribution $\Delta$ see figure \ref{fig:data}. After 100 iterations the PVR was 0.092. Scott's way to interpret this number is ``we do not know what the utility of $S$ is, but whatever it is, a different set might beat it by as much as 9.2\%.''\\
 \begin{figure}
-\caption{Average stopping time with defferent thresholds}
+\caption{Average stopping time with different thresholds \alexander{Figure out what I would like to do with this section}}
 \includegraphics[width=1\textwidth]{plots/stoppingtimes.pdf}
 \label{fig:st}
 \end{figure}
@@ -986,7 +986,7 @@ In~\cite{orme2006adaptive}, one of the authors presented a paper on Adaptive Max
 
 
 \subsection{Drawing from the Asymptotic Distribution}
-As an alternative to Bayesian bootstrapping to get draws from the posterior, one can sample from asymptotic distribution via MLE implied by the estimated mean and standard errors, sampling $u \sim N(\theta,H^{-1})$, where $\theta$ is the minimizer of the negative loglikehood and $H$ is the Hessian of the negative loglikehood evaluated at $\theta$. The sampling methods preformed about the same using draws from either Bayesian bootstrapping or the asymptotic distribution.
+As an alternative to Bayesian bootstrapping to get draws from the posterior, one can sample from asymptotic distribution via MLE implied by the estimated mean and standard errors, sampling $u \sim N(\theta,H^{-1})$, where $\theta$ is the minimizer of the negative log-likehood and $H$ is the Hessian of the negative log-likehood evaluated at $\theta$. The sampling methods preformed about the same using draws from either Bayesian bootstrapping or the asymptotic distribution.
 
 Finally, yet another faster allows for online updates for streaming data, without model estimation. A benefit of MaxDiff tasks is the number of pairwise comparison is implies with one best-worst pair. One, albeit limited way to use this information, would be to act as if the respondent actually did state all of those comparisons. Then for each pair, we can assign a 'win' the more preferred item and a 'loss' to the others. By merely tallying the number of wins out of comparisons for each item, we have its own 'win percentage' in its contests against other items that it has faced so far. This is a noisy measure of proxy for its underlying utility. Appreciating this is an average as $\hat{p}_{win}$, we can describe its standard error, $se_{win}$, to be used for Thompson Sampling as follows:
 \begin{align}
