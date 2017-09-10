@@ -78,6 +78,29 @@
 \newcommand{\uncert}{\textbf{max-uncert} } 
 
 
+\newcommand{\fixedexpressS}{\textbf{exp}} 
+
+% previously referred to as greedy
+% we need to global change: greedy -> \egreedy
+\newcommand{\egreedyS}{$\epsilon$-\textbf{g}} 
+
+
+% previously referred to as greedythres
+% we need to global change: greedythres -> \egreedythres
+\newcommand{\egreedythresS}{$\epsilon$-\textbf{g-thr}} 
+
+\newcommand{\misminS}{\textbf{max-mis}} 
+
+\newcommand{\tsS}{\textbf{TS} } 
+
+\newcommand{\edtsS}{$\epsilon$-$\delta$-\textbf{dif TS} } 
+
+% previously referred to as TSregthres
+\newcommand{\tsthresS}{\textbf{TS-thr} } 
+
+% previously referred to as TSthres
+\newcommand{\edtsthresS}{$\epsilon$-$\delta$-\textbf{TS-thr} } 
+\newcommand{\uncertS}{\textbf{uncert} } 
 %% Notation in this paper %%
 % S - a set of items in a questions
 % |S| - number of items per question
@@ -669,7 +692,7 @@ Figures \ref{fig:K120_L20_k3hit_k10hit} and \ref{fig:K120_L20_k3hit_k10hit} and 
 \hline 
 \hline
 \multicolumn{10}{l}{(a) After 260 respondents}\\
-k &  \fixedexpress&\egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert \\ \hline
+k &  \fixedexpressS&\egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& \misminS& \uncertS \\ \hline
   3 & 0.65 &   0.85 &  0.86 &   0.86 & 0.87 & 0.78 & 0.86 &    0.88 &   0.84 \\
   10 &  0.83 &   0.88 & 0.90 &   0.92 & 0.91 & 0.87 & 0.92 &    0.91 &   0.90 \\
   20 & 0.82 & 0.78 &  0.86 & 0.83 & 0.82 & 0.86 & 0.88 &  0.88 &   0.89 \\  
@@ -679,7 +702,7 @@ k &  \fixedexpress&\egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin
 \end{tabular}
 \begin{tabular}{llllllllll}
 \multicolumn{10}{l}{(b) After 500 respondents}\\
-k &  \fixedexpress&\egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert  \\
+k &  \fixedexpressS&\egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& \misminS& \uncertS  \\
 \hline
    3 & 0.78 &   0.95 & 0.93 & 0.94 & 0.96 & 0.83 & 0.97 &    0.95 &   0.94 \\
   10 &  0.88 &   0.93 &  0.93 &   0.93 & 0.95 & 0.89 & 0.95 &    0.94 &   0.95 \\  
@@ -718,7 +741,18 @@ For $k \ge L$ the better performers are Greatest Uncertainty with random perturb
 
 But the differences among the other algorithms are also telling. We find that Thompson Sampling (\ts) alone has its limits. It is constructed to select the best items (and eventually, only the best item), so it can do quite well if we only care about identifying a small number of items (the cases $k=3,10$). But is not suited for the active learning problem generally, especially when being evaluated on identifying a larger top set, for instance, when we care about the hit rate for all items in the survey (the case $k=L=20$). While the \edts adds exploration to improve its performance for the other cases, that extra exploration does not direct resources toward the places that matter most in this active learning problem: the areas of high uncertainty at the decision boundary, not just near the top of the list and not scattered randomly.  
 
-Therefore, why do the threshold-based policies, \edtsthres, \uncert and \mismin, outperform those without thresholds? \eric{Add plots highlighting these differences under a few conditions}
+\begin{figure}%
+    \caption{Frequency of item shown for \edts and \edtsthres}%
+    \label{fig:Frequency}%
+ 	\begin{center}
+    \subfloat[]{{\includegraphics[width=.8\textwidth]{plots/edTSfreq.pdf} }}%
+    \qquad
+    \subfloat[]{{\includegraphics[width=.8\textwidth]{plots/edTSthresfreq.pdf} }}%
+	\end{center}
+\end{figure}
+
+Therefore, why do the threshold-based policies, \edtsthres, \uncert and \mismin, outperform those without thresholds? Take a simple example of showing 3 items to a respondent out of 6 items, called A,B,C,D,E, and F, where we want to identify the top 3 items. Let A,B,C,D,E,and F be the utility order. Say at some point we are certain that A and B are in the top 3 and E and F are not. An algorithm without thresholding would pick A,B and either C or D. A will be chosen as the best and C or D will be chosen as the worst, giving us no new information. An algorithm with thresholding will pick C and D and either B or E. Either way the respondent will give a comparison of C and D which gives information as to which one is in the top 3. \eric{Add plots highlighting these differences under a few conditions} This is illustrated in Figure \ref{fig:Frequency} where you can see that \edts really focuses on the top items and \edtsthres gives more of a spread but a focus on items that are near the rank 20 item.
+
 
 
 \eric{Add a Takeaway from each section beginning here.} In conclusion, \textbf{we find ... }
@@ -733,7 +767,7 @@ For the simulations reported in table \ref{table:120mis}, the first 50 robotic r
 
 \begin{table}
 \begin{tabular}{llllllllll}
-\hline   Resp &  \fixedexpress&\egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert   \\ \hline    260 &   0.09 &   0.30 & 0.24 & 0.07  & 0.35 & 0.07 &  0.36 & 0.25 &   0.27 \\
+\hline   Resp &  \fixedexpressS&\egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& \misminS& \uncertS   \\ \hline    260 &   0.09 &   0.30 & 0.24 & 0.07  & 0.35 & 0.07 &  0.36 & 0.25 &   0.27 \\
   500 &  0.25 &   0.57 &  0.49 &  0.13 & 0.54 &   0.1 &    0.64 & 0.54 &  0.50  \end{tabular}
 \begin{center}
 \caption{Top 3 Hit Rate for Various Algorithms at the 260th and 500th Respondent for the 120 item data set with Misinformed Start}
@@ -749,7 +783,7 @@ We illustrate the robustness in Table \ref{table:120mis}. One critical point to 
 \begin{table}
 \begin{center}
 \begin{tabular}{lllllllllll}
-\hline   k &  \fixedexpress & \egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert \\ \hline 
+\hline   k &  \fixedexpressS & \egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& \misminS& \uncertS \\ \hline 
 3&   0.31 &   0.59 & 0.48 & 0.60 &  0.64 & 0.54 & 0.65 & 0.54 &   0.58 \\ 
 10 & 0.46 &   0.61 & 0.54 & 0.63  & 0.66 & 0.58 & 0.68 & 0.68  &   0.69 \\ 
 20 & 0.55 &   0.60 & 0.59 &  0.61 & 0.66 & 0.59 & 0.71 &       0.72 &   0.72\\ 
@@ -762,7 +796,7 @@ We illustrate the robustness in Table \ref{table:120mis}. One critical point to 
 \begin{table}
 \begin{center}
 \begin{tabular}{lllllllllll}
-\hline   k &  \fixedexpress & \egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert  \\ \hline  
+\hline   k &  \fixedexpressS & \egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& \misminS& \uncertS  \\ \hline  
 3 & 0.39 &  0.76 & 0.75 & 0.72 & 0.79 & 0.61 &  0.80 &  0.77 &0.78 \\
 10 &  0.58 &   0.76 & 0.72 & 0.70 & 0.78 & 0.63 & 0.79 & 0.79 &   0.79\\
 20 & 0.68 & 0.72 & 0.76 & 0.67 & 0.76 &  0.63 & 0.82 & 0.84 &    0.85 \\ 
@@ -777,7 +811,7 @@ The advantages seen in the 120-item results are improved upon in the results wit
 \begin{table}
 \begin{center}
 \begin{tabular}{llllllllll}
-\hline   k &  \fixedexpress & \egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert  \\ \hline  3 & 0.90 & 0.97 &  0.97 &  0.97 & 0.97 & 0.97 &  0.96 & 0.94 &  0.94 \\  10 & 0.87 & 0.90 & 0.91 &  0.93 & 0.91 & 0.91 & 0.91 & 0.91 &  0.92  \end{tabular}
+\hline   k &  \fixedexpressS & \egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& \misminS& \uncertS  \\ \hline  3 & 0.90 & 0.97 &  0.97 &  0.97 & 0.97 & 0.97 &  0.96 & 0.94 &  0.94 \\  10 & 0.87 & 0.90 & 0.91 &  0.93 & 0.91 & 0.91 & 0.91 & 0.91 &  0.92  \end{tabular}
 \end{center}
 \caption{Top k Hit Rate for Various Algorithms at the 260th Respondent for the 40 item data set}
 \label{table:40at260}
@@ -786,7 +820,7 @@ The advantages seen in the 120-item results are improved upon in the results wit
 \begin{table}
 \begin{center}
 \begin{tabular}{llllllllll}
-\hline   k &  \fixedexpress & \egreedy&\egreedythres&\ts&\edts&\tsthres&\edtsthres& \mismin& \uncert \\ \hline    
+\hline   k &  \fixedexpressS & \egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& \misminS& \uncertS \\ \hline    
 3 & 0.93 & 0.99 & 0.99 & 0.99 & 0.99 & 0.98 & 0.98 & 0.98 &  0.99 \\  10 & 0.90 &   0.92 &  0.93  & 0.94 & 0.94 & 0.93 &    0.92 & 0.93 &  0.93 \end{tabular}
 \end{center}
 \caption{Top k Hit Rate for Various Algorithms at the 500th Respondent for the 40 item data set}
@@ -797,42 +831,60 @@ Our adaptive models have great advantage over fixed designs for very large numbe
 By reducing the number of items to 40, the Express MaxDiff design can now show each item to every other respondent on average, which is much more than in larger item cases.
 Nevertheless, our results for Adaptive MaxDiff are still better than traditional MaxDiff.
 
-\subsection{Simulated data sets}
+\subsection{Simulated data set}
 \begin{table}
 \begin{center}
 \begin{tabular}{llllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline    10 &   0.212 &   	0.232 &   0.220 &   0.260 & 0.236 & 0.228 & 0.244 &    0.220 &   	0.244 \\  20 &  0.337 & 0.343 & 0.349 & 0.319 & 0.335 & 0.340 &  0.348 & 0.337 & 0.349 \end{tabular}
+\hline   k &  \fixedexpressS & \egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& \misminS& \uncertS \\\hline  10 & 0.77 &   0.88 & 0.88  & 0.87&0.89 & 	0.88&0.89 & 0.89 &  0.88 \\  20 &  0.87 &  0.86 &   0.92  & 0.88&0.90 &  	0.93&0.94&  0.93 &  0.93 \end{tabular}
 \end{center}
-\caption{Top k Hit Rate for Various Algorithms at the 260th Respondent for the uncorrelated data set}
-\label{table:bad260}
-\end{table}
-\begin{table}
-\begin{center}
-\begin{tabular}{llllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline    10 &  0.248 &   0.324	&0.308&	0.344 &0.318 & 0.268 & 	0.332	&0.296 &   0.320 \\  20 & 0.363	&0.399&	0.412& 	0.394 & 0.377&0.402 &  0.410&0.401 &   0.428 \end{tabular}
-\end{center}
-\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent for the uncorrelated data set}
-\label{table:bad500}
-\end{table}
-\begin{table}
-\begin{center}
-\begin{tabular}{llllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline  10 & 0.772 &   0.878 & 0.884 & 0.888 & 0.870&0.892 & 	0.882&0.892 &   0.878 \\  20 &  0.874 &  0.862 &   0.922 &  0.929 & 0.875&0.904 &  	0.925&0.935 &  0.933 \end{tabular}
-\end{center}
-\caption{Top k Hit Rate for Various Algorithms at the 260th Respondent for the correlated data set}
+\caption{Top k Hit Rate for Various Algorithms at the 260th Respondent for the simulated data set}
 \label{table:nice260}
 \end{table}
 \begin{table}
 \begin{center}
 \begin{tabular}{llllllllll}
-\hline   k &  fixed\_express &  greedy &  greedythres &  mismin &    TS &  TSe4 &  TSregthres &  TSthres &  uncert \\\hline    10 & 0.846&0.922&0.924&0.932 & 	0.930&0.938 &   0.916&0.940 &   0.934 \\  20 & 0.902&0.895&0.954& 0.957& 0.896&0.927 & 0.947&0.961 & 0.963 
+\hline   k &  \fixedexpressS & \egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& \misminS& \uncertS  \\\hline    10 & 0.85&0.92&0.92 & 0.93&0.94 & 0.92&0.94&0.93 &   0.93 \\  20 & 0.90&0.90&0.95& 0.90 &0.93 & 0.95&0.96 &0.96& 0.96 
 \end{tabular}
 \end{center}
-\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent for the correlated data set}
+\caption{Top k Hit Rate for Various Algorithms at the 500th Respondent for the simulated data set}
 \label{table:nice500}
 \end{table}
-We created two types of simulated preferences to see if these results would generalize to other data sets. The first, labeled the uncorrelated data set, each respondents preference utility for 100 items are sampled from a uniform distribution. So each respondent's preferences are uncorrelated with every other respondent (the worst possible environment). We take the top $k$ highest mean preference scores across the respondents to be the top $k$ true items. The results are in tables \ref{table:bad260} and \ref{table:bad500}.\\
-The second, labeled the correlated data set, we sample a $\theta_i$ from a uniform distribution for $i=1,\ldots,100$. Then each respondent preference utility is sampled from a normal distribution with mean $\theta_i$ and variance 1. The rankings for each respondent are highly correlated with each other. Once again we take the top $k$ highest mean preference scores across the respondents to be the top $k$ true items. The results are in tables \ref{table:good260} and \ref{table:good500}.\\ The take away is that our previous results generalize to other data sets.
+
+As a nice baseline, we sample a $\theta_i$ from a uniform distribution for $i=1,\ldots,100$. Then each respondent preference utility is sampled from a normal distribution with mean $\theta_i$ and variance 1. The rankings for each respondent are highly correlated with each other. Once again we take the top $k$ highest mean preference scores across the respondents to be the top $k$ true items. The results are in tables \ref{table:nice260} and \ref{table:nice500}.\\ The take away is that our previous results generalize to other data sets.
+
+\subsection{Alternate data set}
+\begin{table}
+\caption{Top k Hit Rate for Various Algorithms after the {250th, 500th} Respondent with 86 items from the Skim group data set.
+ }
+\label{table:skim}
+\begin{center}
+\begin{tabular}{llllllllll}
+\hline 
+\hline
+\multicolumn{10}{l}{(a) After 250 respondents}\\
+k &  \fixedexpressS&\egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& \misminS& \uncertS \\ \hline
+  3 & 0.90 &   1.00 &  NA &   0.97 & 0.99 & NA & NA &    0.98 &   0.97 \\
+  10 &  0.88 &   0.90 & 0.92 &   0.91 & 0.92 & 0.89 & 0.91 &    0.93 &   0.92 \\
+  20 & 0.91 & 0.87 &  0.96 & 0.86 & 0.91 & 0.92 & 0.96 &  0.96 &   0.92 \\  
+  40 &  0.92 &   NA &  0.95 &  NA & NA & 0.94 & 0.95 &  0.96 &   0.95 \\
+\hline
+\hline
+\end{tabular}
+\begin{tabular}{llllllllll}
+\multicolumn{10}{l}{(b) After 500 respondents}\\
+k &  \fixedexpressS&\egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& \misminS& \uncertS  \\
+\hline
+   3 & 0.94 & 1.00 & NA & 0.98 & 1.00 & NA & NA & 1.00 &   0.99 \\
+  10 &  0.91 &   0.92 &  0.93 &   0.92 & 0.93 & 0.90 & 0.93 &    0.93 &   0.94 \\  
+  20 &  0.94 &   0.90 & 0.98 &  0.89 & 0.94 & 0.94 & 0.98 &  0.98 &   0.98 \\ 
+  40 &  0.95 &   NA & 0.97 & NA & NA & 0.96 &  0.97 & 0.97 & 0.97 \\
+\hline 
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+We use data from a study of claims for cleaning products from skim group. The simulation parameters are the same as the Proctor and Gamble study with the exception that we took the batch size to be 10 opposed to 20. The results can be found in table \ref{table:skim}.
+
 
 \section{Alternative Performance Measure: Using True Utility as a Generalization of Hit-Rate}
 \begin{table}
