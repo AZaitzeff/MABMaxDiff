@@ -156,6 +156,7 @@ Best arm identification.
 
 We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. We show our approach outperforms current methods, but we illustrate under which conditions it performs even better; it exhibits even greater improvement for larger problems. 
 
+
 %\textbf{Outdated Abstract, see Introduction.} For large MaxDiff studies whose main purpose is identifying the top few items for the sample, a new adaptive approach called Adaptive MaxDiff may increase efficiency fourfold over standard non-adaptive MaxDiff.  Adaptive MaxDiff leverages information from previous respondents via aggregate logit and Thompson Sampling so later respondents receive designs that oversample the topmost items that are most likely to turn out to be the overall winners. Our approach applies beyond MaxDiff problems to a more general set of bandit problems. We propose a flexible algorithm, $\epsilon$-Diffuse Thompson Sampling (TS), which nests traditional TS. Blending ideas from $\epsilon$-greedy in machine learning and Bayesian approaches, this is a more robust version of TS, which a manager can control with tuning parameters. For instance, being less risk averse, one may drawn more items from diffuse posteriors, making the algorithm robust to changing environments, even extreme non-stationarity. We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. Beyond showing our approach outperforms better than current methods, we show under which conditions it performs even better than (larger problems) or just as well as existing methods (smaller problems).
 
 }%
@@ -190,6 +191,20 @@ One common managerial decision driving such data collection is to select which a
 	\item \emph{Marketing communications.} Consumer packaged goods companies use marketing research, after the products are developed, to decide which consumer benefits they should emphasize. Out of hundreds of potential benefits, they have to select a small number of them for messages.
 	\item \emph{Product offerings.} Retailers are increasingly able to respond to demand and consumer preferences quickly by changing their available product offerings. In anticipation of a new fashion season, an ecommerce retailer may survey customers to identify most preferred styles and lines, and then select the range of items to make available for purchase. 
 \end{enumerate} 
+
+
+P\&G and GM have a common problem: they have 100s of ideas, 
+have a new product, but 100s of new benefits. 
+Classic Idea Screening. Active learning / bandit w Adaptive MaxDiff. 
+
+New kind of problem. 
+This is how many people are trying to solve this problem. 
+
+This isn't conjoint. 
+This needs to be adaptive.N
+This would cost much more money. 
+
+
 
 These settings have a common challenge: identify the best set of items out of many.  This problem setting is distinct from closely related problems but existing methods do not suffice due to scale and objective. 
 
