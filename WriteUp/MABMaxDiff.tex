@@ -7,8 +7,8 @@
 \documentclass[nonblindrev]{informs3}
 %\documentclass[a4paper,12pt]{article}
 
-%%\OneAndAHalfSpacedXI % current default line spacing
-\OneAndAHalfSpacedXII
+\OneAndAHalfSpacedXI % current default line spacing
+%\OneAndAHalfSpacedXII
 %%\DoubleSpacedXII
 %%\DoubleSpacedXI
 
@@ -206,43 +206,48 @@ We implement the methods using MaxDiff survey from a large consumer packaged goo
 % Text of your paper here
 \section{Introduction}
 
-Firms collect more customer data than ever. While much of that is behavioral data (e.g., purchases, clicks, visits, etc.), market research still relies on surveys (e.g., preference measurement) at an increasingly large scale. And as firms push preference measurement methods into a larger scale, market researchers seek to collect data more efficiently -- more information gained per respondent used.  
+% Firms collect more customer data than ever. While much of that is behavioral data (e.g., purchases, clicks, visits, etc.), market research still relies on surveys (e.g., preference measurement) at an increasingly large scale. And 
 
-One common managerial decision driving such data collection is to select which are most preferred items -- such as, ideas, attributes, messages -- among a large set of hundreds of possible items. For instance, consider these illustrative managerial decisions: 
-\begin{enumerate}
-	\item \emph{Idea screening.} Technology companies have long invited consumers to provide ideas for new products and improvements. Automotive companies Complex products, such as, self-driving cars are may contain hundreds of novel features and are sold with different add-ons, which are bundles of features. So consumer surveys could reveal how the best features are preferred, to help the firm decide which features can be included in different models. 
-	\item \emph{Marketing communications.} Consumer packaged goods companies use marketing research, after the products are developed, to decide which consumer benefits they should emphasize. Out of hundreds of potential benefits, they have to select a small number of them for messages.
-	\item \emph{Product offerings.} Retailers are increasingly able to respond to demand and consumer preferences quickly by changing their available product offerings. In anticipation of a new fashion season, an ecommerce retailer may survey customers to identify most preferred styles and lines, and then select the range of items to make available for purchase. 
-\end{enumerate} 
+Market researchers in firms, such as Proctor\&Gamble and General Motors, have a common problem. They consider hundreds of possible alternatives, such as, new product features, consumer-generated ideas, or marketing message appeals, but they need to learn which ones their consumers prefer most. As firms push preference measurement methods into a larger scale, with many more such \emph{items}, market researchers seek to collect data more efficiently, seeking to optimize the information gained per dollar spent on respondents. For instance, consider these illustrative managerial decisions: 
 
+	\paragraph{Idea screening.} Technology companies have long invited consumers to provide ideas for new products and improvements. Automotive companies pursue particularly complex products, such as, self-driving cars, which are sold with different bundles of hundreds of possible features. Consumer research surveys reveal which are the most preferred features, to help the firm decide what should included in different models. 
 
-P\&G and GM have a common problem: they have 100s of ideas, 
-have a new product, but 100s of new benefits. 
-Classic Idea Screening. Active learning / bandit w Adaptive MaxDiff. 
+	\paragraph{Marketing communications.} Consumer packaged goods companies use marketing research, after the products are developed, to decide which consumer benefits they should emphasize. Out of hundreds of potential benefits, they have to select a small number of them for marketing campaign messages.
 
-New kind of problem. 
-This is how many people are trying to solve this problem. 
-
-This isn't conjoint. 
-This needs to be adaptive.N
-This would cost much more money. 
+	\paragraph{Product offerings.} Retailers are increasingly able to respond to demand and consumer preferences quickly by changing their available product offerings. In anticipation of a new fashion season, an ecommerce retailer may survey customers to identify most preferred styles and lines, and then select the range of items to make available for purchase. 
 
 
+% Quick outline:
+% P&G and GM have a common problem. 
+% Classic Idea Screening. Active learning / bandit w Adaptive MaxDiff. 
+% New kind of problem. 
+% This is how many people are trying to solve this problem. 
+% 
+% This isn't conjoint. 
+% This needs to be adaptive.
+% This would cost much more money. 
 
-These settings have a common challenge: identify the best set of items out of many.  This problem setting is distinct from closely related problems but existing methods do not suffice due to scale and objective. 
 
-Typical choice experiment methods, such as conjoint, are infeasible, too costly, or simply inefficient at this scale. Instead, researchers often use pretest or screening phases to select a smaller set, and use that for the main analysis. Yet there is no systematic method to smoothly transition out of that screening phase, even when the ultimate objective is learning precisely the set of most preferred items. 
+These settings have a common challenge: identify the best set of items out of many.  This challenge is distinct from closely related problems, and the existing methods do not suffice due to scale and objective.  Typical choice experiment methods are infeasible, too costly, or simply inefficient at this scale. 
 
-We focus on settings where the objective is identifying a top set of items as quickly, cheaply, and accurately as possible. Identifying a top set is not the same objective as estimating all parameters as precisely as possible, as in conjoint. In this work, we illustrate how those objectives diverge. So even with improving computation and larger budgets, this problem has a distinct objective and demands a tailored methods. 
+Consumer researchers have recently turned to measurement methods such as, Maximum Difference Scaling (MaxDiff). As of 2016, MaxDiff is used by 70\% of all clients of Sawtooth Research, one of the  largest marketing research software providers. Recent trends suggest that market research teams are pushing MaxDiff to its limits, attempting to use it to obtain obtaining preference or importance scores many more items (hundreds) than it was initially designed for (dozens).
 
-Choice experiment methods for preference measurement continue to be among the most widely adopted market research methods. Choice-based conjoint (CBC) analysis and maximum difference (MaxDiff), for instance, are common choice tasks that continue to be used in both academic and industry settings.
+Current implementations of MaxDiff do not scale to this size, and would require many thousands of respondents, making the approach infeasible, inefficient, and costly. At best, marketing researchers often use pretest or screening phases to select a smaller set, which they then use for the main analysis. This approach can be inaccurate, not getting enough information to correctly identify (and rank) the high-scoring items, or inefficient, spending too long on low-scoring items. Yet there is no systematic method to smoothly transition out of that screening phase, even when the ultimate objective is learning precisely the set of most preferred items. 
 
-Methodological advances, such as adaptive conjoint, have long sought to improve efficiency, obtaining more information from fewer respondents. Those methods use past responses to select the next question to improve precision of all parameters. For instance, adaptive choice-based conjoint (ACBC) methods present respondents with questions to reduce the uncertainty where it is greatest. Which is the next question, or set of product profiles, to best reduce overall uncertainty?
+
+We focus on settings where the objective is identifying a relatively small top set out of a large number items, as accurately and cheaply, as possible. Identifying a top set is not the same objective as estimating all parameters as precisely as possible. In this work, we illustrate how those objectives diverge. So even with improving computation and larger budgets, this problem has a distinct objective and demands a tailored methods. 
+
+
+%``Although MaxDiff shares much in common with conjoint analysis, it is easier to use and applicable to a wider variety of research situations. MaxDiff is also known as `best-worst scaling.' ''
+
+MaxDiff is not conjoint. Choice-based conjoint (CBC) analysis and maximum difference (MaxDiff) are the two the most widely adopted choice experiment methods for preference measurement in both academic and industry research.
+
+Methodological advances, such as adaptive choice-based conjoint (ACBC), have long sought to improve efficiency, obtaining more information from fewer respondents. Those methods use past responses to select the next question to improve precision of all parameters. ACBC methods present respondents with questions to reduce the uncertainty where it is greatest. Which is the next question, or set of product profiles, to best reduce overall uncertainty?
+
 
 But the market researcher's ultimate goal is typically not to only obtain precise estimates of utility partworths of every single alternative or attribute level. If their goal is to identify the most preferred items, why do they need to spend resources (questions, respondents, time) to learn how precisely poor the least-preferred item is compared to the second-least preferred item? 
 
 With that objective in mind, we propose new adaptive choice experiment methods. Our approach departs from traditional adaptive survey methods like adaptive conjoint analysis (ACA): they aim to improve the precision of each of the parameters, but we aim to identify the most preferred items, and as a by product, we estimate those best items more precisely than less preferred items. 
-
 
 The need to optimize this process is greater for large-scale problems with extremely large number of possible attribute levels or items.  In settings with hundreds of items, there is greater opportunity cost of focusing on items that are not important, calling for a need to improve efficiency.
 
@@ -266,6 +271,45 @@ Transition from edts to active learning by talking about adaptive conjoint.  pol
 And MaxError is natural too as it links to the actual decision.}
 
 
+What are the methods actually new to marketing here?
+[1] combining MaxDiff and TS, when either alone is not even well known 
+
+[2] ``diffuse TS'' (ed-TS) 
+
+[3] bandit vs best-k id distinction 
+
+[4] threshold for distinction between learning Ordered v Unordered sets 
+
+[5] weighted likelihood Bayes bootstrap, hardly hardly used in mktg 
+
+[6] MAB stopping rules, only mentioned in Scott 2010 rejoinder 
+
+[7] updating Max Misclass and Max Uncertainty, with perturbations.
+
+
+First 150 respondents, the top 3 item-utilites are replaced by some low utility value, taken from some lower quantile. For respondent 10, it was 5\%-tile (bottom 5th), for respondent 100 it was from 50\%-tile, 100 from 75\% (top 25).
+
+First 50 respondents, replace utility of true top 3
+with bottom 25\% of item-utilities for that respondent. 
+
+
+Computational comparison:
+
+Bayes Boot: sample data 2 per resp, estimate 2 per resp
+
+MLE asymtot: estimate 1 per batch, sample params 2 per resp
+
+
+How doing MissMin Differs from Toubia and Flores: 
+- independence assumption, each one, beta-binomial counting. integral of beta distribution, closed-form. 
+- their problem is show a person an item, does a person say yes or no?
+- we're doing this on utilities (not percent someone likes it)
+- we're doing it jointly, with posterior draws. 
+- both of us are add perturbation noise.
+- both of us are using the mean of the k-th item. midpoint( kth k+1th )
+
+Using stopping rules is more computationally intensive. 
+When you're checking for stopping rules. We're using Percent True Utility because that's what Potential Value Remaining is... and you have to use say 100 samples.
 
 
 \section{Framework and literature}
@@ -297,7 +341,7 @@ We also draw on ideas in closely related area, active learning. Recent theoretic
 \end{figure}
 MaxDiff, Maximum Difference Scaling, is a preference measurement and item scaling method.  In a MaxDiff questionnaire the researcher asks respondents for their best and worst item out of a set, then repeats this choice task. Initially proposed by~\cite{louviere1991best}, MaxDiff was first released as a software system in 2004 by Sawtooth Software, a top marketing research software company in North America. Since its release its popularity increased steadily with penetration of the technique now reaching 68\% of all Sawtooth users in 2015 (Figure \ref{fig:pop}). 
 
-MaxDiff offers benefits over alternative methods. MaxDiff provides more discrimination among items and between respondents on the items than traditional rating scales~\cite{cohen2004s}. Besides enhanced discrimination, it avoids the scale use bias so problematic with traditional ratings scales (CITE).
+MaxDiff offers benefits over alternative methods. MaxDiff provides more discrimination among items and between respondents on the items than traditional rating scales~\cite{cohen2004s}. Besides enhanced discrimination, it avoids the scale use bias so problematic with traditional ratings scales (CITE Louvier, Keith Chrzan work).
 
 MaxDiff, while it is a distinct type of choice experiment, is closely related to conjoint. A key difference is that it involves both best and worst choices instead of only one. But in its most common form, MaxDiff may be thought of as a one-attribute CBC study with many levels.  
 
@@ -331,7 +375,7 @@ The traditional MaxDiff design approach shows each item an equal number of times
 Thompson Sampling makes a new draw from the vector of item preferences using the estimated population preferences (aggregate logit scores) plus normally distributed error, with standard deviations equal to the standard errors of the logit weights.  As the sample size increases, the standard errors of course tighten.\\
 \begin{figure}[!ht]
 \caption{Respondent-by-item counts}
-\includegraphics[width=1\textwidth]{plots/3dotplot.pdf}
+\includegraphics[width=1\textwidth]{plots/3dotplot-lowres.png}
 \label{fig:dots}
 \end{figure}
 To understand the logic of the algorithm, consider a snapshot in time during the data collection. Imagine we have just collected data from 100 respondents, and we decide to summarize their preferences (for each of 100+ items) with aggregate logit.  Then, to generate a MaxDiff task for the 101st respondent, we could generate a draw from the population preferences leveraging the population means and normal errors with standard deviations equal to the empirically estimated standard errors.  We then can sort that newly sampled vector of preference scores from the most to the least preferred item.  The five most preferred items might be taken into the first task to show to the 101st respondent.  The process (with or without updating the logit weights after recording the first task's answer) could be repeated to choose the five items to show in the second task for the 101st respondent, etc.  To reduce the load on the server managing the data collection, perhaps only after every 20th respondent has completed the survey, the logit weights and standard errors would be updated.\\
@@ -516,7 +560,7 @@ Figure \ref{fig:illustrating_edts} illustrates how \edts differs from \ts.
 For $\epsilon$-$\delta$ case, its density does not become a spike as quickly as it does without $\epsilon$-$\delta$ . This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and the smaller the $\delta$, the more exploration and slower the algorithm settles on its set of items. 
 
 \begin{figure}[!ht]
-\caption{Respondent-by-item counts}
+\caption{Selecting your $\epsilon$-$\delta$ values. }
 \includegraphics[width=1\textwidth]{plots/hr120v20k10ed.pdf}
 \label{fig:ed}
 \end{figure}
@@ -595,7 +639,7 @@ For example, after the first 200 respondents, the Fixed Express Design obtains a
 Figure \ref{fig:effects_epsilon_delta} shows the way the $\epsilon$ and $\delta$ affect the performance. 
 
 \begin{figure}
-\caption{How \edts varies with $\epsilon$ and $\delta$. \eric{Show typical plot of hit rate over respondents. Show many \edts versions: eps = 1/2 (left) and eps = 1/4 (right), with multiple lines in each plot, delta = 1/2 (one color) and delta = 1/4 (another color). And in each of the plots also show regular \ts (eps=0,delta=1). The plots below are just placeholders.} }
+\caption{How \edts varies with $\epsilon$ and $\delta$. \eric{Show typical plot of hit rate over respondents. Show many \edts versions: eps = 1/2 (left) and eps = 1/4 (right), with multiple lines in each plot, delta = 1/2 (one color) and delta = 1/4 (another color). And in each of the plots also show regular \ts (eps=0,delta=1).} \eric{Add in Fixed Express, (eps=1,delta=0). } }
 \label{fig:effects_epsilon_delta}
  	\begin{center}
     \subfloat[$\epsilon=1/2$]{{\includegraphics[width=.4\textwidth]{plots/hr120v20k10e2.pdf} }}%
