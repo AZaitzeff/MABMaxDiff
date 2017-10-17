@@ -271,15 +271,46 @@ Transition from edts to active learning by talking about adaptive conjoint.  pol
 And MaxError is natural too as it links to the actual decision.}
 
 
-\eric{ What are the methods actually new to marketing here?
-[1] combining MaxDiff and TS, when either alone is not even well known\\
-[2] ``diffuse TS'' (ed-TS) \\
-[3] bandit vs best-k id distinction \\
-[4] threshold for distinction between learning Ordered v Unordered sets \\
-[5] weighted likelihood Bayes bootstrap, hardly hardly used in mktg \\
-[6] MAB stopping rules, only mentioned in Scott 2010 rejoinder \\
+What are the methods actually new to marketing here?
+[1] combining MaxDiff and TS, when either alone is not even well known 
+
+[2] ``diffuse TS'' (ed-TS) 
+
+[3] bandit vs best-k id distinction 
+
+[4] threshold for distinction between learning Ordered v Unordered sets 
+
+[5] weighted likelihood Bayes bootstrap, hardly hardly used in mktg 
+
+[6] MAB stopping rules, only mentioned in Scott 2010 rejoinder 
+
 [7] updating Max Misclass and Max Uncertainty, with perturbations.
-}
+
+
+First 150 respondents, the top 3 item-utilites are replaced by some low utility value, taken from some lower quantile. For respondent 10, it was 5\%-tile (bottom 5th), for respondent 100 it was from 50\%-tile, 100 from 75\% (top 25).
+
+First 50 respondents, replace utility of true top 3
+with bottom 25\% of item-utilities for that respondent. 
+
+
+Computational comparison:
+
+Bayes Boot: sample data 2 per resp, estimate 2 per resp
+
+MLE asymtot: estimate 1 per batch, sample params 2 per resp
+
+
+How doing MissMin Differs from Toubia and Flores: 
+- independence assumption, each one, beta-binomial counting. integral of beta distribution, closed-form. 
+- their problem is show a person an item, does a person say yes or no?
+- we're doing this on utilities (not percent someone likes it)
+- we're doing it jointly, with posterior draws. 
+- both of us are add perturbation noise.
+- both of us are using the mean of the k-th item. midpoint( kth k+1th )
+
+Using stopping rules is more computationally intensive. 
+When you're checking for stopping rules. We're using Percent True Utility because that's what Potential Value Remaining is... and you have to use say 100 samples.
+
 
 \section{Framework and literature}
 
@@ -529,7 +560,7 @@ Figure \ref{fig:illustrating_edts} illustrates how \edts differs from \ts.
 For $\epsilon$-$\delta$ case, its density does not become a spike as quickly as it does without $\epsilon$-$\delta$ . This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and the smaller the $\delta$, the more exploration and slower the algorithm settles on its set of items. 
 
 \begin{figure}[!ht]
-\caption{Respondent-by-item counts}
+\caption{Selecting your $\epsilon$-$\delta$ values. }
 \includegraphics[width=1\textwidth]{plots/hr120v20k10ed.pdf}
 \label{fig:ed}
 \end{figure}
@@ -608,7 +639,7 @@ For example, after the first 200 respondents, the Fixed Express Design obtains a
 Figure \ref{fig:effects_epsilon_delta} shows the way the $\epsilon$ and $\delta$ affect the performance. 
 
 \begin{figure}
-\caption{How \edts varies with $\epsilon$ and $\delta$. \eric{Show typical plot of hit rate over respondents. Show many \edts versions: eps = 1/2 (left) and eps = 1/4 (right), with multiple lines in each plot, delta = 1/2 (one color) and delta = 1/4 (another color). And in each of the plots also show regular \ts (eps=0,delta=1). The plots below are just placeholders.} }
+\caption{How \edts varies with $\epsilon$ and $\delta$. \eric{Show typical plot of hit rate over respondents. Show many \edts versions: eps = 1/2 (left) and eps = 1/4 (right), with multiple lines in each plot, delta = 1/2 (one color) and delta = 1/4 (another color). And in each of the plots also show regular \ts (eps=0,delta=1).} \eric{Add in Fixed Express, (eps=1,delta=0). } }
 \label{fig:effects_epsilon_delta}
  	\begin{center}
     \subfloat[$\epsilon=1/2$]{{\includegraphics[width=.4\textwidth]{plots/hr120v20k10e2.pdf} }}%
