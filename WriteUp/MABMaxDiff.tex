@@ -1010,7 +1010,9 @@ Draw 3 &4.81 & 5.23 & 5.04 &  3.96 &  4.17 & 4.37 &  3.58 & 2.99 \\
 As an example see table \ref{table:data} for draws of exponential weighted utility of a single item. I put the columns in current rank order and only show the top 8 for convenience. Then $S$ is the set containing what is currently ranked as the first, second and third ranked item. Then $\mu^1_{S}=4.02+3.50+5.08=12.6$ and $\mu_{S^*}^{1}=5.08+4.41+4.16=13.65$ So $\Delta^{1}=\frac{13.65-12.6}{12.6}=.083$. Likewise $\Delta^{2}=\frac{12.6-12.39}{12.39}=.017$ and $\Delta^{3}=\frac{15.08-15.08}{15.08}=0$ (Note $\Delta^m=0$ when the $S$ contains the top utilities). The histogram of $\Delta$ after 100 iterations and 220 iterations is shown in figure \ref{fig:data}. \\
 The `potential value remaining' (PVR) is the 95 quantile of the distribution $\Delta$ see figure \ref{fig:data}. After 100 iterations the PVR was 0.092. Scott's way to interpret this number is ``we do not know what the utility of $S$ is, but whatever it is, a different set might beat it by as much as 9.2\%.''\\
 \begin{figure}
-\caption{Average stopping time with different thresholds \alexander{Figure out what I would like to do with this section}}
+\caption{Average stopping time with different thresholds \alexander{Replace this plot with stophisted02.pdf
+stophistprob02.pdf and
+stophistTSgr02.pdf}
 \includegraphics[width=1\textwidth]{plots/stoppingtimes.pdf}
 \label{fig:st}
 \end{figure}
