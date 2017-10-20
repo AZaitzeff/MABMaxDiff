@@ -820,7 +820,10 @@ Therefore, why do the threshold-based policies, \edtsthres, \uncert and \mismin,
 \section{Robustness tests} \label{sec:robust}
 
 \subsection{Misinformed Starts (When Early Responders Are Horribly Non-Representative)}
-
+\alexander{Look at hr120v20k3moremis1top10.pdf
+hr120v20k3moremis2top10.pdf
+hr120v20k3moremis2top5.pdf
+hr120v20k3moremis1top5.pdf and see if you want to add in those results (for the 1st 150 respondants percentile of top 3 items is (resp number)/2)}
 What would happen if the first 50 respondents we interviewed were actually not very representative of the average preferences for the sample?  What if we tried to throw Adaptive MaxDiff off the scent?  In fact, let's consider a worst-case scenario: the first responders actually believe \textit{nearly the opposite} from the rest of the sample\\
 For the simulations reported in table \ref{table:120mis}, the first 50 robotic respondents mimicked randomly drawn human vectors of utilities as before but were diabolically manipulated to behave as if the top 3 true items were actually nearly the worst in preference (we set the utilities for the top 3 true items for the population equal to the bottom 25th percentile utility item for each respondent).  After this misinformed start, the remaining respondents represented well-behaved respondents drawn using bootstrap sampling as before, with true individual-level preferences as given in the original dataset donated by Procter \& Gamble.\\
 
@@ -1012,7 +1015,7 @@ The `potential value remaining' (PVR) is the 95 quantile of the distribution $\D
 \begin{figure}
 \caption{Average stopping time with different thresholds \alexander{Replace this plot with stophisted02.pdf
 stophistprob02.pdf and
-stophistTSgr02.pdf}
+stophistTSgr02.pdf}}
 \includegraphics[width=1\textwidth]{plots/stoppingtimes.pdf}
 \label{fig:st}
 \end{figure}
