@@ -560,7 +560,7 @@ Figure \ref{fig:illustrating_edts} illustrates how \edts differs from \ts.
 For $\epsilon$-$\delta$ case, its density does not become a spike as quickly as it does without $\epsilon$-$\delta$ . This speed is controlled through two parameters: epsilon, the proportion of items sampled from the diffuse distribution, and $\delta$, factor increasing variance for the diffuse distribution.  The larger the $\epsilon$ and the smaller the $\delta$, the more exploration and slower the algorithm settles on its set of items. 
 
 \begin{figure}[!ht]
-\caption{Selecting your $\epsilon$-$\delta$ values. }
+\caption{Selecting your $\epsilon$-$\delta$ values. \alexander{get rid of the plot or put it somewhere else} }
 \includegraphics[width=1\textwidth]{plots/hr120v20k10ed.pdf}
 \label{fig:ed}
 \end{figure}
@@ -639,7 +639,7 @@ For example, after the first 200 respondents, the Fixed Express Design obtains a
 Figure \ref{fig:effects_epsilon_delta} shows the way the $\epsilon$ and $\delta$ affect the performance. 
 
 \begin{figure}
-\caption{How \edts varies with $\epsilon$ and $\delta$. \eric{Show typical plot of hit rate over respondents. Show many \edts versions: eps = 1/2 (left) and eps = 1/4 (right), with multiple lines in each plot, delta = 1/2 (one color) and delta = 1/4 (another color). And in each of the plots also show regular \ts (eps=0,delta=1).} \eric{Add in Fixed Express, (eps=1,delta=0). } }
+\caption{How \edts varies with $\epsilon$ and $\delta$. \eric{Show typical plot of hit rate over respondents. Show many \edts versions: eps = 1/2 (left) and eps = 1/4 (right), with multiple lines in each plot, delta = 1/2 (one color) and delta = 1/4 (another color). And in each of the plots also show regular \ts (eps=0,delta=1).} \eric{Add in Fixed Express, (eps=1,delta=0). } \alexander{done}}
 \label{fig:effects_epsilon_delta}
  	\begin{center}
     \subfloat[$\epsilon=1/2$]{{\includegraphics[width=.4\textwidth]{plots/hr120v20k10e2.pdf} }}%
