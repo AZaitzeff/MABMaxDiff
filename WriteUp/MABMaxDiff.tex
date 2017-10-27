@@ -115,6 +115,43 @@
 \begin{document}
 %%%%%%%%%%%%%%%%
 
+% Cover Page
+
+\begin{center}
+~ \\
+\end{center}
+
+\vspace{2in}
+
+\begin{center}
+\textbf{Bandit Adaptive MaxDiff: \\ 
+Best-Arm Identification for Large-Scale Idea Screening} \\
+
+PRELIMINARY! DO NOT DISTRIBUTE \\
+\end{center}
+
+
+
+\vspace{1in}
+
+\begin{center}
+{Eric Schwartz,}
+\emph{University of Michigan, {ericmsch@umich.edu} } \\
+{Alexander Zaitzeff,}
+\emph{University of Michigan} \\
+{Kenneth Fairchild,} 
+\emph{Sawtooth Software} \\
+{Bryan Orme,}
+\emph{Sawtooth Software} 
+\end{center}
+
+\vspace{1in}
+
+\begin{center}
+%Date
+October 27, 2017
+\end{center}
+
 % Outcomment only when entries are known. Otherwise leave as is and 
 %   default values will be used.
 %\setcounter{page}{1}
@@ -141,46 +178,41 @@
 % Title or shortened title suitable for running heads. Sample:
 % \RUNTITLE{}
 % Enter the (shortened) title:
-\RUNTITLE{Active Learning for MaxDiff and Idea Screening PRELIMINARY! PLEASE DO NOT DISTRIBUTE}
+\RUNTITLE{Bandit Adaptive MaxDiff PRELIMINARY! PLEASE DO NOT DISTRIBUTE}
 
 % Full title. Sample:
 % \TITLE{Bundling Information Goods of Decreasing Value}
 % Enter the full title:
-\TITLE{Best Arm Identification and Active Learning for Choice Experiments: \\ Applications to Large-scale Adaptive MaxDiff \\
-and Idea Screening \\
+\TITLE{Bandit Adaptive MaxDiff: Best-Arm Identification for Large-Scale Idea Screening \\
 PRELIMINARY! DO NOT DISTRIBUTE
 }
+
+% Best-Arm Identification for Choice Experiments: \\ Applications to Large-Scale Adaptive MaxDiff \\
+% and Idea Screening \\
+
 
 % Block of authors and their affiliations starts here:
 % NOTE: Authors with same affiliation, if the order of authors allows, 
 %   should be entered in ONE field, separated by a comma. 
 %   \EMAIL field can be repeated if more than one author
 
-\ARTICLEAUTHORS{%
-\AUTHOR{Eric Schwartz}
-\AFF{University of Michigan, \EMAIL{ericmsch@umich.edu}, \URL{}}
-\AUTHOR{Alexander Zaitzeff}
-\AFF{University of Michigan, \EMAIL{azaitzef@umich.edu}, \URL{}}
-\AUTHOR{Kenneth Fairchild}
-\AFF{Sawtooth Software, \EMAIL{}, \URL{}}
-\AUTHOR{Bryan Orme}
-\AFF{Sawtooth Software, \EMAIL{}, \URL{}}
+% \ARTICLEAUTHORS{%
+% \AUTHOR{Eric Schwartz}
+% \AFF{University of Michigan, \EMAIL{ericmsch@umich.edu}, \URL{}}
+% \AUTHOR{Alexander Zaitzeff}
+% \AFF{University of Michigan, \EMAIL{azaitzef@umich.edu}, \URL{}}
+% \AUTHOR{Kenneth Fairchild}
+% \AFF{Sawtooth Software, \EMAIL{}, \URL{}}
+% \AUTHOR{Bryan Orme}
+% \AFF{Sawtooth Software, \EMAIL{}, \URL{}}
 
-Based on an earlier 2015 Sawtooth Conference Paper \\ with Kenneth Fairchild, Bryan Orme, Eric Schwartz.
-} % end of the block
-
+% % Based on an earlier 2015 Sawtooth Conference Paper \\ with Kenneth Fairchild, Bryan Orme, Eric Schwartz.
+% } % end of the block
 
 
 
 \ABSTRACT{% % Enter your abstract
-Marketing research often measure consumers' preferences in order to identify their most preferred items, such as product features, marketing messages, or innovations, among a large set of hundreds of candidates. Common techniques are idea screening and choice tasks, including conjoint and best-worst scaling (MaxDiff). .... \textbf{to be continued ... }
-
-Best arm identification.
-
-We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. We show our approach outperforms current methods, but we illustrate under which conditions it performs even better; it exhibits even greater improvement for larger problems. 
-
-
-%\textbf{Outdated Abstract, see Introduction.} For large MaxDiff studies whose main purpose is identifying the top few items for the sample, a new adaptive approach called Adaptive MaxDiff may increase efficiency fourfold over standard non-adaptive MaxDiff.  Adaptive MaxDiff leverages information from previous respondents via aggregate logit and Thompson Sampling so later respondents receive designs that oversample the topmost items that are most likely to turn out to be the overall winners. Our approach applies beyond MaxDiff problems to a more general set of bandit problems. We propose a flexible algorithm, $\epsilon$-Diffuse Thompson Sampling (TS), which nests traditional TS. Blending ideas from $\epsilon$-greedy in machine learning and Bayesian approaches, this is a more robust version of TS, which a manager can control with tuning parameters. For instance, being less risk averse, one may drawn more items from diffuse posteriors, making the algorithm robust to changing environments, even extreme non-stationarity. We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. Beyond showing our approach outperforms better than current methods, we show under which conditions it performs even better than (larger problems) or just as well as existing methods (smaller problems).
+Marketing research often measures consumers' preferences in order to identify their most preferred items among a set of candidates, such as product benefits, innovative features, or message appeals. Common techniques are idea screening and choice tasks, including conjoint analysis and maximum-difference (MaxDiff) scaling. These methods, however, are not built for large-scale problems, like identifying the best set of 30 items out of hundreds of alternatives, yet firms are increasingly seeking to do just that. For large MaxDiff studies whose main purpose is identifying the top few items for the respondent, we propose a new approach, Bandit Adaptive MaxDiff, which can increase efficiency four-fold over standard MaxDiff, by identifying the best items with fewer respondents. Our proposed solution leverages information from previous respondents, so later respondents receive designs that oversample the items that are most likely to turn out to be the in the overall top set. Instead of learning all preference parameters with equal precision, Bandit Adaptive MaxDiff more precisely estimates the parameters of most interest to the manager. We implement the methods empirically using MaxDiff survey results from Proctor \& Gamble, a large consumer packaged goods manufacturer.  Through a series of simulation experiments, we consider a wide range of benchmark algorithms to illustrate under what conditions the proposed approach reduces to existing methods and when it performs even better (i.e., for larger problems).  Our approach draws on both the classic multi-armed bandit literature, as well as the more recent work on best-k-arm identification problem. We introduce and test several new components to these algorithms, which can apply outside of our idea screening and preference measurement problem. We introduce researcher-chosen parameters to control robustness to a changing environment when using Thompson Sampling; we allow for the algorithms to specifically learn an unranked (vs. ranked) top set; and we evaluate a set of approximations to posterior sampling to allow for faster model updates.
 
 }%
 
@@ -188,7 +220,14 @@ We implement the methods using MaxDiff survey from a large consumer packaged goo
 % Fill in data.
 \KEYWORDS{idea screening, maximum-difference surveys, adaptive conjoint, active learning, multi-armed bandit, best-arm identification, Bayesian bootstrap, best-worst scaling, Thompson Sampling, uncertainty minimization}
 
+
+
+%\textbf{Outdated Abstract, see Introduction.} For large MaxDiff studies whose main purpose is identifying the top few items for the sample, a new adaptive approach called Adaptive MaxDiff may increase efficiency fourfold over standard non-adaptive MaxDiff.  Adaptive MaxDiff leverages information from previous respondents via aggregate logit and Thompson Sampling so later respondents receive designs that oversample the topmost items that are most likely to turn out to be the overall winners. Our approach applies beyond MaxDiff problems to a more general set of bandit problems. We propose a flexible algorithm, $\epsilon$-Diffuse Thompson Sampling (TS), which nests traditional TS. Blending ideas from $\epsilon$-greedy in machine learning and Bayesian approaches, this is a more robust version of TS, which a manager can control with tuning parameters. For instance, being less risk averse, one may drawn more items from diffuse posteriors, making the algorithm robust to changing environments, even extreme non-stationarity. We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. Beyond showing our approach outperforms better than current methods, we show under which conditions it performs even better than (larger problems) or just as well as existing methods (smaller problems).
+
 \maketitle
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Samples of sectioning (and labeling) in MKSC
@@ -217,22 +256,22 @@ Market researchers in firms, such as Proctor\&Gamble and General Motors, have a 
 	\paragraph{Product offerings.} Retailers are increasingly able to respond to demand and consumer preferences quickly by changing their available product offerings. In anticipation of a new fashion season, an ecommerce retailer may survey customers to identify most preferred styles and lines, and then select the range of items to make available for purchase. 
 
 
-% Quick outline:
-% P&G and GM have a common problem. 
-% Classic Idea Screening. Active learning / bandit w Adaptive MaxDiff. 
-% New kind of problem. 
-% This is how many people are trying to solve this problem. 
-% 
-% This isn't conjoint. 
-% This needs to be adaptive.
-% This would cost much more money. 
-
-
 These settings have a common challenge: identify the best set of items out of many.  This challenge is distinct from closely related problems, and the existing methods do not suffice due to scale and objective.  Typical choice experiment methods are infeasible, too costly, or simply inefficient at this scale. 
 
 Consumer researchers have recently turned to measurement methods such as, Maximum Difference Scaling (MaxDiff). As of 2016, MaxDiff is used by 70\% of all clients of Sawtooth Research, one of the  largest marketing research software providers. Recent trends suggest that market research teams are pushing MaxDiff to its limits, attempting to use it to obtain obtaining preference or importance scores many more items (hundreds) than it was initially designed for (dozens).
 
 Current implementations of MaxDiff do not scale to this size, and would require many thousands of respondents, making the approach infeasible, inefficient, and costly. At best, marketing researchers often use pretest or screening phases to select a smaller set, which they then use for the main analysis. This approach can be inaccurate, not getting enough information to correctly identify (and rank) the high-scoring items, or inefficient, spending too long on low-scoring items. Yet there is no systematic method to smoothly transition out of that screening phase, even when the ultimate objective is learning precisely the set of most preferred items. 
+
+
+\eric{Quick outline of flow:
+- P\&G and GM have a common problem: they want to find the best things out of a large set of ideas.
+- New kind of problem. 
+- Many people in industry are trying to solve this problem. 
+- This is like classic Idea Screening, but we have a new twist using best-arm identification and bandit algorithms for Adaptive MaxDiff. 
+- This isn't conjoint. 
+- This needs to be adaptive.
+- If it weren't adaptive, this would cost much more money. 
+}
 
 
 We focus on settings where the objective is identifying a relatively small top set out of a large number items, as accurately and cheaply, as possible. Identifying a top set is not the same objective as estimating all parameters as precisely as possible. In this work, we illustrate how those objectives diverge. So even with improving computation and larger budgets, this problem has a distinct objective and demands a tailored methods. 
@@ -1090,7 +1129,7 @@ Although our simulations involve 120-item and 300-item tests, we expect that eve
 Future research should test our findings using human respondents.  Using an adaptive process that focuses on comparing best items may result in a more cognitively difficult task than a standard level-balanced, near-orthogonal approach.  The greater expected within-set utility balance may lead to higher response error which may counteract some of the benefits of the adaptive approaches.  However, based on previous research~\cite{orme2006adaptive} that employed within-respondent adaptivity, the additional degree of difficulty that the Bandit adaptive approach could impose upon individual respondents (owing to utility balance) would probably not counteract the lion share of the benefits we've demonstrated using simulated respondents.\\
 This paper also introduces a framework that links conjoint methods and multi-armed bandit methods. Much like adaptive conjoint methods began with aggregate adaptation and then progressed to individual-level adaptive, so we propose an aggregate adaptive approach. But future could explore methods using fully heterogeneous models, and adapting within each individual. A partially pooled model will be useful here, as it is with other adaptive conjoint methods. \\
 Our method relates to existing adaptive conjoint just as M-efficiency criterion is to D-efficiency.  Unlike M-efficiency designs where the researcher decides the managerial weight of different factors a priori, we know which of the items should receive more weight. Instead, that is exactly what we want to learn actively. \\
-We should note that as of this article's publication date, Sawtooth Software does not offer Adaptive MaxDiff as a commercial tool.  Sawtooth Software may perhaps one day soon offer Adaptive MaxDiff as an option within its commercially available MaxDiff software.  As for the authors, we look forward to this possibility as we've been especially impressed by the potential cost savings and increased accuracy!
+We should note that as of this article's publication date, Sawtooth Software does not offer Adaptive MaxDiff as a commercial tool, but it is currently testing versions of it to be commercially available MaxDiff software. 
 
 
 
