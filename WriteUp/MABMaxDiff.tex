@@ -402,25 +402,49 @@ We let $l(a,y)$ be the loss by performing decision $a$ when true output is $y$. 
 The objective of the decision problem is to select the best $a$ to minimize expected loss based on training data $D$ considering some potential input data $x$,
 \begin{align}
 a^{*} := \text{arg}\min_a \rho(a) = \text{arg}\min_a \int_y l(a,y) P(y|x,D) dy  \\
-EL(x) := \rho(a^{*}) = \min_a \int_y l(a,y) P(y|x,D) dy \\
+EL(x) := \rho(a^{*}) = \min_a \int_y l(a,y) P(y|x,D) dy , 
 \end{align}
+so the $EL(x)$ is the minimized expected loss.
 
-This can be understood for the  marketing research problem as follows. 
+This can be understood for the marketing research problem as follows. The $a$ is the act of assigning a rank ordering $\pi$ of items' utilities $u$. The past data $D$ is the set of items observed so far and the collection of the implied partial rank orderings of those items based on surveys of respondent, which reflect utilities $u$. The input $x$ is the set of \numperset items considered to be asked to the next respondent, and the potential output $y$ is the potential collection of partial rank orderings of those items in input $x$.
+
+We note that despite $a^{*}$ minimizing expected loss under the posterior, the $EL(x)$ is defined given an input $x$. For different possible choices of $x$, the best action $a^{*}$ may change, and therefore, the level of best loss $EL(x)$ may change too. 
+
+Next we consider the possible choices of input $x$, the next data selected. 
+
+Since we have access to a pool of possible items, $x \in \mathcal{X}$, we also know the distribution of those input values, $P(x)$. We want to select the next $x$that will minimize the generalization error
+
+The expected error on unseen examples is the average expected loss over the input distribution, which is known as the generalization error $\int_x EL(x)P(x)dx$. We aim to minimize that generalized error, for any general input $x$.
+
+Active learning strategy selects the input instance $x$ to maximize the expected loss $EL(x)$ given the input $x$: $\text{arg}\max_x EL(x)$. This is the essence of the ELO principle: To minimize generalized loss, select data that maximizes expected loss, even when taking the action that minimizes loss given that input and action.
 
 
-For the ranking and selection problem, the optimal action $a^{*}$ is the $\pi$ that 
-
-The expected error on unseen examples is the {average expected loss over the input distribution $\int_x EL(x)P(x)dx$. To minimize generalized error, active learning selects the input instance $x$ to maximize the expected loss $EL(x)$:
-select $\text{arg}\max_x EL(x)$.
-
-
-
-The test points $X_q = (x_1,...,x_q)$ with unknown labels. 
-
-$l(a,Y) = $ loss based on ranking $a$ if the true labels are $Y$.
+For binary classification, intuitively, an active learning strategy would select the next data points that are likely to have predicted a class with probability near 0.5 since observing its true class will be most informative. Formally, the binary classification output is $y \in \mathcal{Y} = { -1, +1 } $ and the action is the prediction $a$ also in $\mathcal{Y}$. The loss is also binary, $l(a,y)=0$ if $a=y$, and $1$ if $a \neq y$. The loss-minimizing prediction is to select whichever of the two potential outcomes is more likely.
 \begin{align}
-\int_Y l(a,Y) P(Y|X_q,D)dY
+a^{*} 
+= \text{arg} \min_{a} P(y=a|x,D) 
+= \text{arg} \min_{a} \left\{ 0 \cdot P(y=a|x,D) + 1 \cdot P(y \neq a|x,D) \right\} 
 \end{align}
+
+The minimized expected loss is then
+\begin{align}
+EL(x) = \min \left( P(y=1|x,D), P(y=0|x,D) \right).
+\end{align}
+
+The active learning strategies will select an $x$ to that would currently have the highest EL(x). In this case, 
+\begin{align}
+x^{*}  = \text{arg}\max_{x} \min \left( P(y=1|x,D), P(y=0|x,D) \right),
+\end{align}
+It selects the inputs $x$ where the predicted probabilities are at 0.5 $= P(y=1|x,D), P(y=0|x,D)$.
+
+
+
+---
+
+
+decision $\pi$ vs truth $\pi^{*}$
+
+
 ELO principle for active learning says to select the $X_q$ with the highest expected losses, EL(q),
 \begin{align}
 EL(q) := \min_{a} \int_{Y} l(a,Y) P(Y|X_q,D) dY \\
@@ -428,7 +452,6 @@ q^{*} = \text{arg}\max_q EL(q) \\
 EL^{*}(q) = \max_q EL(q) 
 \end{align}
 
-decision $\pi$ vs truth $\pi^{*}$
 
 
 
