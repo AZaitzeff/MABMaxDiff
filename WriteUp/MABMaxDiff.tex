@@ -263,16 +263,19 @@ Firms measure consumers' preferences in order to identify the most preferred ite
 The problem we address in this paper appears across a range of marketing settings. Consider these illustrative managerial decisions with a common challenge to identify the best set of items out of many:
 
 \begin{itemize}
-	\item \emph{Idea screening.} Technology companies have long invited consumers to provide ideas for new products and improvements. Automotive companies pursue particularly complex products, such as, self-driving cars, which are sold with different bundles of hundreds of possible features. Consumer research surveys reveal which are the most preferred features, to help the firm decide what should be included in different models.  
-	\item \emph{Marketing communications.} Consumer packaged goods companies use marketing research, after the products are developed, to decide which consumer benefits they should emphasize. Out of hundreds of potential benefits, they have to select a small number of them for marketing campaign messages.
-	\item \emph{Product offerings.} Retailers are increasingly able to respond to demand and consumer preferences quickly by changing their available product offerings. In anticipation of a new fashion season, an ecommerce retailer surveys customers to identify most preferred styles and lines, and then select the range of items to make available for purchase.
+	\item \emph{Crowd-sourced feature selection.} Technology companies have long invited consumers to provide ideas for new products and improvements. For instance, automotive companies develop particularly complex products, such as, self-driving cars, which are sold with different bundles of hundreds of possible features. Consumer surveys reveal which are the most preferred features to help the firm decide which should be included in a given car model.
+	\item \emph{Product assortment offering.} Retailers are increasingly able to respond to demand and consumer preferences quickly by changing their available product offerings. In anticipation of a new fashion season, an ecommerce retailer surveys customers to identify most preferred styles and lines, and then select the range of items to make available for purchase.
+	\item \emph{Marketing communications.} As products are being developed, firms also must decide which consumer benefits they should emphasize. For instance, consumer packaged goods companies use marketing research to determine which claims about their products should be central to a campaign, and even shown on product packaging. Out of hundreds of potential benefits, they have to select only a handful of them for marketing  messages.
 \end{itemize}
 
+These three examples belong to a larger class of problems-- large-scale idea screening. In this paper, we develop a new method to solve this modern marketing research challenge by cutting down expenses and increasing the return of information gained per dollar spent on large-scale screening surveys. We propose a novel method leveraging algorithms from multi-armed bandit literature and active learning for ranking and selection problems from computer science. The approach can be approximated for real-time execution and provides even greater gains in information and cost savings for larger problems. 
 
-In this paper, we develop a new method to solve this modern marketing research challenge, cutting down expenses and increasing the information gained per dollar spent on large-scale consumer idea screening surveys. We propose a novel method, Bandit Adaptive MaxDiff, and demonstrate it can cut costs for large MaxDiff studies conducted to identify respondents’ most preferred items. Working with Procter \& Gamble (P\&G), we show that our new method can increase efficiency 2.5 to 4.0 times over current MaxDiff practices by accurately identifying the best items quicker with fewer respondents. The work was developed and deployed with Sawtooth Software, a provider of conjoint and MaxDiff, opening up the potential savings of millions of dollars in market research budgets. 
+We illustrate this empirically in the setting of best-worst scaling preference measurement, also known as, MaxDiff, in which consumer respondents select their most and least preferred items from the presented set. Our method, Bandit Adaptive MaxDiff, can cut costs for large MaxDiff studies conducted to identify respondents’ most preferred items. Working with Procter \& Gamble (P\&G), we show that the new method can increase efficiency 2.5 to 4.0 times over current MaxDiff practices by accurately identifying the best items quicker with fewer respondents. The work was developed and deployed with Sawtooth Software, a provider of conjoint and MaxDiff, opening up the potential savings of millions of dollars in market research budgets. 
 
+new intro should continue from here.
+---- 
 
-Facing this problem, firms such as Proctor \& Gamble (P\&G) often turn to MaxDiff surveys to screen out weaker ideas, identify the best items, and learn more about them. Among all corporate users of the market research software, Sawtooth Software, 70\% of them have used MaxDiff in 2017. There is plenty of room to make this data collection and preference learning process more efficient through adaptive methods. Other adaptive approaches, such as adaptive conjoint (ACA and ACBC; Aurora and Huber 2002; Toubia et al. 2004) and preliminary adaptive MaxDiff approaches (Orme 2006), do not suffice here because our setting is distinct. 
+Facing this problem, firms such as Proctor \& Gamble (P\&G) often turn to MaxDiff surveys to screen out weaker ideas, identify the best items, and learn more about them. Among all corporate users of the market research software, Sawtooth Software, 70\% of them have used MaxDiff in 2017. This data collection and preference learning process can be made more efficient through adaptive methods. But this problem is not the same as that solved by other adaptive approaches, such as adaptive (choice-based) conjoint analysis, or ACA (ACBC) (Aurora and Huber 2002; Toubia et al. 2004) and preliminary adaptive MaxDiff approaches (Orme 2006). 
 
 But typical adaptive discrete choice experiment methods do not have the objective suited for this problem. Those methods seek to learn preferences for all items equally. Even the adaptive versions of conjoint, such as ACBC, serve respondents with optimized questions to minimize preference uncertainty everywhere and maximize the researcher's overall learning. By contrast, in our setting, we specifically want to learn how much respondents prefer certain items, such as the top 20 items, and do not need to spend resources learning how precisely the 100th-best item differs from the 90th-best item. 
 
@@ -501,14 +504,19 @@ Each time period, the decision ...
 - Decisions can be made in batches of $b$ respondents per period.
 
 
-
-
-
-\section{Framework and literature}
-
-
-\subsection{Multi-armed bandit, best-arm identification, and active learning}
+\subsection{Compared to Multi-Armed Bandit}
+\textbf{Multi-armed bandit, best-arm identification, and active learning}
 Our approach builds upon on state-of-the-art multi-armed bandit and active learning algorithms, both from machine learning and reinforcement learning literatures. 
+
+\subsubsection{Standard bandit problem}
+
+Continuing the above notation, we define Thompson Sampling. 
+
+\subsubsection{best-arm identification}
+
+The best arm identification problem...
+More generally, selecting the best $k$ instead of single best, is known as the best-k-arms identification problem...
+
 
 MAB problems balance learning and earning. MAB problems appear in marketing experiments for online advertising~\cite{schwartzetal2017},~\cite{urban2013morphing} and website design~\cite{hauser2009website}. One particular MAB method amenable to multivariate parametric models is Thompson Sampling.
 
@@ -526,13 +534,12 @@ The best arm identification problem is more similar to a classic active learning
 We also draw on ideas in closely related area, active learning. 
 
 
-
 Recent theoretical advances, show the value of adding perturbations, such as, Follow The Perturbed Leader (FTPL)~\citep{kalai2005efficient}. Others prove that adding perturbations of Gumbel distributed noise leads to an optimal MAB strategy~\citep{abernethy2015fighting,kujala2005following}. The perturbation methods provide an intuitive randomization decision strategy, which is appropriate for our application, yet their connection to other approaches and applications are limited. Perturbation resolves the learning-and-earning tradeoff for the stochastic MAB setting and improves pure learning for the active learning setting, but it also goes further, and does so in the adversarial setting. This suggests it is a strategy more robust to the non-random dynamic changes in an environment. 
 
 
 
 
-
+\section{Preference Measurement}
 \subsection{Idea Screening and Maximum Difference Scaling}
 \begin{figure}
 \caption{MaxDiff is becoming more popular over time with Sawtooth Software users} \label{fig:pop}
@@ -547,9 +554,10 @@ MaxDiff offers benefits over alternative methods. MaxDiff provides more discrimi
 MaxDiff, while it is a distinct type of choice experiment, is closely related to conjoint. A key difference is that it involves both best and worst choices instead of only one. But in its most common form, MaxDiff may be thought of as a one-attribute CBC study with many levels.  
 
 \subsection{Studying More Items with MaxDiff: Survey of Market Research Practitioners}
-MaxDiff has proven so useful that market researchers increasingly find reasons to use MaxDiff for a large number of items.  How many is a large number of items?  In their 2007 paper, Hendrix and Drucker described ``large sets'' as about 40 to 60 items, proposing variants to MaxDiff called Augmented and Tailored MaxDiff to handle such large problems~\cite{hendrix2007alternative}. In their 2012 paper, Wirth and Wolfrath also investigated variants to MaxDiff called Express and Sparse MaxDiff for handling what they described as ``very large sets'' of items~\cite{wirth2012largeset}.  Very large to these authors meant potentially more than 100 items.  To support their findings, they conducted a study among synthetic robotic respondents with 120 items and a real study among humans with 60 items.
 
-For Hendrix and Drucker 40 to 60 items was large, for Wirth and Wolfrath 120 items was very large.  For this current paper, we're referring to huge numbers of items as potentially 300 or more. The motivation of our research is beyond academic curiosity, as marketing researchers are seeking such applications pushing MaxDiff further than it was perhaps ever intended. \\
+MaxDiff has proven so useful that market researchers increasingly find reasons to use MaxDiff for a large number of items. And even the what is meant by ``large number'' of items has grown in recent years. \cite{hendrix2007alternative} describe ``large sets'' as about 40 to 60 items, proposing variants to MaxDiff, called \emph{Augmented and Tailored MaxDiff} to handle such large problems. \cite{wirth2012largeset} also investigated variants to MaxDiff called \emph{Express} and \emph{Sparse MaxDiff} for handling what they described as ``very large sets'' of items, which they say meant potentially more than 100 items.  To support their findings, they conducted a simulation study of robotic respondents using 120 items and a real study among consumer respondents with 60 items.
+
+For this current paper, we refer even larger numbers of items, potentially 300 or more. The motivation for the large scale is of academic interest, as we explore how algorithms scale, but is also of practical interest, as marketing researchers are pushing MaxDiff further than it was perhaps ever intended. \\
 \begin{figure}
 \caption{Sawtooth Customer Feedback Survey 2015. Maximum Number of Items Studied via MaxDiff (top; Mean= 40, Median=30, Maximum=400) and Main Purpose for MaxDiff Study with 41+ Items (bottom) } 
 \label{fig:max_and_purpose}
@@ -559,13 +567,17 @@ For Hendrix and Drucker 40 to 60 items was large, for Wirth and Wolfrath 120 ite
 \end{center}
 \end{figure}
 
-Sawtooth Software's 2015 Customer Feedback Survey represents users of the software. The survey asked for the largest number of items that users had included in a MaxDiff study during the last 12 months (Figure \ref{fig:max_and_purpose}). Nearly one-fifth of respondents indicated their firms had conducted a study with 51 or more items.  The maximum number of items studied was 400.
+To illustrate the growing interest in MaxDiff, Sawtooth Software's Customer Feedback Survey, representing users of the software, reveals the extent of the increasing penetration and need to accommodate more items. By 2017, nearly 70\% of users had employed some MaxDiff study. The survey also asked for the largest number of items that users had included in a MaxDiff study during the last 12 months (Figure \ref{fig:max_and_purpose}). Nearly 20\% of respondents indicated their firms had conducted a study with 51 or more items, and the maximum was 400. 
 
 To some it may seem odd and overwhelming that some researchers are conducting MaxDiff studies with more than 80 or even 400 items.  However, when we consider that individual MaxDiff items may actually represent conjoined elements that constitute a profile (say, a combination of packaging style, color, claims, and highlighted ingredients), then it can make much more sense to do 400-item studies.  If the profiles involve multiple highly interactive attributes that pose challenges for CBC, then MaxDiff with huge numbers of items could be a viable alternative.
 
 The survey also asked Sawtooth Software customers what the main purpose was for that study with the reported maximum number of items. For studies involving 41 or more items, the main reasons are displayed in Figure \ref{fig:max_and_purpose}. For 42\% of these large MaxDiff studies, the main purpose was to identify the top item or top few items.  
 
-Our research shows that if this is the main goal, then traditional design strategies can be wasteful. We will show that an adaptive approach using bandit algorithms can be about 4x more efficient.  Without the Bandit Adaptive Maxdiff approach, you are potentially wasting 75 cents of every dollar you are spending on MaxDiff data collection. 
+Our research shows that if this is the main goal, then traditional design strategies can be wasteful. We will show that an adaptive approach using bandit algorithms can be up to 4x more efficient-- without the Bandit Adaptive Maxdiff approach, you are potentially wasting 75 cents of every dollar you are spending on MaxDiff data collection. 
+
+
+\subsection{MaxDiff choice model}
+Consider describing the choice model and basic data collection for standard static fixed maxdiff. 
 
 
 %\textbf{Emphasize our goal is to identify the top items.}
