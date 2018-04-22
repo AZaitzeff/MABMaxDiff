@@ -1,16 +1,27 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% To toogle between Marketing Science / INFORMS format, 
+%%%%%%% search for: %KMSC_FORMAT% 
+%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Author template for Marketing Science (mksc)
 %% Mirko Janc, Ph.D., INFORMS, mirko.janc@informs.org
 %% ver. 0.95, December 2010
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\documentclass[mksc,blindrev]{informs3} % current default for manuscript submission
-\documentclass[nonblindrev]{informs3}
-%\documentclass[a4paper,12pt]{article}
+% %\documentclass[mksc,blindrev]{informs3} % current default for manuscript submission
 
-\OneAndAHalfSpacedXI % current default line spacing
-%\OneAndAHalfSpacedXII
-%%\DoubleSpacedXII
-%%\DoubleSpacedXI
+%MKSC_FORMAT% \documentclass[nonblindrev]{informs3}
+\documentclass[a4paper,12pt]{article}
+
+
+%MKSC_FORMAT% \OneAndAHalfSpacedXI % current default line spacing
+% %\OneAndAHalfSpacedXII
+% %%\DoubleSpacedXII
+% %%\DoubleSpacedXI
+
+
+
 
 % If hyperref is used, dvi-to-ps driver of choice must be declared as
 %   an additional option to the \documentclass. For example
@@ -32,22 +43,26 @@
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{subfig}
+\usepackage{amsmath,graphicx,amssymb}
+
 
 \setlength{\parindent}{1cm} % Default is 15pt.
 
 %% Setup of theorem styles. Outcomment only one. 
 %% Preferred default is the first option.
-\TheoremsNumberedThrough     % Preferred (Theorem 1, Lemma 1, Theorem 2)
-%\TheoremsNumberedByChapter  % (Theorem 1.1, Lema 1.1, Theorem 1.2)
+
+%MKSC_FORMAT%  \TheoremsNumberedThrough     % Preferred (Theorem 1, Lemma 1, Theorem 2)
+%MKSC_FORMAT% \TheoremsNumberedByChapter  % (Theorem 1.1, Lema 1.1, Theorem 1.2)
 
 %% Setup of the equation numbering system. Outcomment only one.
 %% Preferred default is the first option.
-\EquationsNumberedThrough    % Default: (1), (2), ...
+% \EquationsNumberedThrough    % Default: (1), (2), ...
 %\EquationsNumberedBySection % (1.1), (1.2), ...
-\DeclareMathOperator{\logit}{logit}
-% In the reviewing and copyediting stage enter the manuscript number.
-%\MANUSCRIPTNO{} % When the article is logged in and DOI assigned to it,
-                 %   this manuscript number is no longer necessary
+
+
+
+%MKSC_FORMAT% \DeclareMathOperator{\logit}{logit}
+\newcommand{\logit}{logit}
 
 % to use for comments
 \newcommand{\alexander}[1]{\textcolor{blue}{\textbf{(alexander)} #1}}
@@ -116,6 +131,11 @@
 \newcommand{\numtopset}{k} 
 \newcommand{\numperset}{L} 
 
+\newcommand{\titleofthispaper}{
+	\textbf{Active Learning for Ranking and Selection: \\
+	An Application to Idea Screening with Bandit Adaptive MaxDiff} 
+}
+%{Bandit Adaptive MaxDiff: Best-Item Identification for Large-Scale Idea Screening} 
 
 
 %%%%%%%%%%%%%%%%
@@ -123,42 +143,34 @@
 %%%%%%%%%%%%%%%%
 
 % Cover Page
-
 \begin{center}
-~ \\
+
+	~ \\
+
+	\vspace{2in}
+
+	\titleofthispaper
+
+	\vspace{1in}
+
+	{Eric Schwartz,}
+	\emph{University of Michigan, {ericmsch@umich.edu} } \\
+	{Kenneth Fairchild,} 
+	\emph{Sawtooth Software} \\
+	{Bryan Orme,}
+	\emph{Sawtooth Software} \\
+	{Alexander Zaitzeff,}
+	\emph{University of Michigan} 
+
+	\vspace{1in}
+
+	%Date
+	\today
+	%January 31, 2018
+
+
 \end{center}
-
-\vspace{2in}
-
-\begin{center}
-\textbf{Bandit Adaptive MaxDiff: \\ 
-Best-Item Identification for Large-Scale Idea Screening} \\
-
-%Technical Appendix for ISMS Practice Prize \\
-\end{center}
-
-
-
-\vspace{1in}
-
-\begin{center}
-{Eric Schwartz,}
-\emph{University of Michigan, {ericmsch@umich.edu} } \\
-{Kenneth Fairchild,} 
-\emph{Sawtooth Software} \\
-{Bryan Orme,}
-\emph{Sawtooth Software} \\
-{Alexander Zaitzeff,}
-\emph{University of Michigan} 
-\end{center}
-
-\vspace{1in}
-
-\begin{center}
-%Date
-\today
-%January 31, 2018
-\end{center}
+\newpage
 
 % Outcomment only when entries are known. Otherwise leave as is and 
 %   default values will be used.
@@ -173,32 +185,6 @@ Best-Item Identification for Large-Scale Idea Screening} \\
 %\ISSUE{0000} %
 %\LONGFIRSTPAGE{0001} %
 %\DOI{10.1287/xxxx.0000.0000}%
-
-% Author's names for the running heads
-% Sample depending on the number of authors;
-% \RUNAUTHOR{Jones}
-% \RUNAUTHOR{Jones and Wilson}
-% \RUNAUTHOR{Jones, Miller, and Wilson}
-% \RUNAUTHOR{Jones et al.} % for four or more authors
-% Enter authors following the given pattern:
-%\RUNAUTHOR{}
-
-% Title or shortened title suitable for running heads. Sample:
-% \RUNTITLE{}
-% Enter the (shortened) title:
-\RUNTITLE{Bandit Adaptive MaxDiff}
-
-% Full title. Sample:
-% \TITLE{Bundling Information Goods of Decreasing Value}
-% Enter the full title:
-\TITLE{Bandit Adaptive MaxDiff: 
-Best-Item Identification for Large-Scale Idea Screening} 
-
-%{\\Technical Appendix for ISMS Practice Prize}
-
-% Best-Arm Identification for Choice Experiments: \\ Applications to Large-Scale Adaptive MaxDiff \\
-% and Idea Screening \\
-
 
 % Block of authors and their affiliations starts here:
 % NOTE: Authors with same affiliation, if the order of authors allows, 
@@ -219,21 +205,56 @@ Best-Item Identification for Large-Scale Idea Screening}
 % } % end of the block
 
 
+% Author's names for the running heads
+% Sample depending on the number of authors;
+% \RUNAUTHOR{Jones}
+% \RUNAUTHOR{Jones and Wilson}
+% \RUNAUTHOR{Jones, Miller, and Wilson}
+% \RUNAUTHOR{Jones et al.} % for four or more authors
+% Enter authors following the given pattern:
+%\RUNAUTHOR{}
 
-\ABSTRACT{% % Enter your abstract
+% Title or shortened title suitable for running heads. Sample:
+% \RUNTITLE{}
+% Enter the (shortened) title:
+%MKSC_FORMAT% \RUNTITLE{Bandit Adaptive MaxDiff}
+
+
+% Full title. Sample:
+% \TITLE{Bundling Information Goods of Decreasing Value}
+% Enter the full title:
+%MKSC_FORMAT% \TITLE
+
+
+\titleofthispaper \\
+
+	% OLD TITLES
+
+	% Best-Arm Identification for Choice Experiments: \\ Applications to Large-Scale Adaptive MaxDiff \\
+	% and Idea Screening \\
+
+	%{\\Technical Appendix for ISMS Practice Prize}
+
+
+\textbf{Abstract:}
+%MKSC_FORMAT% \ABSTRACT
+{% % Enter your abstract
 Marketing research often measures consumers' preferences in order to identify their most preferred items among a set of candidates, such as product benefits, innovative features, or message appeals. Common techniques are idea screening and choice tasks, including conjoint analysis and maximum-difference (MaxDiff) scaling. These methods, however, are not built for large-scale problems, like identifying the best set of 30 items out of hundreds of alternatives, yet firms are increasingly seeking to do just that. For large MaxDiff studies whose main purpose is identifying the top few items for the respondent, we propose a new approach, Bandit Adaptive MaxDiff, which can increase efficiency four-fold over standard MaxDiff, by identifying the best items with fewer respondents. Our proposed solution leverages information from previous respondents, so later respondents receive designs that oversample the items that are most likely to turn out to be the in the overall top set. Instead of learning all preference parameters with equal precision, Bandit Adaptive MaxDiff more precisely estimates the parameters of most interest to the manager. We implement the methods empirically using MaxDiff survey results from Proctor \& Gamble, a large consumer packaged goods manufacturer.  Through a series of simulation experiments, we consider a wide range of benchmark algorithms to illustrate under what conditions the proposed approach reduces to existing methods and when it performs even better (i.e., for larger problems).  Our approach draws on both the classic multi-armed bandit literature, as well as the more recent work on best-k-arm identification problem. We introduce and test several new components to these algorithms, which can apply outside of our idea screening and preference measurement problem. We introduce researcher-chosen parameters to control robustness to a changing environment when using Thompson Sampling; we allow for the algorithms to specifically learn an unranked (vs. ranked) top set; and we evaluate a set of approximations to posterior sampling to allow for faster model updates.
 
-}%
+}~ \\
 
 
 % Fill in data.
-\KEYWORDS{idea screening, maximum-difference surveys, adaptive conjoint, active learning, multi-armed bandit, best-arm identification, Bayesian bootstrap, best-worst scaling, Thompson Sampling, uncertainty minimization}
+
+\textbf{Keywords:}
+%MKSC_FORMAT% \KEYWORDS
+{idea screening, maximum-difference surveys, adaptive conjoint, active learning, multi-armed bandit, best-arm identification, Bayesian bootstrap, best-worst scaling, Thompson Sampling, uncertainty minimization}
 
 
 
 %\textbf{Outdated Abstract, see Introduction.} For large MaxDiff studies whose main purpose is identifying the top few items for the sample, a new adaptive approach called Adaptive MaxDiff may increase efficiency fourfold over standard non-adaptive MaxDiff.  Adaptive MaxDiff leverages information from previous respondents via aggregate logit and Thompson Sampling so later respondents receive designs that oversample the topmost items that are most likely to turn out to be the overall winners. Our approach applies beyond MaxDiff problems to a more general set of bandit problems. We propose a flexible algorithm, $\epsilon$-Diffuse Thompson Sampling (TS), which nests traditional TS. Blending ideas from $\epsilon$-greedy in machine learning and Bayesian approaches, this is a more robust version of TS, which a manager can control with tuning parameters. For instance, being less risk averse, one may drawn more items from diffuse posteriors, making the algorithm robust to changing environments, even extreme non-stationarity. We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. Beyond showing our approach outperforms better than current methods, we show under which conditions it performs even better than (larger problems) or just as well as existing methods (smaller problems).
 
-\maketitle
+%MKSC_FORMAT%  \maketitle
 
 
 
@@ -335,7 +356,7 @@ We illustrate this empirically in the setting of best-worst scaling preference m
 
 %We introduce a first step to make MaxDiff adaptive in a principled manner by using MAB and AL methods. We build on an increasingly accepted method of solving multi-armed bandit problems, Thompson Sampling. We introduce multiple versions: MaxDiff-\ts, its generalization MaxDiff \edts, and \edtsthres. The \edts nests traditional TS. We combine ideas from $\epsilon$-greedy in machine learning and Bayesian approaches to produce a more robust version of TS,  which a manager can control with tuning parameters. For instance, if a manager wants to be extra conservative and maintaining more samples drawn from diffuse posteriors, she will make the algorithm robust to changing environments, even extreme non-stationarity. We also build on another pair of related methods, \mismin and \uncert with perturbations, common in active learning settings. 
 
-Our proposed approach builds upon algorithms initially developed and commonly used for \emph{multi-armed bandit} problems, which have emerged in marketing (Hauser, Liberali, Misra, Schwartz, Urban). But our problem departs from the standard bandit and requires a twist on the known bandit algorithms. In fact, the present problem is more similar to the related \emph{best-arm identification} bandit problem (Russo). But that does not quite match either. Finally, the framework we employed originates in the area of \emph{active learning} (balcan2009agnostic,dasgupta2008general). While an established in the areas of  more theoretical statistics and machine learning literature, active learning has hardly appeared in marketing. One exception is Dzyabura et al. 2011, which considers active learning algorithms to serve as useful decision-making heuristics for individual consumers. 
+Our proposed approach builds upon algorithms initially developed and commonly used for \emph{multi-armed bandit} problems, which have emerged in marketing (Hauser, Liberali, Misra, Schwartz, Urban). But our problem departs from the standard bandit and requires a twist on the known bandit algorithms. In fact, the present problem is more similar to the related \emph{best-arm identification} bandit problem (Russo). But that does not quite match either. Finally, the framework we employed originates in the area of \emph{active learning} \citep{balcan2009agnostic,dasgupta2008general}. While an established in the areas of  more theoretical statistics and machine learning literature, active learning has hardly appeared in marketing. One exception is Dzyabura et al. 2011, which considers active learning algorithms to serve as useful decision-making heuristics for individual consumers. 
 
 We also consider the practical implementation of the algorithms. The scalability and speed of each is considered. We provide alternative versions that are faster but may sacrifice theoretical statistical validity. Nevertheless, some fast heuristics perform quite well empirically. 
 
@@ -394,12 +415,13 @@ The rest of the paper is structured as follows. In the next section, we formaliz
 \textbf{Also include picture of active learning v active ranking selection v top k ID bandit v bandit}
 
 
-\section{General Model}
+\section{General Modeling Framework}
 
 % Active learning, classification and regression, deterministic labels, 
 % Active learning, ranking and selection, noisy labels (outcomes), re-sampling,
 % Bandit, ranking and selection, noisy labels (outcomes), re-sampling,v
 
+\subsection{Active Learning with Bayesian Decision Theory}
 
 We consider the various problems described above as a sequential decision making problem. The market researcher wants to learn the relative ranking of many items, but, facing uncertainty about them, she can select which items to learn about in the next customer interaction. She considers $n$ items with unknown utilities $u_1, \ldots, u_\numitems$. Their unknown rank ordering, $u_{\pi^{*}(1)} > \ldots, u_{\pi^{*}(\numitems)}$. Uncertain about $u$ and $\pi^{*}$, she will have to make a decision $a$ based on her beliefs. The most general decision here is characterized by, $a=\pi$, a permutation of length $\numitems$, where the predicted rank of the $j$-th item is $\pi(j)$. The complete permutation includes simply identifying a subset (classification), or a ranking within that subset (partial rank). 
 
@@ -423,7 +445,7 @@ The objective of the decision problem is to eventually select the best $a$ using
 
 We utilize the framework of expected loss optimization (ELO) of Long et al. (2010). To achieve this expected loss minimization, we now consider the expected loss of action $a$ on any data  $(x,y)$. We let $l(a,y)$ be the loss by performing decision $a$ when true output is $y$. But we are uncertain about $y$. By integrating over potential outcomes with $y \sim P(y|x,D)$, we compute the expected loss,
 \begin{align}
-\rho(a) = E_{y} \left[ l(a,y) \right] := \int_y l(a,y) P(y|x,D) dy .
+\rho(a) := E_{y} \left[ l(a,y) \right] = \int_y l(a,y) P(y|x,D) dy .
 \end{align}
 
 To minimize expected loss for any input data $x$, select action:
@@ -432,7 +454,7 @@ a^{*} = \text{arg}\min_a \rho(a) = \text{arg}\min_a \int_y l(a,y) P(y|x,D) dy,
 \end{align},
 which yields the minimized expected loss (MiEL) for that input $x$,
 \begin{align}
-MiEL(x) = \rho(a^{*}) = \min_a \int_y l(a,y) P(y|x,D) dy .
+MiEL(x) := \rho(a^{*}) = \min_a \int_y l(a,y) P(y|x,D) dy .
 \end{align}
 
 %The $EL(x)$ is the minimized expected loss (aka., MIEL). Minimized expected loss really should be called $MIEL(x)$. 
@@ -443,7 +465,7 @@ Then consider the possible choices of the next input data $x$. We have access to
 
 But, for choosing the next input and output instance to observe, an active learning strategy selects the input example that would \emph{maximize} the minimized expected loss, $\max_x MiEL(x)$, with 
 \begin{align}
-x^{*}  &= \text{arg} \max_{x} EL(x) = \text{arg} \max_{x} \min_{a} \int_y l(a,y) P(y|x,D) dy \\
+x^{*}  &= \text{arg}\max_x MiEL(x) = \text{arg}\max_{x} \left( \min_{a} \int_y l(a,y) P(y|x,D) dy \right) \\
 \end{align}
 
 Selecting the $x$ where expected loss would be largest has the following consequence: after incorporating $x$ into the training data $D \to D \cup x \}$ and updating the posterior distributions, the subsequent generalized error (averaged of expected loss) will have decreased by the more than it would have from observing any other $(x,y)$ pair.
@@ -454,64 +476,65 @@ This is the essence of the ELO principle: Select data that maximizes the minimiz
 
 Consider the binary classification active learning problem. Formally, the binary classification output is $y \in \mathcal{Y} = \{-1,+1\}$ and the action is the prediction $a$, which in this case, is also in $\{-1,+1\}$. Since the loss is also binary, $l(a,y)=0$ if $a=y$, and $1$ if $a \neq y$. 
 
-Given past training data $D$ to estimate a model $f_\theta(x)$, consider a test data $x$ (with unknown label $y$), so we can define any action $a$ as a prediction of $y$.
+Given past training data $D$ to estimate a model $f_\theta: \mathcal{X} \to \mathcal{Y}$, consider any test data $x \in \mathcal{X}$ (with unknown label $y$), not used for estimating the model ($x \notin D$). So we can define any action $a$ to be any out-of-sample prediction of $y$. For this illustration, the prediction, $a=f_\theta(x)$, could be based on any model, e.g., logistic regression, regularized regression (Lasso or Ridge), SVM, decision tree, or random forests, where cutoffs could be used to create binary predictions. 
 
-Then loss-minimizing prediction $a^{*}$ is the prediction of $y$ that has smallest model error, or simply, select whichever of the two potential outcomes is more likely.
+Then prediction that minimizes expected binary loss is called $a^{*}$and equals the prediction of $y$ that has smallest model error:
 \begin{align}
 a^{*} &= \text{arg} \min_{a} \int_y l(a,y) P(y|x,D) dy  \\
 & = \text{arg} \min_{a} \left\{ 0 \cdot P(y=a|x,D) + 1 \cdot P(y \neq a|x,D) \right\}  \\
 &= \text{arg} \min_{a} P(y \neq a|x,D) \\
 &= \text{arg} \max_{a} P(y = a|x,D) .
 \end{align}
-That $a^{*}$, yields a minimized expected loss of, 
+That is, to minimize expected loss, simply select whichever of the two potential outcomes is more likely. That $a^{*}$ yields the minimized expected loss of:
 \begin{align}
  MiEL(x) &= \min_{a} P(y \neq a|x,D) \\
  &= \min \left\{ P(y=1|x,D), P(y=0|x,D) \right\},
 \end{align}
-or simply $1 - P(y = a^{*}|x,D)$ the error of the best prediction.
+or simply $1 - P(y = a^{*}|x,D)$ the error of the best prediction. And, so far, this would be true of any supervised learning binary classification problem seeking to minimize its prediction error on an out-of-sample data point $x$.
 
-So far, this would be true of any supervised learning binary classification problem seeking to minimize its prediction error on an out-of-sample data point $x$.
-
-But active learning goes one step farther. The active learning strategy considers the potential model errors for each unlabeled example, and it selects the example data $x$ that has the highest prediction error, $MiEL(x)$, under the current model posterior. In this case, it selects the inputs $x^{*}$ where the predicted probabilities are 0.5, $P(y=1,x^{*},D) = P(y=0,x^{*},D) = 0.5$. Formally,
+But active learning goes one step farther. The active learning strategy considers the potential model errors for each unlabeled example, and it selects the example data $x$ that has the highest prediction error, $MiEL(x)$, under the current model posterior. Formally,
 \begin{align}
 x^{*}  &= \text{arg} \max_{x} \min_{a} \int_y l(a,y) P(y|x,D) dy \\
 &= \text{arg} \max_{x} MiEL(x) \\
 & =  \text{arg} \max_{x} \min_{a} \left( P(y=1|x,D), P(y=0|x,D) \right),
 \end{align}
-and 
+and that data point $x^{*}$ yields
 \begin{align}
 \max_{x} MiEL(x) = \max_{x} \min_{a} \left( P(y=1|x,D), P(y=0|x,D) \right) = 0.5 .
 \end{align}
 
-For binary classification, an active learning strategy would select the next data points that are likely to have predicted probability closest to 0.5 because observing its true label will be most informative. 
+For binary classification, an active learning strategy would select the next data points that are likely to have predicted probability closest to 0.5 because observing its true label will be most informative.
 
-[Should it be 0.5 or the predicted label marginal distribution p(y|D), without any x ]
+%[Should it be 0.5 or the predicted label marginal distribution p(y|D), without any x ]
 
 
-With formal notation, we revisit the defining elements of the problem we study:
-\begin{itemize}
-	\item (finite budget $T << \infty$)
-	\item (loss function, $l(a,y)$)
-	\item (sequential data collection, $D \to D \cup (x,y) $)
-	\item (pool of inputs, $x \in \mathcal{X}$)
-	\item (stochastic output, $y \sim f_{\theta}(x)$)
-\end{itemize}
 
-\subsection{Compared to Standard Active Learning}
 
-The current problem departs from the standard active learning for ranking problem in several ways. First, in standard active learning problems, the true labels $y$ for $x$ are revealed with certainty. But in this marketing problem, the researcher observes noisy reflections of underlying utilities in the form of partial rank orderings. The data generating process is typically considered deterministic, but the environment we consider is stochastic.
+\subsection{Departures from Standard Active Learning}
+
+The current problem departs from the standard active learning for ranking problem in several ways. First, in standard active learning problems, the true labels $y$ for each $x$ are revealed with certainty. But in this marketing problem, the researcher observes noisy reflections of underlying utilities in the form of partial rank orderings. the environment we consider is stochastic, while the data generating process is typically considered to be deterministic. This is referred to ``noisy labels'' in the active learning literature \citep{NatarajanEtAl2013_noisy}.
 
 Second, observing $y$ provides a unique label for $x$, in a typical active learning setting, so there is no need to sample point $x$ again. But our problem permits re-sampling. Each $x$ can be re-sampled to observe another realization of $y \sim Y|x$, which can be used to reduce uncertainty in $\theta$. This uncertainty reduction in the presence of a noisy outcome is the piece most connected to the classic multi-armed bandit problem. 
 
-For now, we consider the decision to be simply the full $\numitems$-item rank ordering, the most general form of ranking and selection problem. But one particular decision may be selecting the highest-utility item (top 1), the top set of items (top $\numtopset$, where $\numtopset << \numitems$), or a partial rank ordering of the top set of items. The decision could be judged rewarded or penalized based on more than just the ranking, but also the value of the items' utilities $u$. For instance, identifying the best item when it has much higher utility than the second-best may carry more weight for the manager than doing so when the top two items have nearly equal utilities. These will enter into the specification of the loss function, which is the error from ranking.
+The defining elements of our problem are as follows:
+\begin{itemize}
+	\item finite budget, $T << \infty$
+	\item loss function, $l(a,y)$
+	\item sequential data collection, $D \to D \cup (x,y)$
+	\item pool of inputs, $\{ x | x \in \mathcal{X} \}$
+	\item stochastic output, $y \sim f_{\theta}(x)$
+\end{itemize}
+
+For now, we consider the decision $a=\pi$ to be choosing a full $\numitems$-item permutation, $\pi = \pi(1),\pi(2),\ldots,\pi(\numitems)$ so the loss depends on rank ordering too. This is most general form of ranking and selection problem, which nests various sub-problems. For instance, the decision could be selecting the highest-utility item (top 1), the top set of items (top $\numtopset$, where $\numtopset << \numitems$), or a partial rank ordering of the top set of $\numtopset$ items. The decision could also be judged rewarded or penalized based on the the value of the unknown items' utilities $u$ in addition to their ranking. For instance, identifying the best item when it has much higher utility than the second-best may carry more weight for the manager than doing so when the top two items have nearly equal utilities. These will enter into the specification of the loss function, which is the error from a suboptimal ranking.
 
 \textbf{Define rank, top $k$ selection with binary and linear loss, partial rank, but clarify notation of $b$}
 $\pi(i)$ 
+
 We denote this by action $a_k(i)=1$, if $i$ is believed to be in the top set, and $0$, otherwise, such that $\sum_{i} a_k(i) = k$.
 \begin{align} 
-l(a,u) &= \frac{1}{k} \sum_{i \in 1:k} \left( 1 - a_k(i) \right) & \text{(binary)} \\
-l(a,u) &= \frac{1}{k} \left( \sum_{i \in 1:k} u_{i}^{*} - \sum_{i = 1}^{K} a_k(i) u_{i}^{*} \right) & \text{(linear in utility)}\\
-l(a,u) &= \frac{1}{k} \left( 
+l(\pi,u) &= \frac{1}{k} \sum_{i \in 1:k} \left( 1 - a_k(i) \right) & \text{(binary)} \\
+l(\pi,u) &= \frac{1}{k} \left( \sum_{i \in 1:k} u_{i}^{*} - \sum_{i = 1}^{K} a_k(i) u_{i}^{*} \right) & \text{(linear in utility)}\\
+l(\pi,u) &= \frac{1}{k} \left( 
 	\sum_{i = 1}^{K} ( a_k(i) u_{i}^{*} < u_{j}^{*} )
 \right) & \text{(rank, pairwise)} \\
 & & \text{(other ranking loss function here)} \\
@@ -1395,7 +1418,9 @@ We should note that as of this article's publication date, Sawtooth Software doe
 
 
 % Acknowledgments here
-\ACKNOWLEDGMENT{%
+%MKSC_FORMAT% \ACKNOWLEDGMENT
+\textbf{Acknowledgments:}
+{%
 % Enter the text of acknowledgments here
 }% Leave this (end of acknowledgment)
 
@@ -1421,7 +1446,7 @@ We should note that as of this article's publication date, Sawtooth Software doe
 % CASE 1: BiBTeX used to constantly update the references 
 %   (while the paper is being written).
 \bibliographystyle{informs2014} % outcomment this and next line in Case 1
-\bibliography{source} % if more than one, comma separated
+\bibliography{source,activelearning,banditbib,banditpricingbib} % if more than one, comma separated
 
 % CASE 2: BiBTeX used to generate mypaper.bbl (to be further fine tuned)
 %\input{mypaper.bbl} % outcomment this line in Case 2
