@@ -1,0 +1,97 @@
+
+@article{balcan2009agnostic,
+  title={Agnostic active learning},
+  author={Balcan, Maria-Florina and Beygelzimer, Alina and Langford, John},
+  journal={Journal of Computer and System Sciences},
+  volume={75},
+  number={1},
+  pages={78--89},
+  year={2009},
+  publisher={Elsevier}
+}
+https://dl.acm.org/citation.cfm?doid=1143844.1143853
+
+@inproceedings{dasgupta2008general,
+  title={A general agnostic active learning algorithm},
+  author={Dasgupta, Sanjoy and Hsu, Daniel J and Monteleoni, Claire},
+  booktitle={Advances in neural information processing systems},
+  pages={353--360},
+  year={2008}
+}
+http://papers.nips.cc/paper/3325-a-general-agnostic-active-learning-algorithm.pdf
+
+@inproceedings{NatarajanEtAl2013_noisy,
+ author = {Natarajan, Nagarajan and Dhillon, Inderjit S. and Ravikumar, Pradeep and Tewari, Ambuj},
+ title = {Learning with Noisy Labels},
+ booktitle = {Proceedings of the 26th International Conference on Neural Information Processing Systems - Volume 1},
+ series = {NIPS'13},
+ year = {2013},
+ location = {Lake Tahoe, Nevada},
+ pages = {1196--1204},
+ numpages = {9},
+ url = {http://dl.acm.org/citation.cfm?id=2999611.2999745},
+ acmid = {2999745},
+ publisher = {Curran Associates Inc.},
+ address = {USA},
+} 
+
+
+
+@incollection{GolovinEtAl2010_noisy,
+title = {Near-Optimal Bayesian Active Learning with Noisy Observations},
+author = {Golovin, Daniel and Krause, Andreas and Debajyoti Ray},
+booktitle = {Advances in Neural Information Processing Systems 23},
+editor = {J. D. Lafferty and C. K. I. Williams and J. Shawe-Taylor and R. S. Zemel and A. Culotta},
+pages = {766--774},
+year = {2010},
+publisher = {Curran Associates, Inc.},
+url = {http://papers.nips.cc/paper/4073-near-optimal-bayesian-active-learning-with-noisy-observations.pdf}
+}
+
+
+
+
+=======================
+
+Zhang, Jing, Xindong Wu, and Victor S. Shengs. "Active learning with imbalanced multiple noisy labeling." IEEE transactions on cybernetics 45.5 (2015): 1095-1107.
+@article{zhang2015active,
+  title={Active learning with imbalanced multiple noisy labeling},
+  author={Zhang, Jing and Wu, Xindong and Shengs, Victor S},
+  journal={IEEE transactions on cybernetics},
+  volume={45},
+  number={5},
+  pages={1095--1107},
+  year={2015},
+  publisher={IEEE}
+}
+
+
+All traditional active learning methods involve evaluating the informativeness of unlabeled instances, which is called the instance selection (query) strategy [6]. [6] Y. Fu, X. Zhu, and B. Li, “A survey on instance selection for active learning,” Knowl. Inf. Syst., vol. 35, no. 2, pp. 249–283, 2013.
+
+Uncertainty sampling is a type of commonly used strategy, which is based on posterior probabilities, including 
+
+margin sampling [18], [18] T. Scheffer, C. Decomain, and S. Wrobel, “Active hidden Markov mod- els for information extraction,” in Proc. Int. Conf. Adv. Intell. Data Anal. (CAIDA), 2001, pp. 309–318.
+
+entropy measure [20], [20] B. Settles and M. Craven, “An analysis of active learning strategies for sequence labeling tasks,” in Proc. Conf. Empirical Methods Natural Lang. Process. (EMNLP), Oct. 2008, pp. 1070–1079.
+
+multiple-instance measure [21], [21] B. Settles, M. Craven, and S. Ray, “Multiple-instance active learn- ing,” in Proc. Adv. Neural Inf. Process. Syst. (NIPS), vol. 20. 2008, pp. 1289–1296.
+
+and least confidence measure [2]. [2] A. Culotta and A. McCallum, “Reducing labeling effort for struc- tured prediction tasks,” in Proc. 20th Nat. Conf. Artif. Intell., 2005, pp. 746–751.
+
+Query by committee [22] is another commonly used type, where a committee of classifiers is used to evaluate unlabeled instances based on voting divergences. [22] H. S. Seung, M. Opper, and H. Sompolinsky, “Query by committee,” in Proc. ACM Workshop Comput. Learn. Theory, 1992, pp. 287–294.
+
+
+Besides these, there are some other strategies, such as expected model change [20], which selects the instance that would impart the greatest change to the current model;  
+[20] B. Settles and M. Craven, “An analysis of active learning strategies for sequence labeling tasks,” in Proc. Conf. Empirical Methods Natural Lang. Process. (EMNLP), Oct. 2008, pp. 1070–1079.
+
+expected error reduction [9], [17], which selects the instance that would reduce the generalization error the most; 
+[9] Y. Guo and R. Greiner, “Optimistic active learning using mutual information,” in Proc. Int. Joint Conf. Artif. Intell. (IJCAI), 2007, pp. 823–829.
+[17] N. Roy and A. McCallum, “Toward optimal active learning through sampling estimation of error reduction,” in Proc. Int. Conf. Mach. Learn. (ICML), 2001, pp. 441–448.
+
+variance reduction [11], which reduces the generalization error indirectly by minimizing output variance; 
+[11] S. C. H. Hoi, R. Jin, and M. R. Lyu, “Large-scale text categorization by batch mode active learning,” in Proc. Int. Conf. World Wide Web (WWW), Edinburgh, U.K., 2006, pp. 633–642.
+
+and density-weighted methods [20], which focuses on the entire input space, avoiding querying outliers. 
+[20] B. Settles and M. Craven, “An analysis of active learning strategies for sequence labeling tasks,” in Proc. Conf. Empirical Methods Natural Lang. Process. (EMNLP), Oct. 2008, pp. 1070–1079.
+
+The off-the-shelf strategies cannot be directly applied to multiple noisy labeling, because there are no ground truths provided by the labelers. In this paper, we define three novel uncertainty measures based on Bayesian estimation and a committee of learned models.
