@@ -581,7 +581,7 @@ E_y[ l(a,u) ] = E_y[ \sum_{t=1}^{T} y^{*} - y(x_t) ]
 \end{align}
 where the sequence of arms $x_1,x_2,\ldots,x_t$ will contain repeats since $n << T$. The number of arms is small relative to periods, and re-sampling arms to reduce uncertainty is the central problem. 
 
-We frame our decision theoretic setup similarly, as others have (Russo et al. 2018). The optimal choice for $x$ naturally differs from what is implied by the ELO principle. One particular multi-armed bandit method amenable to multivariate parametric models is TS, an asymptotically optimal, Bayes risk-minimizing strategy. TS has been proven to be a nearly optimal bandit algorithm. \textbf{Shea: Need reference here.} 
+We frame our decision theoretic setup similarly, as others have (Russo et al. 2018). The optimal choice for $x$ naturally differs from what is implied by the ELO principle. One particular multi-armed bandit method amenable to multivariate parametric models is TS, an asymptotically optimal, Bayes risk-minimizing strategy. TS has been proven to be a nearly optimal bandit algorithm \citep{RussoVanRoy2015}. 
 
 We define TS using the posterior distribution, $P(\theta|D)$, as a stochastic decision, selecting arm $x_i$ with probability
 \begin{align} 
@@ -709,7 +709,7 @@ When analyzing a batch size greater than one, the Misclassification Minimization
 
 \subsubsection{Exploration-diffuse Thompson Sampling}
 
-We propose an algorithm, exploration-diffuse TS or \edts, which offers an extra layer of self-correction, making it more robust to non-stationarity and respondent self-selection. The algorithm draws on the popular $\epsilon$-greedy technique (\textbf{Shea: need reference to e-greedy here}), which mixes greedy sampling with uniform sampling. But instead of being greedy for $1-\epsilon$ samples, \edts follows standard TS; for $\epsilon$ samples, \edts does not necessarily sample items uniformly but draws parameters from a more diffuse posterior distribution where the variance inflation is controlled by $\delta_p$.
+We propose an algorithm, exploration-diffuse TS or \edts, which offers an extra layer of self-correction, making it more robust to non-stationarity and respondent self-selection. The algorithm draws on the popular $\epsilon$-greedy technique \citep{SuttonBarto1998}, which mixes greedy sampling with uniform sampling. But instead of being greedy for $1-\epsilon$ samples, \edts follows standard TS; for $\epsilon$ samples, \edts does not necessarily sample items uniformly but draws parameters from a more diffuse posterior distribution where the variance inflation is controlled by $\delta_p$.
 
 \edts, which intuitively hedges its bets on the most preferred characteristics, is a generalized version of TS. It directly nests standard TS, similar to the way a two-component mixture model nests a pooled model without segments. As $\epsilon \to 0$, the diffuse distribution is never used, so the algorithm collapses to standard TS. As $\delta_p \to 1$, the diffuse distribution becomes equivalent to the non-diffuse distribution. 
 
@@ -763,41 +763,29 @@ As \edts nests $\epsilon$-greedy sampling, \edtsthres encompass $\epsilon$-greed
 \includegraphics[width=0.5\textwidth]{plots/maxdiffpop}
 \end{center}
 \end{figure}
-MaxDiff is a preference measurement and characteristic scaling method. In a MaxDiff questionnaire, the researcher asks respondents for their most and least preferred items out of a set and repeats the choice task for subsequent sets. Initially proposed by~\cite{louviere1991best}, MaxDiff was first released as a software system in 2004 by Sawtooth Software. Since its release, its popularity has increased steadily, and the technique was used by more than 70\% of Sawtooth Software users in 2017 (Figure \ref{fig:pop}). 
+MaxDiff is a preference measurement and characteristic scaling method. In a MaxDiff questionnaire, the researcher asks respondents for their most and least preferred items out of a set and repeats the choice task for subsequent sets. Initially proposed by~\cite{louviere1991best}, MaxDiff was first released as a software system in 2004 by Sawtooth Software. Since its release, its popularity has increased steadily, and the technique was used by more than 70\% of Sawtooth Software users in 2017 (Figure \ref{fig:pop}). These users are practitioners of marketing research and consumer insights across industries.
 
-The MaxDiff approach provides more discrimination among items and respondents than traditional rating scales \citep{cohen2004s}. It also avoids the scale-use bias common to traditional ratings techniques (Louvier; Chrzan). (\textbf{Shea: Incomplete citation})
+The MaxDiff approach provides more discrimination among items and respondents than traditional rating scales \citep{cohen2004s}. It also avoids the scale-use bias common to traditional ratings techniques \citep{marley2005some,chrzan2006empirical}.
 
-The MaxDiff technique is closely related to conjoint analysis, but MaxDiff allows the respondent to select a best and worst item instead of only one. In its most common form, MaxDiff may be thought of as a one-attribute, choice-based conjoint study with many levels. The differences between conjoint and MaxDiff in their static form are not as relevant for large-scale ranking and selection problems as the differences between the adaptive versions, as the adaptive conjoint objective differs from our objective.
+The MaxDiff technique is closely related to conjoint analysis, but MaxDiff allows the respondent to select a best and worst item instead of only one, which is what makes it best-worst scaling \citep{marley2005some}. In its most common form, MaxDiff may be thought of as a one-attribute, choice-based conjoint study with many levels. But MaxDiff can be applied to full-profile multi-attribute alternatives as well \citep{marley2012models}. The differences between conjoint and MaxDiff in their static form are not as relevant for large-scale ranking and selection problems as the differences between the adaptive versions, as the adaptive conjoint objective differs from our objective.
 
 \subsection{Studying Many Items with MaxDiff}
-\textbf{Shea: Seems like this section could be trimmed. Maybe two paragraphs and the fig.} 
 
-Market reseachers have found MaxDiff increasingly useful for analyzing large numbers of possible consumer preferences, and the definition of ``large'' has changed in recent years. \cite{hendrix2007alternative} describe ``large sets'' as about 40 to 60 items, proposing MaxDiff variants Augmented and Tailored MaxDiff to handle them. \cite{wirth2012largeset} also investigated MaxDiff variants, Express and Sparse MaxDiff, for handling ``very large sets'' of more than 100 items. The researchers conduct a simulation study of robotic respondents using 120 items and a real study among consumer respondents with 60 items.
+Market researchers used MaxDiff for analyzing large numbers of possible consumer preferences, and the definition of ``large'' has changed in recent years. \cite{hendrix2007alternative} describe ``large sets'' as about 40 to 60 items, proposing MaxDiff variants Augmented and Tailored MaxDiff to handle them. \cite{wirth2012largeset} also investigated MaxDiff variants, Express and Sparse MaxDiff, for handling ``very large sets'' of more than 100 items. The researchers conduct a simulation study of robotic respondents using 120 items and a real study among consumer respondents with 60 items. In this paper, we refer to even larger numbers of survey items, at least 100 items and potentially 300 or more. Our goal is to explore how algorithms scale and how market researchers can push MaxDiff further than ever before.
 
-We refer to even larger numbers of survey items, potentially 300 or more. The motivation is both academic and practical, as we explore how algorithms scale and how market researchers can push MaxDiff further than ever before. 
+A 2015 Sawtooth Software customer feedback survey revealed users' need to accommodate more consumer preference items (see Appendix, Figure \ref{fig:max_and_purpose}). Nearly 20\% of respondents indicated their firms had conducted a study with more than 50 items; the maximum was 400. However, according to Sawtooth Software guidance for typical problems, the recommended number of items for a MaxDiff study is about 30, and the alternative profiles recommended for a conjoint study is about 20. The respondents were also asked the main purpose for their large-scale MaxDiff studies. For 42\% of the studies, the main purpose was to identify the top or top few items. Our research shows that for such settings, traditional design strategies can be wasteful, and an adaptive approach can save firms time and money.
 
-\begin{figure}
-\caption{A 2015 Sawtooth Software customer feedback survey explored the maximum number of items users studied via MaxDiff (top: mean= 40, median=30, maximum=400) and their main purpose in conducting a study with at least 41 items (bottom). } 
-\label{fig:max_and_purpose}
-\begin{center} 
-\includegraphics[width=0.7\textwidth]{plots/maxnumstudy}
-\includegraphics[width=0.7\textwidth]{plots/maxdiffpurpose}
-\end{center}
-\end{figure}
 
-A 2015 Sawtooth Software customer feedback survey revealed users' need to accommodate more consumer preference items (Figure \ref{fig:max_and_purpose}). It asked users for the largest number of items they had included in a MaxDiff study during the last 12 months. Nearly 20\% of respondents indicated their firms had conducted a study with more than 50 items; the maximum was 400. The typically recommended number of items for a MaxDiff study is about 30. The number of alternative profiles recommended for a conjoint study is about 20. (\textbf{Shea: citation needed})
+% One setting where practitioners consider MaxDiff studies with more than 50 or even 400 distinct product features or service characteristics is the way those items are defined. Those MaxDiff items may represent conjoined elements, like a combination of packaging style, color, claims, and highlighted ingredients. In addition, profiles involving multiple, highly interactive attributes pose challenges for choice-based conjoint analyses, making large-scale MaxDiff studies viable alternatives.
 
-Why are some researchers conducting MaxDiff studies with more than 50 or even 400 product or service characteristics? Individual MaxDiff items may represent conjoined elements, like a combination of packaging style, color, claims, and highlighted ingredients. In addition, profiles involving multiple, highly interactive attributes pose challenges for choice-based conjoint analyses, making large-scale MaxDiff studies viable alternatives.
-
-The 2015 survey also asked Sawtooth Software customers about the main purpose for their large-scale MaxDiff  studies. The reasons given for studies involving 41 or more items are displayed in Figure \ref{fig:max_and_purpose}. For 42\% of the studies, the main purpose was to identify the top or top few items. Our research shows traditional design strategies can be wasteful for this purpose. An adaptive approach using bandit algorithms can save firms time and money.
 
  % can be up to 4x more efficient-- without the Bandit Adaptive Maxdiff approach, you are potentially wasting 75 cents of every dollar you are spending on MaxDiff data collection. 
 
-\subsection{Standard MaxDiff Choice Model}
+\subsection{MaxDiff: A Best-Worst Scaling Choice Model}
 
-In a standard MaxDiff study, every respondent selects both the best and worst option from an available set of characteristics in each discrete choice task. The model for the data comes from a class known as best-worst scaling, one of which is MaxDiff. We adopt our framework from the best-worst scaling literature. For a review, see~\cite{marley2012models}, Marley 2010, and~\cite{marley2005some}. 
+In a standard MaxDiff study, every respondent selects both the best and worst option from an available set of characteristics in each discrete choice task. The model for the data comes from a class known as best-worst scaling, one of which is MaxDiff. We adopt our framework from the best-worst scaling literature \citep{marley2005some,marley2012models}. 
 
-If we have \emph{k} possible items and select a set \emph{S} for each choice task, we can define two random variables: best ($B_z$) and worst ($W_z$) for each $z \in S$.  We then define a third random variable, best-worst $BW_{r,s}$, for any $r,s \in S$. Following a random utility framework, the utilities have deterministic and stochastic components. Thurstone provides a consistent random utility model where each $\varepsilon_z$ features the extreme value distribution. Because the model is consistent, we have $B_z=-W_z=U_z$ and $BW_{r,s}=U_r-U_s$ and
+Suppose we have $k$ possible items and select a set, $S$, for each choice task. Then we can define two random variables: best ($B_z$) and worst ($W_z$) for each $z \in S$.  We then define a third random variable, best-worst $BW_{r,s}$, for any $r,s \in S$. Following a random utility framework, the utilities have deterministic and stochastic components. Thurstone provides a consistent random utility model where each $\varepsilon_z$ features the extreme value distribution. Because the model is consistent, we have $B_z=-W_z=U_z$ and $BW_{r,s}=U_r-U_s$ and
 \begin{align*}
 &B_z=v_z+\varepsilon_z\\
 &W_z=-v_z-\varepsilon_z\\
@@ -823,13 +811,11 @@ To accommodate the standard utility structure, we let utility $u(z)=\log{(b(z))}
 &W_S(y)=\frac{e^{u(y)}}{\sum_{z \in S} e^{u(z)}}\\
 &WB_S(x,y)=\frac{e^{u(x)-u(y)}}{\sum_{r,s \in S, r\neq s} e^{u(r)-u(s)}}.
 \end{align*}
-We can derive the same representation from the random utility model suggested by ~\cite{marley2005some}. We can view best-worst choice as a generalization of the classic multinomial logit technique for selecting best only.
+We can derive the same representation from the random utility model suggested by \cite{marley2005some}. We can view best-worst choice as a generalization of the classic multinomial logit technique for selecting best only.
 
-\subsubsection{Model Estimation}
+\subsubsection{Best-Worst Model Estimation}
 
-One way to estimate the MaxDiff choice model is to enumerate all possible pairs of items $x$ and $y$ and describe their joint probability of being best and worst, which is the probability of yielding the largest difference $BW_S(x,y)$ in consumer behavior. The pairwise approach scales quadratically for number of items. 
-
-We adopt an alternative approach reflecting the literature and practice that is shown to be a near exact approximation of~\cite{cohen2003maximum}. This allows us to estimate the best model and worst model independently, without explicitly estimating the best-worst probability.  (See Appendix for details.)
+One way to estimate the MaxDiff choice model is to enumerate all possible pairs of items and describe the joint probability of being best and worst. This is the probability of yielding the largest difference $BW_S(x,y)$ in consumer behavior. This pairwise approach is not practical because it scales quadratically for number of items. So, we adopt an alternative approach reflecting the literature and practice that is shown to be a near exact approximation of the full model \cite{cohen2003maximum}. This allows us to estimate the best model and worst model independently, without explicitly estimating the best-worst probability. (See Appendix for details.)
 
 %\textbf{Emphasize our goal is to identify the top items.}
 
@@ -837,7 +823,7 @@ We adopt an alternative approach reflecting the literature and practice that is 
 
 %We utilize the best available bandit alogrithms and draw upon the active learning and best k arm identification problems. Thompson Sampling involves allocating resources to an action in proportion to the probability that it is the best action~\cite{thompson1933likelihood}. 
 
-Bandit Adaptive MaxDiff incorporates adaptive learning as a natural method for solving top-set ranking and selection problems. Our approach leverages prior learning during survey administration to create more efficient questionnaires and more precise aggregate score estimates. On the one hand, we want to come to a conclusion about the relative importance of a large number of product or service characteristics within a MaxDiff problem. On the other hand, we want to utilize what we have learned as we go to target actions likely to allow the researcher greater precision. TS has proven useful for these types of problems \citep{schwartzetal2017,russo2017tutorial}.
+Our proposed approach, Bandit Adaptive MaxDiff, incorporates adaptive learning as a natural method for solving top-set ranking and selection problems. Our approach leverages prior learning during survey administration to create more efficient questionnaires and more precise aggregate score estimates. On the one hand, we want to come to a conclusion about the relative importance of a large number of product or service characteristics within a MaxDiff problem. On the other hand, we want to utilize what we have learned as we go to target actions likely to allow the researcher greater precision. TS has proven useful for these types of problems \citep{schwartzetal2017,russo2017tutorial}.
 
 For each of our survey respondents, we select $\numperset$ items and generate a MaxDiff design of $J$ best-worst tasks, each with a choice set of $|S|$ items. For example, as our empirical default, we use $\numperset=20$, $J=12$, and $|S|=5$, standard numbers used in MaxDiff studies \citep{wirth2012largeset}. 
 
@@ -875,7 +861,7 @@ The Bandit Adaptive MaxDiff base algorithm draws on TS to address the multi-arme
   
 \subsubsection{Learning with Bayesian Bootstrapping}
 
-For TS models, we first characterize parameter uncertainty. We use a multinomial logit model; the first but least practical option to obtain posterior draws would be to use the Markov Chain Monte Carlo, which would be too slow to update in real time. A more practical way to approximate the posterior is to sample from the asymptotic distribution via the maximum likelihood implied by the estimated mean and standard errors, a Laplace Approximation of the Posterior (\textbf{Shea: reminder to address previous citation comment})(CITE?). The Laplace approach reflects the estimated population preferences and normally distributed error, with standard deviations equal to the standard errors of the parameter estimates. The method would work quickly, but it forces the joint posterior into a multivariate normal distribution. 
+For TS models, we first characterize parameter uncertainty. We use a multinomial logit model; the first but least practical option to obtain posterior draws would be to use the Markov Chain Monte Carlo, which would be too slow to update in real time. A more practical way to approximate the posterior is to sample from the asymptotic distribution via the maximum likelihood implied by the estimated mean and standard errors, a Laplace Approximation of the Posterior \citep{tierney1986accurate}. The Laplace approach reflects the estimated population preferences and normally distributed error, with standard deviations equal to the standard errors of the parameter estimates. The method would work quickly, but it forces the joint posterior into a multivariate normal distribution. 
 
 We can obtain posterior samples using the Bayesian Bootstrap method by sampling weights $\beta$ for each respondent: $\beta_1,\beta_2,\ldots,\beta_N \sim \text{exp}(1)$. The weights are used for sampling respondents with replacements to form a new bootstrapped dataset. If a respondent is sampled, all the data is included in the bootstrapped sample. The probability of any one respondent $i$'s data being sampled in any one draw is $\beta_i / \sum_{i}^{N}\beta_i$.  For each bootstrapped dataset, we obtain parameter estimates of $\theta$ using a weighted  maximum likelihood estimate as follows:
 \begin{align}
@@ -921,13 +907,13 @@ Suppose  early respondents make choices leading the researchers to believe certa
 
 Such sampling could be too aggressive, as the natural parameter uncertainty is not sufficient. Or it may be too slow to adjust to large changes in the sampled respondents, reflecting either a shift in the population or that the earlier respondents are not representative of the broader population. This potential problem can be addressed with \edts.
 
+
 \begin{table}
-\caption{Summary of Adaptive MaxDiff Algorithms}
-\begin{tabular}{p{5cm}|p{11cm}}
-Algorithm & Short Description \\
+\begin{tabular}{p{3in}|p{3in}}
+Algorithm & Description of sampling scheme \\
 \hline
-MaxDiff TS & Sample from current posterior distribution, serve up $\numperset$ items with highest sampled utility.\\
-MaxDiff $\epsilon$-Diffuse TS & Sample from current posterior distribution, serve up $(1-\epsilon)L$ items with highest sampled utility; sample from current diffuse posterior distribution, serve up $\epsilon L$ items with highest sampled utility not in $(1-\epsilon)L$.\\
+MaxDiff TS & Take $\numperset$ items with highest utility sampled from the posterior.\\
+MaxDiff $\epsilon$-Diffuse TS & Take $(1-\epsilon)L$ items with highest utility sampled from the regular posterior; sample from diffuse posterior distribution, and take $\epsilon L$ items with highest sampled utility from remaining items.\\
 $\epsilon$-Greedy & Take $(1-\epsilon)L$ with greatest current estimated $\theta$; take remaining $\epsilon L$ uniformly from remaining items.\\
 TS Closest to the Threshold & Take $\numperset$ items with sampled utility closest to $\frac{u_k+u_{k+1}}{2}$.\\
 $\epsilon$-Diffuse TS Closest to the Threshold & Take $(1-\epsilon)L$ (from posterior) and  $\epsilon L$ (from diffuse posterior) items with sampled utility closest to $\frac{u_k+u_{k+1}}{2}$.\\
@@ -935,10 +921,10 @@ $\epsilon$-Greedy Closest to the Threshold & Take $(1-\epsilon)L$ items with est
 Misclassification Minimization with Random Perturbation& Take $\numperset$ items most likely misclassified (bottom items that should be top and vice-versa); add perturbation to probability.\\
 Greatest Uncertainty with Random Perturbation& Take $\numperset$ items with probabilities of being top at closest to 50\%; add perturbation to probability.\\
 \end{tabular}
-\label{methods}
+\caption{Summary of Adaptive MaxDiff Algorithms.}\label{methods}
 \end{table}
 
-\textbf{Shea: Make captions for all tables flush left}
+% \textbf{Shea: Make captions for all tables flush left}
 
 %%Discuss relation to the Follow the regularized leader / perturbed leader 
 
@@ -1008,8 +994,8 @@ After the first 200 respondents, the Fixed Express design obtains a top-three hi
 Figure \ref{fig:effects_epsilon_delta} shows how $\epsilon$ and $\delta$ affect performance. 
 
 \begin{figure}
-\caption{The plots show performance with $\epsilon = 1/2$ (left) and $\epsilon = 1/4$ (right), with multiple lines in each plot: $\delta = 1/2$ (\textbf{Shea: insert correct color}) and $\delta = 1/4$ (\textbf{Shea: insert correct color}). Each of the plots show standard \ts ($\epsilon = 0$, $\delta =1$) performance.}
-
+\caption{The plots show performance with $\epsilon = 1/2$ (left) and $\epsilon = 1/4$ (right), with multiple lines in each plot: $\delta = 1/2$ (dash-dot) and $\delta = 1/4$ (dash). Each of the plots show standard \ts ($\epsilon = 0$, $\delta =1$) performance.}
+% Need to remove \delta = 0 from plots.
 \label{fig:effects_epsilon_delta}
  	\begin{center}
     \subfloat[$\epsilon=1/2$]{{\includegraphics[width=.4\textwidth]{plots/hr120v20k10e2.pdf} }}%
@@ -1517,6 +1503,18 @@ As of this article's publication date, Sawtooth Software does not offer Bandit A
 \newpage
 
 \section*{Appendix} 
+
+
+\begin{figure}
+\caption{A 2015 Sawtooth Software customer feedback survey explored the maximum number of items users studied via MaxDiff (top: mean= 40, median=30, maximum=400) and their main purpose in conducting a study with at least 41 items (bottom). } 
+\label{fig:max_and_purpose}
+\begin{center} 
+\includegraphics[width=0.7\textwidth]{plots/maxnumstudy}
+\includegraphics[width=0.7\textwidth]{plots/maxdiffpurpose}
+\end{center}
+\end{figure}
+
+
 \subsection*{A1. Model Estimation Details}
 For any individual-task combination, let $Y_{B_S}(z)$ be the binary choice variable, where $Y_{B_S}(z)$ equals 1 if the item is selected as best in the set $S$ and 0 otherwise. $Y_{W_S}(z)$ is the indicator of whether item $z \in S$ is selected as worst. The design matrix $X_{B_S}$ (of size $|S|$-by-$N$) contains indicator variables taking on a value of 1 for each item in the current set $S$ and 0 otherwise. To signal the item as worst, we set $X_{W_S}=-X_{B_S}$, so $X_{W_S}$ contains values of 0 or -1. We express the negative likelihood of the choice data as a multinomial logit with choice probabilities in vector notation as
 \[
@@ -1531,9 +1529,9 @@ Our language about utility sometimes diverges from that used in conjoint or mult
 
 Because the MaxDiff approach is sparse for large numbers and rapid, real-time updates are required, we use the aggregate multinomial logit model rather than a Bayesian approach. The log-likelihood can be written as
 \[
-LL(\theta)=-\sum_{n=1}^N \sum_{x \in S_n} (Y_{B_{S_n}}(x)\log{\frac{e^{\theta_x}}{\sum_{z\in S_n} e^{\theta_z}}}+ Y_{W_{S_n}}(x)\log{\frac{e^{-\theta_x}}{\sum_{z\in S_n} e^{-\theta_z}}}),
+LL(\theta)=\sum_{n=1}^N \sum_{x \in S_n} (Y_{B_{S_n}}(x)\log{\frac{e^{\theta_x}}{\sum_{z\in S_n} e^{\theta_z}}}+ Y_{W_{S_n}}(x)\log{\frac{e^{-\theta_x}}{\sum_{z\in S_n} e^{-\theta_z}}}),
 \]
-where $S_n$ denotes the nth set of choices. We find $\theta$ by minimizing the negative log-likelihood using Newton-Rapson. (\textbf{Shea: Need citation here}) 
+where $S_n$ denotes the nth set of choices. We then find $\theta$ that maximizes the log-likelihood. 
 
 \subsection*{Practical Considerations for Implementation}
 
@@ -1545,7 +1543,7 @@ Two practical issues should be considered when implementing Bandit Adaptive MaxD
 
 First, we want to avoid asking extremely similar questions of the same respondent. A natural consequence of adaptive methods is convergence: As the sample size grows, certain product or service characteristics achieve high preference scores with small standard errors. Without additional restrictions, the same few items will eventually be drawn into adjacent MaxDiff tasks for the same respondent. Although this is statistically most efficient, it upsets human respondents. 
 
-To avoid convergence, the system shows each respondent a fixed number of 20 to 30 items in a balanced, near-orthogonal design, leading to a low degree of repetition across adjacent sets. The approach is similar to Wirth's Express MaxDiff approach (\textbf{Shea: Need citation here}), but the 20 items selected for each respondent are adaptive, leveraging information from the previous respondents and focusing the most recent respondent's efforts on discriminating among items already judged preferential. The approach also keeps the respondent from tiring out, as he or she is not forced to address 120 items at a time.
+To avoid convergence, the system shows each respondent a fixed number of 20 to 30 items in a balanced, near-orthogonal design, leading to a low degree of repetition across adjacent sets. The approach is similar to Express MaxDiff \citep{wirth2012largeset}, but the 20 items selected for each respondent are adaptive, leveraging information from the previous respondents and focusing the most recent respondent's efforts on discriminating among items already judged preferential. The approach also keeps the respondent from tiring out, as he or she is not forced to address 120 items at a time.
 
 Second, we must update the data with regular frequency. If respondents take a firm's survey sequentially, all the data from previous participants can be used to generate new surveys. Often, however, this does not occur. As an alternative, the administrator can update the data once every $b$ respondents complete the survey and then decide the questions for the next $b$ individuals. We call this batch size and in our empirical analysis let $b=20$.
 
