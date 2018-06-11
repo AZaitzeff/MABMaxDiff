@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% To toogle between Marketing Science / INFORMS format, 
-%%%%%%% search for: %KMSC_FORMAT% 
+%%%%%%% search for: %MKSC_FORMAT% 
 %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -11,11 +11,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %\documentclass[mksc,blindrev]{informs3} % current default for manuscript submission
 
-%MKSC_FORMAT% \documentclass[nonblindrev]{informs3}
-\documentclass[a4paper,11pt]{article}
+%MKSC_FORMAT% 
+\documentclass[nonblindrev]{informs3}
+%\documentclass[a4paper,11pt]{article}
 
 
-%MKSC_FORMAT% \OneAndAHalfSpacedXI % current default line spacing
+%MKSC_FORMAT% 
+\OneAndAHalfSpacedXI % current default line spacing
 % %\OneAndAHalfSpacedXII
 % %%\DoubleSpacedXII
 % %%\DoubleSpacedXI
@@ -138,7 +140,6 @@
 }
 %{Bandit MaxDiff: Best-Item Identification for Large-Scale Idea Screening} 
 
-
 %%%%%%%%%%%%%%%%
 \begin{document}
 %%%%%%%%%%%%%%%%
@@ -171,7 +172,7 @@
 
 
 \end{center}
-\newpage
+
 
 % Outcomment only when entries are known. Otherwise leave as is and 
 %   default values will be used.
@@ -213,21 +214,24 @@
 % \RUNAUTHOR{Jones, Miller, and Wilson}
 % \RUNAUTHOR{Jones et al.} % for four or more authors
 % Enter authors following the given pattern:
-%\RUNAUTHOR{}
+%MKSC_FORMAT% 
+\RUNAUTHOR{Schwartz et al.}
 
 % Title or shortened title suitable for running heads. Sample:
 % \RUNTITLE{}
 % Enter the (shortened) title:
-%MKSC_FORMAT% \RUNTITLE{Bandit MaxDiff}
+%MKSC_FORMAT% 
+\RUNTITLE{Bandit MaxDiff}
 
 
 % Full title. Sample:
 % \TITLE{Bundling Information Goods of Decreasing Value}
 % Enter the full title:
-%MKSC_FORMAT% \TITLE
+%\titleofthispaper \\
+%MKSC_FORMAT% 
+\TITLE{Active Learning for Ranking and Selection: Idea Screening with Bandit MaxDiff}
 
 
-\titleofthispaper \\
 \vspace{1mm}
 	% OLD TITLES
 
@@ -237,25 +241,32 @@
 	%{\\Technical Appendix for ISMS Practice Prize}
 
 
-\textbf{Abstract:}
-%MKSC_FORMAT% \ABSTRACT
-{% % Enter your abstract
-Marketing research often measures consumers' preferences to identify what they consider most important items among candidates, such as product benefits, innovative features, or message appeals. Common techniques for identifying preferences are idea screening and choice tasks, including conjoint analysis and maximum-difference (MaxDiff) scaling. These methods, however, are not built for large-scale problems, like identifying the best 30 items out of hundreds. For large MaxDiff studies, the researchers propose a new approach, Bandit MaxDiff, which can increase efficiency four-fold over standard MaxDiff scaling by identifying the most influential preferred items with fewer survey respondents. The proposed solution leverages information from initial respondents, so later respondents receive designs oversampling the items most likely to be the in the overall top set. Instead of learning all preference parameters with equal precision, Bandit MaxDiff estimates the parameters of most interest to the respondent with more precision. The methods are implemented empirically using multiple MaxDiff surveys: one from Proctor \& Gamble, another consumer packaged goods manufacturer, and various synthetic datasets. Through a series of simulation experiments, a range of benchmark algorithms are considered to illustrate under what conditions the proposed approach performs comparably to existing methods and when it performs much better. The researchers' approach draws on both the classic multi-armed bandit literature, active learning in statistical machine learning, and recent work on the best k-arm identification problem. Several new components, which can apply outside the idea screening and preference measurement problem, are introduced to the algorithms to (a) control robustness in a changing environment when using Thompson Sampling, (b) allow the algorithms to learn an unranked (versus ranked) top set, and (c) evaluate a set of approximations to posterior sampling to allow faster model updates.
 
-}~ \\
+%MKSC_FORMAT% 
+\ABSTRACT
+%\textbf{Abstract:}
+{% % Enter your abstract
+Marketing research often measures consumers' preferences to identify what they consider most important items among many candidates, such as product benefits, innovative features, or message appeals. While the objective of existing methods is typically to estimate parameters representing all preferences, these problem settings call for a different pair of potential goals: minimize the cost to correctly select the best items, or given a fixed budget, maximize the accuracy and precision of estimated preferences for the best items. This goal is especially important in settings with extremely large numbers of items. Common techniques for identifying preferences are idea screening and choice tasks, including conjoint analysis and maximum-difference (MaxDiff) scaling, however, are not built for large-scale problems, like identifying the best 30 items out of hundreds. 
+
+The researchers propose a new approach, rooted in active learning and multi-armed bandit algorithms from statistical machine learning, to overcome this scale and make goal-directed adaptive ranking and selection problems more efficient. As an example, the authors use MaxDiff as an illustration, proposing a new approach, Bandit MaxDiff, which can increase efficiency four-fold over standard MaxDiff scaling by identifying the most influential preferred items with fewer survey respondents. The proposed solution leverages information from initial respondents, so later respondents receive designs oversampling the items most likely to be the in the overall top set. Instead of learning all preference parameters with equal precision, Bandit MaxDiff estimates the parameters of most interest to the respondent with more precision. The methods are implemented empirically using multiple MaxDiff surveys: one from Proctor \& Gamble, another consumer packaged goods manufacturer, and various synthetic datasets. Through a series of simulation experiments, a range of benchmark algorithms are considered to illustrate under what conditions the proposed approach performs comparably to existing methods and when it performs much better. The researchers' approach draws on both the classic multi-armed bandit literature, active learning in statistical machine learning, and recent work on the best k-arm identification problem. Several new components, which can apply outside the idea screening and preference measurement problem, are introduced to the algorithms to (a) control robustness in a changing environment when using Thompson Sampling, (b) allow the algorithms to learn an unranked (versus ranked) top set, and (c) evaluate a set of approximations to posterior sampling to allow faster model updates.
+
+} ~ \\
 
 
 % Fill in data.
 
-\textbf{Keywords:}
-%MKSC_FORMAT% \KEYWORDS
+
+%MKSC_FORMAT% 
+\KEYWORDS
+%\textbf{Keywords:}
 {idea screening, maximum-difference surveys, MaxDiff, adaptive conjoint, active learning, multi-armed bandit, best arm identification, Bayesian bootstrap, best-worst scaling, Thompson Sampling, uncertainty minimization}
 
 
 
 %\textbf{Outdated Abstract, see Introduction.} For large MaxDiff studies whose main purpose is identifying the top few items for the sample, a new adaptive approach called Adaptive MaxDiff may increase efficiency fourfold over standard non-adaptive MaxDiff.  Adaptive MaxDiff leverages information from previous respondents via aggregate logit and Thompson Sampling so later respondents receive designs that oversample the topmost items that are most likely to turn out to be the overall winners. Our approach applies beyond MaxDiff problems to a more general set of bandit problems. We propose a flexible algorithm, $\epsilon$-Diffuse Thompson Sampling (TS), which nests traditional TS. Blending ideas from $\epsilon$-greedy in machine learning and Bayesian approaches, this is a more robust version of TS, which a manager can control with tuning parameters. For instance, being less risk averse, one may drawn more items from diffuse posteriors, making the algorithm robust to changing environments, even extreme non-stationarity. We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. Beyond showing our approach outperforms better than current methods, we show under which conditions it performs even better than (larger problems) or just as well as existing methods (smaller problems).
 
-%MKSC_FORMAT%  \maketitle
+%MKSC_FORMAT%  
+\maketitle
 
 
 
