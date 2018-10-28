@@ -229,7 +229,7 @@
 % Enter the full title:
 %\titleofthispaper \\
 %MKSC_FORMAT% 
-\TITLE{Active Learning for Ranking and Selection: Idea Screening with Bandit MaxDiff}
+\TITLE{Active Learning for Ranking and Selection in Marketing: Efficient Idea Screening with Bandit MaxDiff}
 
 
 \vspace{1mm}
@@ -246,9 +246,7 @@
 \ABSTRACT
 %\textbf{Abstract:}
 {% % Enter your abstract
-Marketing research often measures consumers' preferences to identify what they consider most important items among many candidates, such as product benefits, innovative features, or message appeals. While the objective of existing methods is typically to estimate parameters representing all preferences, these problem settings call for a different pair of potential goals: minimize the cost to correctly select the best items, or given a fixed budget, maximize the accuracy and precision of estimated preferences for the best items. This goal is especially important in settings with extremely large numbers of items. Common techniques for identifying preferences are idea screening and choice tasks, including conjoint analysis and maximum-difference (MaxDiff) scaling, however, are not built for large-scale problems, like identifying the best 30 items out of hundreds. 
-
-The researchers propose a new approach, rooted in active learning and multi-armed bandit algorithms from statistical machine learning, to overcome this scale and make goal-directed adaptive ranking and selection problems more efficient. As an example, the authors use MaxDiff as an illustration, proposing a new approach, Bandit MaxDiff, which can increase efficiency four-fold over standard MaxDiff scaling by identifying the most influential preferred items with fewer survey respondents. The proposed solution leverages information from initial respondents, so later respondents receive designs oversampling the items most likely to be the in the overall top set. Instead of learning all preference parameters with equal precision, Bandit MaxDiff estimates the parameters of most interest to the respondent with more precision. The methods are implemented empirically using multiple MaxDiff surveys: one from Proctor \& Gamble, another consumer packaged goods manufacturer, and various synthetic datasets. Through a series of simulation experiments, a range of benchmark algorithms are considered to illustrate under what conditions the proposed approach performs comparably to existing methods and when it performs much better. The researchers' approach draws on both the classic multi-armed bandit literature, active learning in statistical machine learning, and recent work on the best k-arm identification problem. Several new components, which can apply outside the idea screening and preference measurement problem, are introduced to the algorithms to (a) control robustness in a changing environment when using Thompson Sampling, (b) allow the algorithms to learn an unranked (versus ranked) top set, and (c) evaluate a set of approximations to posterior sampling to allow faster model updates.
+Marketing research often measures consumers' preferences to identify what they consider most important items among many candidates, such as product benefits, innovative features, or message appeals. While the objective of existing methods is typically to estimate parameters representing all preferences, these problem settings call for a different pair of potential goals: minimize the cost of correctly select the best items while ensuring high the accuracy and precision of estimated preferences for the best items. This goal is especially important in settings with extremely large numbers of items. Common techniques for identifying preferences are idea screening and choice tasks, including conjoint analysis and maximum-difference (MaxDiff) scaling, however, are not built for large-scale problems, like identifying the best dozen items out of hundreds. This research proposes a new approach, rooted in active learning and multi-armed bandit algorithms from statistical machine learning, to overcome this scale and make goal-directed adaptive ranking and selection problems more efficient. Using MaxDiff as an illustration of the broader class of problems, the research proposes a new approach: Bandit MaxDiff. The empirical studies shows Bandit MaxDiff can increase efficiency four-fold over standard MaxDiff scaling by identifying the most influential preferred items with fewer survey respondents. The proposed solution use information from initial respondents, so later respondents receive designs oversampling the items most likely to be the in the overall top set. Instead of learning all preference parameters with equal precision, Bandit MaxDiff estimates the parameters of most interest to the respondent with more precision. The methods are implemented empirically using multiple MaxDiff surveys: one from Proctor \& Gamble, consumer packaged goods manufacturer, and various synthetic datasets. Through a series of simulation experiments, a range of benchmark algorithms are considered to illustrate under what conditions the proposed approach out performs existing methods. The researchers' approach draws on both the classic multi-armed bandit literature, active learning in statistical machine learning, and recent work on the best k-arm identification problem. Several new components, which can apply outside the idea screening and preference measurement problem, are introduced to the algorithms to (a) control robustness in a changing environment when using Thompson Sampling, (b) allow the algorithms to learn an unranked (versus ranked) top set, and (c) evaluate a set of approximations to posterior sampling to allow faster model updates.
 
 } ~ \\
 
@@ -287,16 +285,11 @@ The researchers propose a new approach, rooted in active learning and multi-arme
 
 \newpage
 
-% Text of your paper here
+% ASK GUI LIBERALI HOW TO CITE 2015 SAWTOOTH PAPER
+
 \section{Introduction}
 
-% Firms collect more customer data than ever. While much of that is behavioral data (e.g., purchases, clicks, visits, etc.), market research still relies on surveys (e.g., preference measurement) at an increasingly large scale. And 
-
-Firms measure consumers' preferences to identify the characteristics most important to them among a set of candidates, such as product benefits, new features, or message appeals. Measurement techniques commonly include idea screening surveys, such as choice-based conjoint analysis and maximum-difference (MaxDiff), or best-worst, scaling. 
-
-The measurement techniques, however, are not built for large-scale problems, like identifying the best set of 20 items out of 100 alternatives. As managers push preference measurement methods onto a larger scale, market researchers must collect data from more customers via surveys, increasing costs. Therefore, managers seek to increase the information gained per dollar spent on survey respondents. 
-
-The problem we address appears across a range of marketing settings. Consider the following managerial decisions where the common challenge is to identify the best items out of many:
+Firms measure consumers' preferences to identify the characteristics most important to them among a set of candidates, such as, product benefits, new features, or message appeals. For instance, consider the following managerial decisions:
 
 \begin{itemize}
 	\item \emph{Crowd-sourced feature selection.} Technology companies have long invited consumers to provide ideas for new products and improvements. For example, automotive companies offer complex products, such as self-driving cars, with different bundles of hundreds of possible features. Consumer surveys reveal the most preferred features to help the firms decide which should be included on each model.
@@ -304,20 +297,78 @@ The problem we address appears across a range of marketing settings. Consider th
 	\item \emph{Marketing communications.} As products are developed, firms must decide which consumer benefits to emphasize. Consumer packaged goods companies use marketing research to determine which product claims should be central to an advertising campaign and shown on packaging. Out of hundreds of potential benefits, they must select a handful for marketing messages.
 \end{itemize}
 
-In this paper, we develop a new method to solve large-scale idea screening challenges that decreases expenses and increases information gained per dollar spent on surveys. The method, known as Bandit MaxDiff, leverages algorithms from multi-armed bandit literature and active learning for ranking and selection problems from the computer science field. The approach can be approximated for real-time execution.
+These problems share a common challenge to identify the best items out of many facing uncertainty and limited resources. These problems call for a manager to output a list of top items in one of two forms: (A) select the highest ranked top set (unordered) or (B) select the top set and rank the items within the set (ordered). With all of the resources and time, these problems are solved with more data. But in practice, data collection is costly, so there is a desire to solve these problems by using data, such as actual customer surveys, more efficiently.  Therefore, managers seek to increase the information gained per dollar spent on survey respondents. 
 
-The Bandit MaxDiff approach is best used in settings characterized by the following elements:
+This research puts forward a family of adaptive data collection methods. While these are rooted in the statistical machine learning literatures, including Thompson Sampling \citep{thompson1933likelihood}, our methods are heuristics that we show to have strong empirical performance because they are comprised of new components proposed here. Among these novel adaptive sampling extensions are: 
+%(1) sampling from a finite mixture of two posteriors (instead of one), balance exploration versus exploitation to be more robust in practice; (2) selecting to observe items with maximum expected loss based on Bayesian decision theory, but done efficiently using approximate posterior sampling; and (3) thresholding by oversampling items close to the decision boundary. 
 \begin{itemize}
-\item \emph{Finite budget.} The market researcher tests preferred characteristics by surveying target customers, which carries a high opportunity cost.
-\item \emph{Loss function.} The market researcher's ultimate decision about preferred characteristics is directly linked to learning-ranking and selection.
-\item \emph{Sequential data collection.} Data can be collected one respondent at a time.
-\item \emph{Pool of inputs.} The decision maker sees all possible preferred characteristics and selects which to observe.
-\item \emph{Stochastic output.} After selecting a characteristic, the revealed preference is a noisy signal.
+\item (1) sample the item that maximizes \emph{conditional minimized Bayes risk}, efficiently using approximate posterior sampling; 
+\item (2) oversample items close to a \emph{threshold}, the decision boundary; and 
+\item (3) sample from a mixture of posteriors (regular one and a more diffuse distribution) to making the exploration-exploitation balance more robust in practice.
+\end{itemize}
+We consider the methods' performance relative to each other and against benchmarks. All the algorithms follow the same broad steps of our general adaptive approach (Algorithm \ref{alg:general}).
+
+While our approach is general, we illustrate an application to one instance in the class of analogous problems, idea screening for large numbers of items using consumer preference measurement with maximum-difference scaling, a form of best-worst scaling preference measurement in which consumer respondents select their most and least preferred alternatives from a set. 
+
+To do this, we instantiate our framework in this setting, proposing, \emph{Bandit MaxDiff}. We demonstrate that this new method is the best-performing available adaptive MaxDiff, in particular, for large numbers ideas. While idea screening methods typically involve preference measurement surveys, such as choice-based conjoint and MaxDiff, they are designed for measuring preferences among, say, 20 ideas, but are not built for large-scale problems, like identifying the best set of 20 ideas out of 100 alternatives. Yet as managers push preference measurement methods into a larger scale, market researchers must collect data from more respondents via surveys or more involved interviews, increasing costs, especially if those respondents are actual customers.
+
+We illustrate the Bandit MaxDiff approach empirically through a suite of simulations based on other MaxDiff and with an in-market live test. Working with Procter \& Gamble (P\&G), we show the new method can increase efficiency 2.5 to 4 times over current MaxDiff practices by accurately identifying the best items more quickly with fewer respondents. Developed in collaboration Sawtooth Software, Bandit MaxDiff is shown to cut costs for large MaxDiff studies conducted to identify respondents’ most preferred items, allowing the potential savings of millions of dollars in market research budgets. 
+
+We provide evidence of implementing the approach in real-time with P\&G. Compared to the firm's standard approaches to ranking and selection problems, P\&G witnessed a 240\% increase in efficiency in a live, in-market head-to-head randomized-controlled experiment. We provide evidence via simulations with up to 400\% improvement; the approach appears to be applicable to other firms facing similar problems. The simulation studies use multiple past MaxDiff surveys administered by P\&G to analyze the range of potential savings and how different conditions lead to more modest or extreme savings.
+
+How much cost savings could a company like P\&G experience using our new approach? Consider the cost of a typical online data collection effort. Costs to develop customized consumer target segments can range from \$6 to \$18 per completed consumer sample task. For a large study analyzing 50 to 150 or more possible preferences, desired sample sizes are usually between 1,000 and 3,000 respondents, meaning each survey costs \$18,000 to \$54,000. Bandit MaxDiff can decrease the required sample size by 2 to 4 times. With sample size savings of 500 to 2,000 respondents, cost savings could be in the range of \$3,000 to \$36,000.
+
+Like the problem that Bandit MaxDiff resolves, the broader class of problems, which the methodology in this paper addresses, is characterized by the following elements:
+\begin{itemize}
+\item \emph{Limited budget.} Surveys target customers carries a high opportunity cost to asking them about ideas that do not help finding the most preferred ones.
+\item \emph{Loss function.} The market researcher's ultimate decision (e.g., selecting the most preferred ideas) is linked to learning their relative ranking and/or preference values, directly.
+\item \emph{Sequential data collection.} Data from past respondents can be used to determine what to ask the next respondent.
+\item \emph{Pool of ideas.} The decision-maker knows all possible ideas up-front and selects which ask respondents about next.
+\item \emph{Stochastic output.} After asking respondents about ideas, the revealed preference is a noisy signal of true preference.
 \end{itemize}
 
-We illustrate the Bandit MaxDiff approach empirically through best-worst scaling preference measurement (i.e., MaxDiff), in which consumer respondents select their most and least preferred characteristics from a set. Working with Procter \& Gamble (P\&G), we show the new method can increase efficiency 2.5 to 4 times over current MaxDiff practices by accurately identifying the best items more quickly with fewer respondents. 
+\begin{algorithm}
+\caption{Sketch of Adaptive Data-Collection} \label{alg:general}
+\begin{algorithmic}[1]
+\State Initialize with a uniform sample.
+\While {Stopping rule not satisfied:} 
+\State Collect new data for selected items.
+\State Update model estimates and characterize uncertainty.
+\State Select items for next round.
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
 
-Developed and deployed with Sawtooth Software, a provider of conjoint analysis and MaxDiff applications, Bandit MaxDiff is shown to cut costs for large MaxDiff studies conducted to identify respondents’ most preferred items, allowing the potential savings of millions of dollars in market research budgets. 
+The specific proposed approach builds on algorithms initially developed and commonly used for \emph{multi-armed bandit} problems in the marketing literature \citep{HauserEtAl2009,schwartzetal2017,Scott2010,urban2013morphing}. The traditional bandit problem epitomizes the "earning while learning" challenge, which seeks to identify the best way to allocate fixed resources to competing alternatives while maximizing gains. Our problem departs from the standard bandit challenge and requires updates to the known algorithms.
+
+But the problem we address is more aligned with the related \emph{best arm identification} \citep{russo2016simple}. While the traditional bandit problem accumulates maximum reward for the researcher throughout all rounds $1$ to $T$ (i.e., it identifies items delivering the most sales/clicks/etc.), in best arm identification, the goal is to correctly select the best arm (or subset of best $k$ arms) out of all only in the final round $T$. Since thee marketer derives no reward for the initial rounds, best arm identification is known as a \emph{pure learning} problem, as opposed to the typical bandit problem which is an \emph{earning while learning} problem
+
+A generalization of the best $k$ arm identification problem is known as the \emph{ranking and selection}, in which the decision maker tries to learn the true ranking of all items or a subset of items to choose the most preferred option. The problem typically does not necessarily involve sequential data collection and does not feature stochastic observations, but both features can appear in variants.
+
+Sequential ranking and selection problems often appear in the field of active learning \citep{balcan2009agnostic,dasgupta2008general}. While established in the theoretical statistics and machine learning literature, active learning rarely appears in marketing studies. One exception is \citep{dzyabura2011activelearn}, in which active learning algorithms are considered as decision-making heuristics for individual consumers. 
+
+Active learning algorithms are typically assumed to be deterministic observations for the sequential problem of ranking and selection. Labels are revealed with certainty and do not have to be revisited. In stochastic ranking and selection problems, the observations are values sampled from a distribution with unknown parameters.
+
+Surprisingly, only recently the literature has made explicit links between the \emph{active learning}, \emph{best arm identification}, and \emph{multi-armed bandit problems}. \cite{gantigray2013}, for example, ... b
+
+
+Our problem is a sequential stochastic ranking and selection problem. We also consider circumstances in which ranking does not matter within the selected subset, which is characterized by the best k-arm identification problem. The framework we employ therefore draws on both the active learning and multi-armed bandit methods.
+
+We also consider the practical implementation of the three algorithms, including their scalability and speed. We provide alternative, faster versions that may sacrifice theoretical statistical validity. Some fast heuristics, however, perform well.
+
+
+
+To illustrate the effectiveness of Bandit MaxDiff, we first formalize our problem and the general framework to be used. We highlight the framework's active learning and bandit components, relating it to the marketing and statistical machine learning literature. After formalizing the discrete choice model for analyzing MaxDiff data, we introduce Bandit MaxDiff as a particular instance of the broader algorithm. We then present our empirical results in the standard setting, as well as variants of the main results. We implement the methods using a MaxDiff survey administered by Sawtooth Software and P\&G. 
+
+
+
+\eric{ending new intro here}
+
+ -- the selection and the selection with ranking -- 
+
+In this paper, we develop a new method to solve large-scale idea screening challenges that decreases expenses and increases information gained per dollar spent on surveys. The method, Bandit MaxDiff, uses algorithms from multi-armed bandit literature and active learning for ranking and selection problems from the computer science field. 
+
+
 
 
 
@@ -368,38 +419,11 @@ Developed and deployed with Sawtooth Software, a provider of conjoint analysis a
 
 %We introduce a first step to make MaxDiff adaptive in a principled manner by using MAB and AL methods. We build on an increasingly accepted method of solving multi-armed bandit problems, Thompson Sampling. We introduce multiple versions: MaxDiff-\ts, its generalization MaxDiff \edts, and \edtsthres. The \edts nests traditional TS. We combine ideas from $\epsilon$-greedy in machine learning and Bayesian approaches to produce a more robust version of TS,  which a manager can control with tuning parameters. For instance, if a manager wants to be extra conservative and maintaining more samples drawn from diffuse posteriors, she will make the algorithm robust to changing environments, even extreme non-stationarity. We also build on another pair of related methods, \mismin and \uncert with perturbations, common in active learning settings. 
 
-The approach builds on algorithms initially developed and commonly used for multi-armed bandit problems in the marketing literature \citep{HauserEtAl2009,schwartzetal2017,Scott2010,urban2013morphing}. The traditional bandit problem epitomizes the "earning while learning" challenge, which seeks to identify the best way to allocate fixed resources to competing alternatives while maximizing gains. Our problem departs from the standard bandit challenge and requires updates to the known algorithms.
 
-The problem we address is more aligned with the related best arm identification bandit problem \citep{russo2016simple}, more generally known as best k-arm identification. While the traditional bandit problem accumulates maximum reward for the researcher throughout all rounds 1 to \emph{T} (i.e., it identifies items delivering the most sales/clicks/etc.), in best arm identification, the goal is to correctly select the best subset of all possible preferred characteristics only in the final round $T$. Since thee marketer derives no reward for the initial rounds, best arm identification is known as a pure learning problem.
 
-A generalization of the k-arm identification problem is known as ranking and selection, in which the decision maker tries to learn the true ranking of all items or a subset of items to choose the most preferred option. The problem typically does not involve sequential data collection and does not feature stochastic observations, but both features can appear in variants.
 
-Sequential ranking and selection problems often appear in the field of active learning \citep{balcan2009agnostic,dasgupta2008general}. While established in the theoretical statistics and machine learning literature, active learning rarely appears in marketing studies. One exception is Dzyabura et al. (2011), in which active learning algorithms are considered as decision-making heuristics for individual consumers. 
 
-Active learning algorithms are typically assumed to be deterministic observations for the sequential problem of ranking and selection. Labels are revealed with certainty and do not have to be revisited. In stochastic ranking and selection problems, the observations are values sampled from a distribution with unknown parameters.
 
-Our problem is best characterized as a sequential stochastic ranking and selection problem. We also consider circumstances in which ranking does not matter within the selected subset, which is characterized by the best k-arm identification problem. The framework we employ therefore draws on both the active learning and multi-armed bandit problem-solving methods.
-
-We propose three new methods building on Thompson Sampling (TS), rooted in reinforcement learning and dynamic optimization problem solving. We consider the methods' performance relative to each other and against benchmarks. All the algorithms follow the same broad steps of our general adaptive approach (Algorithm \ref{alg:general}).
-
-\begin{algorithm}
-\caption{General Adaptive Method} \label{alg:general}
-\begin{algorithmic}[1]
-\State Initialize with a uniform sample.
-\State Collect new data for selected items.
-\State Update model parameter estimates and characterize uncertainty.
-\State Select items for next data collection.
-\State When stopping rule is not satisfied, repeat steps 2 to 5.
-\end{algorithmic}
-\end{algorithm}
-
-We also consider the practical implementation of the three algorithms, including their scalability and speed. We provide alternative, faster versions that may sacrifice theoretical statistical validity. Some fast heuristics, however, perform well.
-
-We provide evidence of implementing the approach in real-time with P\&G. Compared to the firm's standard approaches to ranking and selection problems, P\&G witnessed a 240\% increase in efficiency in a live, in-market head-to-head randomized-controlled experiment. We provide evidence via simulations with up to 400\% improvement; the approach appears to be applicable to other firms facing similar problems. The simulation studies use multiple past MaxDiff surveys administered by P\&G to analyze the range of potential savings and how different conditions lead to more modest or extreme savings.
-
-How much cost savings could a company like P\&G experience using our new approach? Consider the cost of a typical online data collection effort. Costs to develop customized consumer target segments can range from \$6 to \$18 per completed consumer sample task. For a large study analyzing 50 to 150 or more possible preferences, desired sample sizes are usually between 1,000 and 3,000 respondents, meaning each survey costs \$18,000 to \$54,000. Bandit MaxDiff can decrease the required sample size by 2 to 4 times. With sample size savings of 500 to 2,000 respondents, cost savings could be in the range of \$3,000 to \$36,000.
-
-To illustrate the effectiveness of Bandit MaxDiff, we first formalize our problem and the general framework to be used. We highlight the framework's active learning and bandit components, relating it to the marketing and statistical machine learning literature. After formalizing the discrete choice model for analyzing MaxDiff data, we introduce Bandit MaxDiff as a particular instance of the broader algorithm. We then present our empirical results in the standard setting, as well as variants of the main results. We implement the methods using a MaxDiff survey administered by Sawtooth Software and P\&G. 
 
 % \eric{Note on flow:
 % Transition from edts to active learning by talking about adaptive conjoint.  polyhedral method isn't quite right because including an item doesn't bisect the uncertainty ellipsoid. But picking the one with maximum certainty could still be good. 
@@ -762,8 +786,6 @@ We show how \edts performance varies with different $\epsilon$ and $\delta$ valu
 % \label{fig:ed}
 % \end{figure}
 
-%\eric{ AZ will re-run tests on \edts for different combinations of values of $\epsilon=1/2,1/4,0$ and $\delta=1,1/2,1/4,nearly 0 effectively uniform)$, almost do the whole crossproduct except avoid redundancies.} \alexander{to ES: Which ones do you want to keep? see figure \ref{fig:ed}} 
-
 \subsubsection{Exploration Diffuse with Threshold}
 
 To define an exploration-diffuse TS version with a threshold (\edtsthres), we begin with two draws: $u_R$ from the standard posterior and $u_D$ from the diffuse posterior. We calculate threshold-based item scores $s_R$ and $s_D$ for each and take $(1- \epsilon) \numperset$ items with the best $s_R$ scores and $\epsilon \numperset$ items, with the best $s_D$ scores not already included. 
@@ -800,11 +822,11 @@ A 2015 Sawtooth Software customer feedback survey revealed users' need to accomm
 
 In a standard MaxDiff study, every respondent selects both the best and worst option from an available set of characteristics in each discrete choice task. The model for the data comes from a class known as best-worst scaling, one of which is MaxDiff. We adopt our framework from the best-worst scaling literature \citep{marley2005some,marley2012models}. 
 
-Suppose we have $k$ possible items and select a set, $S$, for each choice task. Then we can define two random variables: best ($B_z$) and worst ($W_z$) for each $z \in S$.  We then define a third random variable, best-worst $BW_{r,s}$, for any $r,s \in S$. Following a random utility framework, the utilities have deterministic and stochastic components. Thurstone provides a consistent random utility model where each $\varepsilon_z$ features the extreme value distribution. Because the model is consistent, we have $B_z=-W_z=U_z$ and $BW_{r,s}=U_r-U_s$ and
+Suppose we a set, $S$, for each choice task. Then we can define two random variables: best ($B_z$) and worst ($W_z$) for each $z \in S$.  We then define a third random variable, best-worst $BW_{r,s}$, for any $r,s \in S$. Following a random utility framework, the utilities have deterministic and stochastic components. Thurstone provides a consistent random utility model where each $\gamma_z$ features the extreme value distribution. Because the model is consistent, we have $B_z=-W_z=U_z$ and $BW_{r,s}=U_r-U_s$ and
 \begin{align*}
-&B_z=v_z+\varepsilon_z\\
-&W_z=-v_z-\varepsilon_z\\
-&BW_{r,s}=v_r-v_s+\varepsilon_r-\varepsilon_s.
+&B_z=v_z+\gamma_z\\
+&W_z=-v_z-\gamma_z\\
+&BW_{r,s}=v_r-v_s+\gamma_r-\gamma_s.
 \end{align*}We can write the probability an item is the best and worst as
 \begin{align*}
 &B_S (x)= Pr⁡( B_x=\max_{z \in S} B_z)\\
@@ -859,7 +881,7 @@ Bandit MaxDiff uniquely translates our current beliefs about parameters into dec
 \begin{algorithmic}[1]
 \State Given: $K,\numperset,J,S,b$.
 \State Initialize first set of questions by sampling $\numperset$ items uniformly.
-\State Design MaxDiff questionnaire covering $\numperset$ items with $J$ tasks of $S$ questions each, $\text{MDDesign}(L,S,J)$, for the next batch of $b$ respondents.
+\State Design MaxDiff questionnaire covering $\numperset$ items with $J$ tasks of $S$ questions each, $\text{MDDesign}($\numperset$,S,J)$, for the next batch of $b$ respondents.
 \State Collect new data from respondents with $n = b*t$ respondents.
 \State Bayesian Bootstrap sample weight replacement using weights ($\alpha_1, ...., \alpha_n)\sim \text{expon}(1)$, obtaining some subset of $n$ previous respondents.
 \State Estimate model parameters ($\theta_t$) and obtain estimated utilities $u = (u_1,...,u_K)$.
@@ -1038,7 +1060,7 @@ Figure \ref{fig:K120_L20_k3hit_k10hit} and Table \ref{table:at_260_500} show the
     \subfloat[Top 20]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k20thres.pdf} }}%
 	\end{center}
 \end{figure}
-%\eric{Please make y-axes the same across all k for the K120 L20 problem. Only show \fixedexpress,\egreedy, \ts,\edts with usual values, and their thresholding counter parts, \egreedythres, \tsthres, \edtsthres. Why is \ts better than \tsthres for $k=10$?  Explain why in a good way \tsthres always does worse than \edtsthres. }
+%\eric{Why is \ts better than \tsthres for $k=10$?  Explain why in a good way \tsthres always does worse than \edtsthres. }
 
 \begin{figure}%
     \caption{For top $k=20$ with 120 items and 20 items per person, the cumulative hit rate obtained (y-axis) improves with the number of respondents interviewed (x-axis) at different rates for each algorithm. }%
@@ -1050,7 +1072,6 @@ Figure \ref{fig:K120_L20_k3hit_k10hit} and Table \ref{table:at_260_500} show the
 	\end{center}
 \end{figure}
 
-%\eric{\fixedexpress, \egreedy, WinApprox (for later), \ts,\edts with usual values, \edtsthres.}
 
 \begin{figure}%
     \caption{For top $k=\{3,10\}$ with 120 items, the cumulative hit rate obtained (y-axis) improves with the number of respondents interviewed (x-axis) at different rates for each algorithm.}%
@@ -1062,7 +1083,7 @@ Figure \ref{fig:K120_L20_k3hit_k10hit} and Table \ref{table:at_260_500} show the
 	\end{center}
 \end{figure}
 
- %\eric{Please make y-axes the same across all k for the K120 L20 problem. Only show \fixedexpress, \ts,\edts with usual values, \tsthres, \edtsthres. Why is \ts better than \tsthres for $k=10$?   }
+ %\eric{Why is \ts better than \tsthres for $k=10$?   }
 
 \begin{figure}%
     \caption{For top $k=\{3,10\}$ with 120 items, the cumulative hit rate obtained (y-axis) improves with the number of respondents interviewed (x-axis) at different rates for each algorithm. The plots show results using the \fixedexpress, \edtsthres, \mismin, and \uncert algorithms.}%
@@ -1074,7 +1095,6 @@ Figure \ref{fig:K120_L20_k3hit_k10hit} and Table \ref{table:at_260_500} show the
 	\end{center}
 \end{figure}
 
-%\eric{Please make y-axes the same across all k for the K120 L20 problem.}
 
 \begin{figure}%
     \caption{The plot shows hit rates for top $k=\{20,40\}$ with 120 items.}%
@@ -1086,7 +1106,6 @@ Figure \ref{fig:K120_L20_k3hit_k10hit} and Table \ref{table:at_260_500} show the
     \end{center}
 \end{figure}
 
-%\eric{Please make y-axes the same across all k for the K120 L20 problem.}
 
 % \begin{figure}
 % \caption{3 Hit Rate with 120 items}
@@ -1173,8 +1192,6 @@ TS alone has its limits---it is constructed to select the best items (and eventu
 \end{figure}
 
 Why do the threshold-based algorithms, \edtsthres, \uncert, and \mismin, outperform those without thresholds? Imagine showing three items out of six (A, B, C, D, E, and F) to a respondent. We want to identify the top three items. Let A, B, C, D, E, and F be the utility order. We are certain A and B are in the top three, and E and F are not. An algorithm without thresholding would pick A, B, and either C or D. A will be chosen as the best item, and C or D will be chosen as the worst, giving us no new information. An algorithm with thresholding will pick C, D, and either B or E. In either case, the respondent will be forced to compare C and D, providing information about which is in the top three. This is illustrated in Figure \ref{fig:Frequency}, where \edts focuses on the top items and \edtsthres provides more of a spread and focuses on items near rank 20.
-
-%\eric{Add plots highlighting these differences under a few conditions} 
 
 % \eric{Add a Takeaway from each section beginning here.} In conclusion, \textbf{we find ... }
 
@@ -1510,7 +1527,7 @@ As of this article's publication date, Sawtooth Software does not offer Bandit M
 % CASE 1: BiBTeX used to constantly update the references 
 %   (while the paper is being written).
 \bibliographystyle{informs2014} % outcomment this and next line in Case 1
-\bibliography{source,activelearning,banditbib,banditpricingbib} % if more than one, comma separated
+\bibliography{source,activelearning,banditbib,banditpricingbib,mktg_activelearn} % if more than one, comma separated
 
 % CASE 2: BiBTeX used to generate mypaper.bbl (to be further fine tuned)
 %\input{mypaper.bbl} % outcomment this line in Case 2
