@@ -345,11 +345,14 @@ But the problem we address is more aligned with the related \emph{best arm ident
 
 A generalization of the best $k$ arm identification problem is known as the \emph{ranking and selection}, in which the decision maker tries to learn the true ranking of all items or a subset of items to choose the most preferred option. The problem typically does not necessarily involve sequential data collection and does not feature stochastic observations, but both features can appear in variants.
 
-Sequential ranking and selection problems often appear in the field of active learning \citep{balcan2009agnostic,dasgupta2008general}. While established in the theoretical statistics and machine learning literature, active learning rarely appears in marketing studies. One exception is \citep{dzyabura2011activelearn}, in which active learning algorithms are considered as decision-making heuristics for individual consumers. 
+Sequential ranking and selection problems often appear in an area known as active learning \citep{balcan2009agnostic,dasgupta2008general}. 
+
+While established in the theoretical statistics and machine learning literature, active learning rarely appears in marketing studies. One exception that explicitly uses active learning algorithms to optimize preference measurement is \cite{huang2016consumer}, which employs active learning for support-vector machines. Another application, \cite{dzyabura2011activelearn}, uses active learning algorithms to be decision-making heuristics for individual consumer learning. 
 
 Active learning algorithms are typically assumed to be deterministic observations for the sequential problem of ranking and selection. Labels are revealed with certainty and do not have to be revisited. In stochastic ranking and selection problems, the observations are values sampled from a distribution with unknown parameters.
 
-Surprisingly, only recently the literature has made explicit links between the \emph{active learning}, \emph{best arm identification}, and \emph{multi-armed bandit problems}. \cite{gantigray2013}, for example, ... b
+Surprisingly, only recently the literature has made explicit links between the \emph{active learning} and \emph{multi-armed bandit problems} \citep{gantigray2013bridgealmab}, and the \emph{best arm identification} is a bridge between the two.
+
 
 
 Our problem is a sequential stochastic ranking and selection problem. We also consider circumstances in which ranking does not matter within the selected subset, which is characterized by the best k-arm identification problem. The framework we employ therefore draws on both the active learning and multi-armed bandit methods.
@@ -367,6 +370,16 @@ To illustrate the effectiveness of Bandit MaxDiff, we first formalize our proble
  -- the selection and the selection with ranking -- 
 
 In this paper, we develop a new method to solve large-scale idea screening challenges that decreases expenses and increases information gained per dollar spent on surveys. The method, Bandit MaxDiff, uses algorithms from multi-armed bandit literature and active learning for ranking and selection problems from the computer science field. 
+
+
+
+Cite adaptive conjoint a bit more. 
+
+
+What to review before showing proposed algorithms. 
+2.1- active learning, Bayesian ELO
+2.2- bandit basics, using Thompson sampling
+2.3- best arm bandit, Top Two Thompson Sampling
 
 
 
@@ -478,6 +491,10 @@ In this paper, we develop a new method to solve large-scale idea screening chall
 % Active learning, ranking and selection, noisy labels (outcomes), re-sampling,
 % Bandit, ranking and selection, noisy labels (outcomes), re-sampling,v
 
+2.1- active learning, Bayesian ELO \\
+2.2- bandit basics, using Thompson sampling\\
+2.3- best arm bandit, Top Two Thompson Sampling\\
+
 \subsection{Active Learning with Bayesian Decision Theory}
 
 In a sequential decision making problem for marketing, the researcher wants to learn the relative ranking of many potential consumer preferences. Facing uncertainty about the items, the researcher can select which to learn about in subsequent customer interactions.
@@ -524,7 +541,7 @@ What is the consequence of selecting $x$ where expected loss would be largest? A
 
 The ELO principle dictates the researcher selects data that maximizes the minimized expected loss  to update the model and take the optimal action, as it will lead to the largest decrease in generalized loss. In other words, the example where even the best decision would be most incorrect is chosen for observtion. 
 
-\subsection{Standard Active Learning and Binary Classification}
+\subsubsection{Standard Active Learning and Binary Classification}
 
 Consider the binary classification active learning problem. Formally, the binary classification output is $y \in \mathcal{Y} = \{-1,+1\}$, and the action is the prediction $a$, which in this case is also within the set $\{-1,+1\}$. Since the loss is also binary, $l(a,y)=0$ if $a=y$ and $1$ if $a \neq y$. 
 
@@ -561,7 +578,7 @@ For binary classification, an active learning strategy would select the next dat
 
 
 
-\subsection{Departures from Standard Active Learning}
+\subsubsection{???Departures from Standard Active Learning}
 
 The sequential ranking and selection problem for market researchers departs from standard active learning in several ways. First, in standard active learning problems, the true labels $y$ for each $x$ are revealed with certainty. But in the marketing problem, the researcher observes noisy reflections of underlying utilities in the form of partial rank ordering. The environment we consider is stochastic, while the data generating process is typically deterministic. The active learning literature \citep{GolovinEtAl2010noisy,NatarajanEtAl2013noisy} calls the labels produced ``noisy."
 
@@ -602,21 +619,20 @@ This is the most general form of a ranking and selection problem, which includes
 % - Decisions can be made in batches of $b$ respondents per period.
 
 
-\subsection{Connection to the Multi-Armed Bandit Problem}
-Our approach to solving large scale ranking and selection problems builds on state-of-the-art multi-armed bandit and active learning algorithms from both the machine learning and reinforcement learning literature.
-
-\subsubsection{Standard Bandit}
+\subsection{Multi-Armed Bandit Problem}
 
 In the standard multi-armed bandit problem, the decision maker seeks to maximize reward by sequentially selecting one of $n$ arms, $x_1,\ldots,x_n$, with unknown mean rewards. Suppose the mean rewards are item utilities captured by $\theta = \{u_1, \ldots, u_n\}$. The essential problem is how to trade off ``earning" (selecting the arm that offers the best utility at the time) versus ``learning" (selecting other arms to reduce uncertainty). The tradeoff has recently been explored in optimizing marketing experiments for online advertising ~(Liberali et al.; \cite{schwartzetal2017,urban2013morphing}) and website morphing \citep{hauser2009website}. 
 
-While the repeat selection of arms in the canonical bandit problem is similar to the Bandit MaxDiff procedure, the loss function differs significantly. Instead of considering reward only at the final action $a$ at ending time $T$, the new objective function considers cumulative reward throughout all periods $t=1,2,...,T$. Each selection of $x$ is itself another action $a$; instead of simply observing labels or outcomes $y$, $y(x_t)$ is the reward from selecting $x_t$ and accumulates as $\sum_{t=1}^{T} y(x_t)$. The standard bandit loss function represents cumulative regret, the gap between optimal and realized performance, and therefore the expected loss represents cumulative expected regret, defined as
+Instead of considering reward only at the final action $a$ at ending time $T$, the new objective function considers cumulative reward throughout all periods $t=1,2,...,T$. Each selection of $x$ is itself another action $a$; instead of simply observing labels or outcomes $y$, $y(x_t)$ is the reward from selecting $x_t$ and accumulates as $\sum_{t=1}^{T} y(x_t)$. The standard bandit loss function represents cumulative regret, the gap between optimal and realized performance, and therefore the expected loss represents cumulative expected regret, defined as
 \begin{align}
 E_y[ l(a,u) ] = E_y[ \sum_{t=1}^{T} y^{*} - y(x_t) ] 
 = u^{*}T - \sum_{t=1}^{T} u(x_t), 
 \end{align}
 where the sequence of arms $x_1,x_2,\ldots,x_t$ will contain repeats since $n << T$. The number of arms is small relative to periods, and re-sampling arms to reduce uncertainty is the central problem. 
 
-We frame our decision theoretic setup similarly, as others have (Russo et al. 2018). The optimal choice for $x$ naturally differs from what is implied by the ELO principle. One particular multi-armed bandit method amenable to multivariate parametric models is TS, an asymptotically optimal, Bayes risk-minimizing strategy. TS has been proven to be a nearly optimal bandit algorithm \citep{RussoVanRoy2015}. 
+\subsubsection{Thompson Sampling}
+
+The optimal choice for $x$ naturally differs from what is implied by the ELO principle \citep{longchapelle2010active}. One particular multi-armed bandit method amenable to multivariate parametric models is TS, an asymptotically optimal, Bayes risk-minimizing strategy. TS has been proven to be a nearly optimal bandit algorithm \citep{RussoVanRoy2015}. 
 
 We define TS using the posterior distribution, $P(\theta|D)$, as a stochastic decision, selecting arm $x_i$ with probability
 \begin{align} 
@@ -624,7 +640,7 @@ w_i = \int_\theta \mathbf{1}_i\left\{ u_\theta(x_i) = \max_{j=1,\ldots,n} u_\the
 \end{align}
 in which the probability arm $x_i$ is the truly optimal arm $\text{arg}\max_{j=1,\ldots,n} u_\theta(x_j)$ with the highest mean reward. 
 
-TS is extremely flexible, requiring only the ability to draw from a posterior distribution. This is typically done numerically, using an empirical posterior like Markov Chain Monte Carlo or the Bayesian Bootstrap. TS has been studied in marketing (Schwartz et al. 2017) and operations research (Russo Van Roy 2014). For a review, see Russo et al. 2018. 
+TS is extremely flexible, requiring only the ability to draw from a posterior distribution. This is typically done numerically, using an empirical posterior like Markov Chain Monte Carlo or the Bayesian Bootstrap. TS has been studied in marketing (Schwartz et al. 2017) and operations research \citep{RussoVanRoy2014}. For a review, see \cite{russo2017tutorial}. 
 
 \subsubsection{Best Arm Identification}
 
@@ -632,11 +648,17 @@ The standard bandit problem solution maximizes average cumulative reward by bala
 
 As in active learning problems, the loss function depends only on a single decision, selecting the arm after $T$ periods. The reward is a key distinction: For a bandit problem, it is observed immediately (e.g., click, acquisition, purchase). And while best arm identification features immediate observations (e.g., consumer choices reveal preferences), they do not represent reward. In fact, whether the best items have been correctly identified cannot be evaluated in real-time during the data collection process. 
 
-The problem of identifying the best arms among a set has historically received little focus, but it has recently attracted attention in the computer science literature \citep{gabillon2012best,kalyanakrishnan2012pac,kaufmann2016complexity,kaufmann2013information,russo2016simple}, in part due to an increase in rigorous study of A/B testing. The best arm identification problem is distinct because it involves pure learning, where the canonical bandit problem calls for a learning-earning tradeoff. 
+The problem of identifying the best arms among a set has historically received little focus. But it has recently attracted attention in the computer science literature \citep{gabillon2012best,jamieson2014lil,kalyanakrishnan2012pac,kaufmann2016complexity,kaufmann2013information,russo2016simple}, in large part due to an increase in rigorous study of A/B testing. The best arm identification problem is distinct because it involves pure learning, where the canonical bandit problem calls for a learning-earning tradeoff. 
 
 Recent theoretical advances show the value of adding perturbations, such as in Follow The Perturbed Leader~\citep{kalai2005efficient}. Others show adding perturbations with Gumbel-distributed noise leads to an optimal multi-armed bandit strategy~\citep{abernethy2015fighting,kujala2005following}. The perturbation methods provide an intuitive randomization decision strategy appropriate for our application, but their connection to other approaches and applications are limited. Perturbation resolves the learning-earning tradeoff for the stochastic multi-armed bandit setting and improves pure learning in the active setting, but it also goes further in the adversarial setting. This suggests the strategy is more robust in an environment with non-random dynamic changes.
 
-\section{Proposed Algorithms} 
+
+\subsubsection{Top Two Thompson Sampling}
+\cite{russo2016simple}
+
+
+
+\section{Proposed New Algorithms for General Problem: Best-Arm Identification} 
 
 We propose a set of new algorithms using TS as the common base to solve our general problem, which features three dimensions: (1) maximizing minimized expected loss; (2) heuristics oversampling at the threshold; and (3) a diffuse exploration distribution. We illustrate these with alternative approximation methods of posterior sampling: asymptotic distribution and Bayesian Bootstrap.
 
@@ -792,6 +814,12 @@ To define an exploration-diffuse TS version with a threshold (\edtsthres), we be
 
 As \edts nests $\epsilon$-greedy sampling, \edtsthres encompass $\epsilon$-greedy. We use the scores $s_i=|u_i - |$ for $c=\frac{u_k+u_{k+1}}{2}$ and take the $((1-\epsilon)L)$ best but sample the remaining scores uniformly (i.e., the most diffuse distribution).
 
+
+\section{Bandit MaxDiff}
+
+Now we instantiate the general set of algorithms in the particular setting of applying the propose algorithms -- inspired by bandits and active learning -- to develop a better procedure for adaptive MaxDiff. First, we formally review MaxDiff, and then integrate the newly proposed methods based on Thompson Sampling.
+
+
 \section{Preference Measurement}
 \subsection{Idea Screening and MaxDiff Scaling}
 \begin{figure}
@@ -889,8 +917,9 @@ Bandit MaxDiff uniquely translates our current beliefs about parameters into dec
 \State Select next questions for respondents.
 \end{algorithmic}
 \end{algorithm}
-
 % $S=\#\{\mathcal{S}\}$
+
+
 
 \subsection{Bandit MaxDiff and Posterior Sampling} \label{sec:bmd_ts_edts}
 
@@ -979,28 +1008,39 @@ Greatest Uncertainty with Random Perturbation& Take $\numperset$ items with prob
 
 % \subsubsection{Algorithm Misclassification Minimization}
 
-\subsubsection{Fixed Express MaxDiff}
+\subsubsection{Uniform Sampling: Fixed Express MaxDiff}
 We uniformly and randomly draw $\numperset$ of $K$ items without replacement to show to each respondent, achieving balance across items and respondents. For example, in a problem with $\numperset=20$ of $K=120$, each item appears $\frac{J*S}{L} = \frac{12*5}{20} = 3$ times per respondent on average.
 
 \subsubsection{$\epsilon$-Greedy}
 We test $\epsilon$-greedy as a baseline for our adaptive methods, letting $\theta$ be the current estimated parameters. We take the $(1-\epsilon)L$ items with the greatest $\theta$ value and choose the remaining $\epsilon L$ uniformly. We use $\epsilon=\frac{1}{4}$ for our empirical analysis and test others. For greedy alone, $\epsilon=0$ would always serve the top $\numperset$ items with the highest estimated average utility to subsequent survey respondents.
 
-\section{Empirical Analysis: Main Results}
+
+
+
+
+
+\section{Empirical Analysis: Main Results for Bandit MaxDiff}
 
 \label{sec:empirical_main}
 We compare our proposed set of adaptive approaches to existing adaptive and non-adaptive strategies. We use simulated choice data based on inferred preferences from an actual MaxDiff survey.
 
-\subsection{Data}
-Our data, which include 981 respondents and 120 items, come from a survey conducted by P\&G using Sawtooth Software. The items represent product features and benefits, but the subject matter and item text is hidden for confidentiality purposes. The questions come from a sparse MaxDiff study using a fixed, non-adaptive design with balance across all items and respondents. 
+\subsection{Simulation Experiment Setup}
 
-Instead of raw choice data, P\&G provides the individual-level posterior mean utilities for all respondents and items, which are obtained via Markov Chain Monte Carlo sampling for a hierarchical Bayes (HB) logit model. We call the individual-level utilities the true HB utilities. The utilities offer realistic preference patterns across the items and respondents and generate data for our respondent simulations.  Therefore, our simulated respondents mimic the actual respondents' preferences on average---to answer each new MaxDiff task, we perturb the true HB utilities by independent and identically distributed Gumbel error.
+\subsubsection{Data Generating Process}
 
-\subsection{Simulation Setup}
-To measure performance, we consider a range of metrics: item utilities' estimated rank order, correct hit rate for estimated top-ranked item sets, estimated top set utility values, and variability around estimated utilities. We obtain the measures by comparing estimates to true values. For each respondent batch, we run aggregate logits and compare the estimated utilities' current rank order to the true rank order for the known utilities, represented by aggregate averages across all respondents' true individual-level utilities. We run the simulations 100 independent times to obtain a distribution of measures. 
+Our dataset, consisting of 981 respondents and 120 items, comes from a survey conducted by P\&G using Sawtooth Software. The items represent product features and benefits, but the subject matter and item text is hidden for confidentiality purposes. The questions come from a sparse MaxDiff study using a fixed, non-adaptive design with balance across all items and respondents. 
 
-Our primary performance measure is \textbf{top $k$ hit rate}, or the percentage of true top $k$ items that appear in the estimated top $k$ set. For example, if the estimated scores identify seven of the true top-10 items, irrespective of order, the hit rate is 70\%. We use $k=3,10,20,40$. 
+Instead of raw choice data, we have the individual-level posterior mean utilities for all respondents and items, which are obtained via Markov Chain Monte Carlo sampling for a hierarchical Bayes logit model. We call these individual-level mean utilities the ``truth'' in our data-generating process. The utilities offer realistic preference patterns across the items and respondents and permit us to generate data for our respondent simulations.  Therefore, our simulated respondents mimic the actual respondents' preferences on average---to answer each new MaxDiff task, we perturb those true utilities with independent and identically distributed Gumbel error. 
 
-Hit rate is a natural consideration in an active learning problem. It evaluates the quality of the adaptive learning procedures with respect to the eventual decision. Hit rate is also related to regret in solving typical multi-armed bandit problems. It reflects how far we are from always selecting the truly best set of arms for all time periods. But our problem is not equivalent to the standard bandit setting, as we do not have an observed reward like clicks or purchases. 
+\subsubsection{Measure of Performance}
+
+After each batch of respondents, we run aggregate logit model to obtain current beliefs of utilities. We compare those current aggregate estimated utilities to the aggregate of the true aggregate-level utilities, which are the item-specific averaged across all true individual-level utilities. For every case, we run the simulations 100 independent times to obtain a distribution of measures. 
+
+Our primary performance measure is \textbf{top $k$ hit rate}: the proportion of items correctly chosen to be into the top set. That is, we compute the percentage based on the cumulative sum of instances when true top $k$ items that appear in the estimated top $k$ set at each time point. For example, if the estimated scores identify seven of the true top-10 items, irrespective of order, the hit rate for that period is 70\%. We consider a range, $k=3,10,20,40$, depending on the simulation setting. Hit rate is a natural consideration in an active learning problem. It evaluates the quality of the adaptive learning procedures with respect to the eventual decision of selection. It reflects how far we are from always selecting the truly best set of arms for all time periods. 
+
+But we clarify that this particular hit rate measure is appropriate if the goal of the business problem is selecting the top set. It does not consider the rank ordering within the top set (as a particular loss function for ranking would). And hit rate also does not explicitly evaluate the accuracy and precision of the estimated utilities compared to the truth, as mean squared error, MSE, would.  For the clarity and space, we do not show multiple performance measures for all simulations; only for some simulations settings later on, we will show performance in terms of alternative measures, including MSE of estimated utilities and estimated sum of utility values of the chosen top set compared to that of the true best set (akin to regret). The former should be preferable to hit rate, if the business problem is concerned with rank ordering within the top set.
+
+For the main simulation environment, we examine true aggregate utilities in Figure \ref{fig:util}. The differences among the top-item utilities make the task of identifying the truly best items quite difficult. With $K=120$ items in the dataset, we observe that the true preferences for approximately the top 15 respondents are within 1.0 on a logit scale in terms of utility. Due to how tightly the top items are clustered, the hit rate measures we employ are highly discriminating between competing methods.
 
 \begin{figure}[!ht]
 \caption{The plot shows the rank order and utility values on the logit scale for all 120 items in the survey, highlighting the top 10 (blue) and top three (red) items. The values become the means for the unobserved data-generating process.}
@@ -1008,42 +1048,54 @@ Hit rate is a natural consideration in an active learning problem. It evaluates 
 \label{fig:util} 
 \end{figure}
 
-The differences among the top-item utilities makes identifying the truly best items difficult (Figure \ref{fig:util}). With 120 items in the dataset, we observe that the true preferences for approximately the top 15 respondents are within 1.0 on a logit scale in terms of utility. Due to how tightly the top items are clustered, the hit rate measures we employ are highly discriminating between competing methods.
+\subsubsection{Simulation Experiment Design Factors}
 
-In the base setting, we simulate the process of collecting survey data from $N=500$ respondents in batches of $b=20$ per period, using bootstrap sampling with replacement from the original 981 individuals. We consider the first 20 respondents the initial group, which always receive $\numperset=20$ items uniformly selected for all methods. All adaptive methods begin after the 20th respondent. Each simulated respondent completes $J=12$ choice sets (best-worst tasks), where each set includes $S=5$ items.
+Every setting can be described by a tuple: $\{N,b,K,\numperset,J,S\}$. In the base setting, we simulate the process of collecting survey data about $K-120$ items from $N=500$ respondents in batches of $b=20$ per period. We use bootstrap sampling with replacement from the original dataset of 981 individuals. We consider the first batch of respondents to be initial group, which always receive $\numperset=20$ items uniformly selected, for all methods. In that sense, the adaptive methods only begin after the $20^{th}$ respondent. Each simulated respondent completes $J=12$ choice sets (best-worst tasks), and each set includes $S=5$ items. We then extend the base setting in a variety of dimensions -- $K$, $N$, $\numperset$, $J$ -- and measure performance by varying $k$.
 
-We test the different adaptive approaches found in Table \ref{methods}. For our base setting, we use ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$) for $\epsilon-\delta$TS methods. The natural benchmark is the existing fixed MaxDiff approach.
+We test the different adaptive approaches found in Table \ref{methods}. For our base setting, we begin use ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$) for methods involving $\epsilon-\delta$ TS. The natural benchmark common across is existing MaxDiff approach, Fixed Express.
 
-\subsection{Results: Greedy, Thompson Sampling, $\epsilon-\delta$ TS, and Fixed Express}
 
-Our initial results show even simple adaptive methods perform better for large scale ranking and selection problems than static approaches. But a simple adaptive greedy algorithm, which does not explicitly incorporate learning, does not perform well enough. Table \ref{fig:simple_result} shows how TS improves substantially over the greedy approach, and \edts shows even more improvement for hit rate.
+\subsection{Primary Results for Bandit MaxDiff}
+
+\subsubsection{Comparing Fixed Express, Greedy, Thompson Sampling, \edts}
+
+Our primary results highlight that the proposed adaptive methods \ts and \edts, central to Bandit MaxDiff, perform better for large MaxDiff problems than static approaches. But an adaptive greedy algorithm, which does not explicitly incorporate learning, does not perform well enough. Figure \ref{fig:simple_result} shows how \ts improves substantially over the greedy approach, and \edts shows even more improvement for hit rate.
 
 \begin{figure}
-\caption{The plots show results for the \fixedexpress, \egreedy, \ts, and \edts algorithms for k=3, K=120, and L=20. Performance represents cumulative hit rate per number of respondents at that point in time.}
+\caption{The plots show results for the \fixedexpress, \egreedy, \ts, and \edts algorithms for $k=3$, $K=120$, and $\numperset=20$. Performance represents cumulative hit rate per number of respondents at that point in time.}
 \label{fig:simple_result}
 \begin{center}
 	\includegraphics[width=.8\textwidth]{plots/hr120v20k3.pdf}
 \end{center}
 \end{figure}
 
-After the first 200 respondents, the Fixed Express design obtains a top-three hit rate of 60\%, where the TS-based approaches achieves a top-three hit rate of about 80\%. Practically, if a marketing researcher wants a hit rate of 80\%, the methods can achieve it with a smaller sample size. But the high performing adaptive methods are at least three times more efficient than the standard Fixed Express MaxDiff approach. This holds for the different values tested in the basic setting. 
+Practically speaking the results are significant. If a marketing researcher wants a hit rate of 80\%, the Bandit MaxDiff approach can achieve it \emph{at least three times more efficiently}: using a smaller sample size (about 160 respondents) than the standard Express MaxDiff approach (at least 500 respondents). As we will see the  holds for the different values tested in the basic setting.
+ 
+Viewed another way, we see that after 260 respondents the \ts and \edts have achieved hit rates of about 85\% when standard Express MaxDiff reaches 65\%. As more data are collected, the methods exhibit naturally diminishing returns to scale, as they asymptote close to 100\% hit rate and the non-adaptive approach is still improving. For clarity, to highlight differences, we only show a restricted range: above 50\% hit rate (y-axis) and the first 500 respondents (x-axis), but we the gains continue beyond 2,000 respondents for this problem. 
 
-Figure \ref{fig:effects_epsilon_delta} shows how $\epsilon$ and $\delta$ affect performance. 
+The exact average hit rates for $k=3,10,20,40$, averaged across 100 independent experiments, for this problem are reported in Table \ref{table:at_260_500}.
+
+We now turn to a comparison between the adaptive methods. While \edts slightly outperforms \ts and \egreedy, the gains are mostly earlier on. But we do not mean to overstate those differences in this problem setting. The performance gap between \edts and \ts widens dramatically when considering non-stationary settings, such as a misinformed start (see Section \ref{sec:robust}). 
+
+To better understand, how $\epsilon$ and $\delta$ affect performance of the \edts, we report the results from testing a range of values in Figure \ref{fig:effects_epsilon_delta}. These also display the top $k=10$ hit rate.
+
 
 \begin{figure}
 \caption{The plots show performance with $\epsilon = 1/2$ (left) and $\epsilon = 1/4$ (right), with multiple lines in each plot: $\delta = 1/2$ (dash-dot) and $\delta = 1/4$ (dash). Each of the plots show standard \ts ($\epsilon = 0$, $\delta =1$) performance.}
 % Need to remove \delta = 0 from plots.
 \label{fig:effects_epsilon_delta}
  	\begin{center}
-    \subfloat[$\epsilon=1/2$]{{\includegraphics[width=.4\textwidth]{plots/hr120v20k10e2.pdf} }}%
+    \subfloat[$\epsilon=1/2$]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k10e2.pdf} }}%
     \qquad
-    \subfloat[$\epsilon=1/4$]{{\includegraphics[width=.4\textwidth]{plots/hr120v20k10e4.pdf} }}%
+    \subfloat[$\epsilon=1/4$]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k10e4.pdf} }}%
     \end{center}
 \end{figure}
 
-The performance gap between TS and \edts widens dramatically when considering non-stationary settings, such as a misinformed start (see Section \ref{sec:robust}). 
+
 
 \subsection{Results: Thresholding, Uncertainty Reduction, Misclassification}
+
+
 
 Each algorithm selects $\numperset=20$ items to show every respondent. We examine hit rate for the top $k$ items, $k = \{3,10,20,40\}$. Smaller $k$ values make the problem more challenging early in the process, as selecting the top three out of 120 is more difficult than selecting the top 40 out of 120, particularly in light of the true utility value distribution (Figure \ref{fig:util}).  
 
