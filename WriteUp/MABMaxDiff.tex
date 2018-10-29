@@ -134,9 +134,12 @@
 \newcommand{\numperset}{L} 
 \newcommand{\topset}{\text{Top}_k} 
 
+
+\newcommand{\risk}{\mathcal{R}} 
+
 \newcommand{\titleofthispaper}{
-	\textbf{Active Learning for Ranking and Selection: \\
-	Idea Screening with Bandit MaxDiff} 
+	\textbf{Active Learning and Best Arm Identification: \\
+	Efficient Idea Screening with Bandit MaxDiff} 
 }
 %{Bandit MaxDiff: Best-Item Identification for Large-Scale Idea Screening} 
 
@@ -229,7 +232,7 @@
 % Enter the full title:
 %\titleofthispaper \\
 %MKSC_FORMAT% 
-\TITLE{Active Learning for Ranking and Selection in Marketing: Efficient Idea Screening with Bandit MaxDiff}
+\TITLE{Active Learning and Best Arm Identification: Efficient Idea Screening with Bandit MaxDiff}
 
 
 \vspace{1mm}
@@ -257,7 +260,7 @@ Marketing research often measures consumers' preferences to identify what they c
 %MKSC_FORMAT% 
 \KEYWORDS
 %\textbf{Keywords:}
-{idea screening, maximum-difference surveys, MaxDiff, adaptive conjoint, active learning, multi-armed bandit, best arm identification, Bayesian bootstrap, best-worst scaling, Thompson Sampling, uncertainty minimization}
+{best arm identification, multi-armed bandit, active learning, idea screening, adaptive maximum-difference surveys, best-worst scaling, Bayesian decision theory, Thompson Sampling, Bayesian bootstrap}
 
 
 
@@ -289,97 +292,88 @@ Marketing research often measures consumers' preferences to identify what they c
 
 \section{Introduction}
 
-Firms measure consumers' preferences to identify the characteristics most important to them among a set of candidates, such as, product benefits, new features, or message appeals. For instance, consider the following managerial decisions:
+Firms measure consumers' preferences to identify the characteristics most important to them among a set of candidates, such as, product benefits, features, or creative elements. Consider the following illustrative marketing problems:
 
 \begin{itemize}
-	\item \emph{Crowd-sourced feature selection.} Technology companies have long invited consumers to provide ideas for new products and improvements. For example, automotive companies offer complex products, such as self-driving cars, with different bundles of hundreds of possible features. Consumer surveys reveal the most preferred features to help the firms decide which should be included on each model.
-	\item \emph{Product assortment offerings.} Retailers can respond quickly to demand and consumer preferences by changing their product offerings. In anticipation of a new fashion season, an e-commerce retailer might survey customers to identify preferred styles and lines and select the range of items to make available.
-	\item \emph{Marketing communications.} As products are developed, firms must decide which consumer benefits to emphasize. Consumer packaged goods companies use marketing research to determine which product claims should be central to an advertising campaign and shown on packaging. Out of hundreds of potential benefits, they must select a handful for marketing messages.
+	\item \emph{Marketing communication.} As products are developed, marketers decide which consumer benefits to emphasize. Consumer packaged goods companies often use research to select a handful of benefits out of hundreds of ideas to determine which product claims should be central to an promotional campaign and shown on packaging. 
+	\item \emph{Crowd-sourced feature selection.} Companies bringing complex technologies to market are known to invite consumers to provide feedback on new product features and improvements. For example, automotive companies offer complex products, such as self-driving cars, with different bundles of hundreds of possible features, so surveying customers can reveal the most preferred ones inform which bundles should be offered.
+	\item \emph{Product assortment offerings.} Retailers can respond quickly to demand and consumer preferences by changing their product offerings. In anticipation of a new fashion season, an e-commerce retailer might survey trend-setting customers to identify preferred styles and select the range of items to make available.
 \end{itemize}
 
-These problems share a common challenge to identify the best items out of many facing uncertainty and limited resources. These problems call for a manager to output a list of top items in one of two forms: (A) select the highest ranked top set (unordered) or (B) select the top set and rank the items within the set (ordered). With all of the resources and time, these problems are solved with more data. But in practice, data collection is costly, so there is a desire to solve these problems by using data, such as actual customer surveys, more efficiently.  Therefore, managers seek to increase the information gained per dollar spent on survey respondents. 
+These problems share a common challenge to identify the best ideas out of many facing uncertainty and limited resources. These problems call for a manager to output a list of top ideas in one of two forms: (i) select the highest ranked top set of ideas (unordered) or (ii) select the top set and rank the ideas within the set (ordered). With unlimited resources, these problems are solved with more data. But in practice, data collection is costly, especially surveying or interviewing verified customers or potential customers in a target segment, so there is a need to solve these problems gathering data more efficiently.  Therefore, managers seek to increase the information gained per dollar spent on survey respondents. 
 
-This research puts forward a family of adaptive data collection methods. While these are rooted in the statistical machine learning literatures, including Thompson Sampling \citep{thompson1933likelihood}, our methods are heuristics that we show to have strong empirical performance because they are comprised of new components proposed here. Among these novel adaptive sampling extensions are: 
-%(1) sampling from a finite mixture of two posteriors (instead of one), balance exploration versus exploitation to be more robust in practice; (2) selecting to observe items with maximum expected loss based on Bayesian decision theory, but done efficiently using approximate posterior sampling; and (3) thresholding by oversampling items close to the decision boundary. 
+This paper addresses this decision optimization as it puts forward a family of adaptive data collection methods. These are rooted in the statistical machine learning literature, employing a common multi-armed bandit algorithm, Thompson Sampling \citep{thompson1933likelihood}, as the common building block, but we extend them in various ways. The resulting proposed methods are practical heuristics, which we show to have strong empirical performance attributed to new algorithmic elements proposed here: (1) sample the item that maximizes \emph{minimized Bayes risk}, of the selection decision rule while efficiently using posterior approximation techniques; (2) oversample items close to a \emph{threshold} reflecting the decision boundary; and (3) sample from a mixture of a posteriors and a more diffuse posterior distribution making the exploration-exploitation balance more robust to various issues that arise in practice. 
+
+By assembling these novel adaptive sampling elements, we formulate the family of methods that can efficiently solve both problems (i) and (ii) above for large numbers of items.\footnote{We use ``items'' and ``ideas'' interchangeably throughout.} We evaluate the methods' performance relative to each other and against benchmarks. All the algorithms follow the same broad steps of our adaptive approach, sketched in Algorithm \ref{alg:general}, which is general enough to to address an array of problems. That class of problems, which we will show has not been sufficiently addressed by existing methods, is characterized by the following elements:
 \begin{itemize}
-\item (1) sample the item that maximizes \emph{conditional minimized Bayes risk}, efficiently using approximate posterior sampling; 
-\item (2) oversample items close to a \emph{threshold}, the decision boundary; and 
-\item (3) sample from a mixture of posteriors (regular one and a more diffuse distribution) to making the exploration-exploitation balance more robust in practice.
-\end{itemize}
-We consider the methods' performance relative to each other and against benchmarks. All the algorithms follow the same broad steps of our general adaptive approach (Algorithm \ref{alg:general}).
-
-While our approach is general, we illustrate an application to one instance in the class of analogous problems, idea screening for large numbers of items using consumer preference measurement with maximum-difference scaling, a form of best-worst scaling preference measurement in which consumer respondents select their most and least preferred alternatives from a set. 
-
-To do this, we instantiate our framework in this setting, proposing, \emph{Bandit MaxDiff}. We demonstrate that this new method is the best-performing available adaptive MaxDiff, in particular, for large numbers ideas. While idea screening methods typically involve preference measurement surveys, such as choice-based conjoint and MaxDiff, they are designed for measuring preferences among, say, 20 ideas, but are not built for large-scale problems, like identifying the best set of 20 ideas out of 100 alternatives. Yet as managers push preference measurement methods into a larger scale, market researchers must collect data from more respondents via surveys or more involved interviews, increasing costs, especially if those respondents are actual customers.
-
-We illustrate the Bandit MaxDiff approach empirically through a suite of simulations based on other MaxDiff and with an in-market live test. Working with Procter \& Gamble (P\&G), we show the new method can increase efficiency 2.5 to 4 times over current MaxDiff practices by accurately identifying the best items more quickly with fewer respondents. Developed in collaboration Sawtooth Software, Bandit MaxDiff is shown to cut costs for large MaxDiff studies conducted to identify respondents’ most preferred items, allowing the potential savings of millions of dollars in market research budgets. 
-
-We provide evidence of implementing the approach in real-time with P\&G. Compared to the firm's standard approaches to ranking and selection problems, P\&G witnessed a 240\% increase in efficiency in a live, in-market head-to-head randomized-controlled experiment. We provide evidence via simulations with up to 400\% improvement; the approach appears to be applicable to other firms facing similar problems. The simulation studies use multiple past MaxDiff surveys administered by P\&G to analyze the range of potential savings and how different conditions lead to more modest or extreme savings.
-
-How much cost savings could a company like P\&G experience using our new approach? Consider the cost of a typical online data collection effort. Costs to develop customized consumer target segments can range from \$6 to \$18 per completed consumer sample task. For a large study analyzing 50 to 150 or more possible preferences, desired sample sizes are usually between 1,000 and 3,000 respondents, meaning each survey costs \$18,000 to \$54,000. Bandit MaxDiff can decrease the required sample size by 2 to 4 times. With sample size savings of 500 to 2,000 respondents, cost savings could be in the range of \$3,000 to \$36,000.
-
-Like the problem that Bandit MaxDiff resolves, the broader class of problems, which the methodology in this paper addresses, is characterized by the following elements:
-\begin{itemize}
-\item \emph{Limited budget.} Surveys target customers carries a high opportunity cost to asking them about ideas that do not help finding the most preferred ones.
-\item \emph{Loss function.} The market researcher's ultimate decision (e.g., selecting the most preferred ideas) is linked to learning their relative ranking and/or preference values, directly.
+\item \emph{Loss function focused on the bests.} The ultimate objective is to select the most preferred ideas, which may or may not depend on the ranking of preference levels among the most preferred set.
+\item \emph{Limited budget.} Data gathering from target customers carries a high cost, so there are substantial opportunity costs of asking them about ideas that do not help finding the most preferred ones.
 \item \emph{Sequential data collection.} Data from past respondents can be used to determine what to ask the next respondent.
-\item \emph{Pool of ideas.} The decision-maker knows all possible ideas up-front and selects which ask respondents about next.
+\item \emph{Pool of ideas.} The decision maker knows all possible ideas up-front.
 \item \emph{Stochastic output.} After asking respondents about ideas, the revealed preference is a noisy signal of true preference.
 \end{itemize}
 
 \begin{algorithm}
-\caption{Sketch of Adaptive Data-Collection} \label{alg:general}
+\caption{Template of Adaptive Data Collection} \label{alg:general}
 \begin{algorithmic}[1]
 \State Initialize with a uniform sample.
-\While {Stopping rule not satisfied:} 
+\For {Each period:} 
 \State Collect new data for selected items.
 \State Update model estimates and characterize uncertainty.
 \State Select items for next round.
-\EndWhile
+\State \textbf{if} {Stopping rule satisfied} \textbf{then} stop \textbf{else} continue \textbf{end if}.
+\EndFor
 \end{algorithmic}
 \end{algorithm}
 
-The specific proposed approach builds on algorithms initially developed and commonly used for \emph{multi-armed bandit} problems in the marketing literature \citep{HauserEtAl2009,schwartzetal2017,Scott2010,urban2013morphing}. The traditional bandit problem epitomizes the "earning while learning" challenge, which seeks to identify the best way to allocate fixed resources to competing alternatives while maximizing gains. Our problem departs from the standard bandit challenge and requires updates to the known algorithms.
+While the methods we propose are general, we illustrate an application to one instance in this class of analogous problems: \emph{idea screening} for large numbers of items using \emph{maximum-difference (MaxDiff)} surveys. MaxDiff is a form of best-worst scaling preference measurement in which consumer respondents select their most and least preferred alternatives from a set \citep{marley2005some}.
 
-But the problem we address is more aligned with the related \emph{best arm identification} \citep{russo2016simple}. While the traditional bandit problem accumulates maximum reward for the researcher throughout all rounds $1$ to $T$ (i.e., it identifies items delivering the most sales/clicks/etc.), in best arm identification, the goal is to correctly select the best arm (or subset of best $k$ arms) out of all only in the final round $T$. Since thee marketer derives no reward for the initial rounds, best arm identification is known as a \emph{pure learning} problem, as opposed to the typical bandit problem which is an \emph{earning while learning} problem
+To do this, we instantiate our framework in this idea screening setting, proposing a specific method: \emph{Bandit MaxDiff}. We demonstrate that this new method is the best-performing available adaptive MaxDiff, in particular, for large numbers ideas (e.g., at least 100) and for ensuring robustness to changes during surveying (e.g., non-representative early respondents). While idea screening methods typically involve preference measurement surveys, such as choice-based conjoint and standard MaxDiff, they are designed for measuring preferences among, say, 20 ideas, but are not built for large-scale problems, like identifying the best set of 20 ideas out of 100 alternatives. Despite the wide availability of online survey providers, obtaining high quality consumer samples useful for a particular managerial decision remains challenging. Yet as managers push preference measurement methods into a larger scale, market researchers must collect data from more respondents via surveys or more involved interviews, increasing costs, especially if those respondents are mean to actually reflect a firm's target customer segment.
 
-A generalization of the best $k$ arm identification problem is known as the \emph{ranking and selection}, in which the decision maker tries to learn the true ranking of all items or a subset of items to choose the most preferred option. The problem typically does not necessarily involve sequential data collection and does not feature stochastic observations, but both features can appear in variants.
+Developed in collaboration Sawtooth Software, Bandit MaxDiff cuts costs for large MaxDiff studies conducted to identify respondents’ most preferred items, allowing the potential savings of millions of dollars in market research budgets. We show the new method can increase efficiency 2.5 to 4 times over current MaxDiff practices by accurately identifying the best items more quickly with fewer respondents. Bandit MaxDiff achieves this by oversampling items likely to be truly the best, thereby providing more accurate and precise assessments for the ideas that managers care most about, the most preferred ones likely to be used. 
 
-Sequential ranking and selection problems often appear in an area known as active learning \citep{balcan2009agnostic,dasgupta2008general}. 
+We provide empirical evidence of Bandit MaxDiff's performance in a number of ways. We show a suite of simulations experiments, which are based on past MaxDiff surveys with real customers, including one administered by Procter \& Gamble (P\&G) using Sawtooth Software and another from a customer of Skimm Group, a Netherlands-based market research, who has also adopted a version of Bandit MaxDiff. These simulations analyze the range of potential savings and how different conditions lead to more modest or extreme savings. Finally, we also provide evidence of implementing the approach in real-time with P\&G. Compared to the firm's standard approaches to ranking and selection problems, P\&G witnessed a 240\% increase in efficiency in a live, in-market head-to-head randomized-controlled experiment.
 
-While established in the theoretical statistics and machine learning literature, active learning rarely appears in marketing studies. One exception that explicitly uses active learning algorithms to optimize preference measurement is \cite{huang2016consumer}, which employs active learning for support-vector machines. Another application, \cite{dzyabura2011activelearn}, uses active learning algorithms to be decision-making heuristics for individual consumer learning. 
+The empirical evidence, in total, indicates that the approach appears to be quite promising and widely applicable similar problems faced by other firms. How much cost savings could a company, like P\&G, experience using Bandit MaxDiff? Consider the cost of a typical online data collection effort. Costs to develop customized consumer target segments can range from \$6 to \$18 per completed consumer sample task. For a large study analyzing 50 to 150 or more possible preferences, desired sample sizes are usually between 1,000 and 3,000 respondents, meaning each survey costs \$18,000 to \$54,000. Bandit MaxDiff can decrease the required sample size by 2 to 4 times. With sample size savings of 500 to 2,000 respondents, cost savings could be in the range of \$3,000 to \$36,000 \emph{per survey}. Savings on these orders of magnitude can accumulate as consumer research continues to grow.\footnote{Estimates come from a range provided by Sawtooth Software.}
 
-Active learning algorithms are typically assumed to be deterministic observations for the sequential problem of ranking and selection. Labels are revealed with certainty and do not have to be revisited. In stochastic ranking and selection problems, the observations are values sampled from a distribution with unknown parameters.
-
-Surprisingly, only recently the literature has made explicit links between the \emph{active learning} and \emph{multi-armed bandit problems} \citep{gantigray2013bridgealmab}, and the \emph{best arm identification} is a bridge between the two.
-
-
-
-Our problem is a sequential stochastic ranking and selection problem. We also consider circumstances in which ranking does not matter within the selected subset, which is characterized by the best k-arm identification problem. The framework we employ therefore draws on both the active learning and multi-armed bandit methods.
-
-We also consider the practical implementation of the three algorithms, including their scalability and speed. We provide alternative, faster versions that may sacrifice theoretical statistical validity. Some fast heuristics, however, perform well.
+\eric{Taken together the key contributions of this paper are methodological and substantive in nature. First, this work aims to open the door to addressing broader array of sequential data collection problems in marketing outside of conjoint and standard MaxDiff, by drawing on to the active learning and best arm bandit identification literature, to use practical and efficient heuristics. Second, the work 
+}
 
 
 
-To illustrate the effectiveness of Bandit MaxDiff, we first formalize our problem and the general framework to be used. We highlight the framework's active learning and bandit components, relating it to the marketing and statistical machine learning literature. After formalizing the discrete choice model for analyzing MaxDiff data, we introduce Bandit MaxDiff as a particular instance of the broader algorithm. We then present our empirical results in the standard setting, as well as variants of the main results. We implement the methods using a MaxDiff survey administered by Sawtooth Software and P\&G. 
+\subsection{Relevant Marketing Literature}
+
+This research builds on a range of methodologies that have been well-studied in the marketing literature. To start, adaptive preference measurement is typically performed with adaptive conjoint analysis, usually adaptive choice-based conjoint \citep{arora2001improving,toubia2003fast,toubia2004polyhedral}. And while there are preliminary adaptive approaches for MaxDiff \citep{orme2006adaptive}, it received much less attention in the academic literature. A thorough treatment of choice-based conjoint literature is beyond the scope of this paper, we encourage the reader to see review, \cite{toubia2007chapter}. 
+
+Idea screening using customers, while widely practiced is not widely studied. \cite{toubia2007adaptive} is an exception that studies exactly this problem, proposing a variety of active idea screening heuristics. In that work, those heuristics are presented as simple scoring rules to decide which ideas to ask the next consumer about, using previously collected consumer preferences expressed as a binary choice (like / do not like) for each idea. We adopt a similar setting -- and at times similar heuristics for scoring -- but we will show how some of these rules can be extended to be more efficient and how some can be formally derived from the underlying optimization problem.
+
+The specific proposed approach builds on algorithms three related areas in statistical machine learning that have used for problems in the marketing literature. First, marketing has seen applications of \emph{multi-armed bandit} methods to address adaptive experimentation of website design and advertising \citep{HauserEtAl2009,schwartzetal2017,urban2013morphing}. The traditional bandit problem epitomizes the ``earning while learning'' challenge, which seeks to identify the best way to allocate fixed resources to competing alternatives while maximizing gains. Our problem departs from the standard bandit challenge and requires updates to the known algorithms.
+
+Next, since the problem we address is not exactly an ``earning while learning'' problem and is better characterized as ``pure learning'' problem, we turn to \emph{active learning}. While well-established in the theoretical literatures of statistics and machine learning, active learning rarely appears in marketing studies. One exception that explicitly uses active learning algorithms to optimize preference measurement is \cite{huang2016consumer}, which employs active learning for support-vector machines. Another application, \cite{dzyabura2011activelearn}, uses active learning algorithms to be decision-making heuristics for individual consumer learning. 
+
+But the problem we address is not quite a bandit problem nor an active learning problem; instead, it sits between two an is more aligned with the \emph{best arm identification} problem \citep{
+audibert2010best}. While the objective in a traditional bandit problem is to accumulate maximum reward throughout all periods by taking the actions likely to have highest reward, in the best arm identification setting, the goal is to correctly select the best arm -- or subset of best arms -- after a dedicated learning period. This problem has not yet appeared in the marketing literature, but it has natural connections to the way firms increasingly run A/B testing, or real-time marketing experiments. We revisit this formally and in detail in subsequent sections.
+
+\begin{center}{---}\end{center}
+
+ % Since the marketer derives no reward for the initial rounds, the best arm identification problem is known as a pure learning problem as opposed to an earning while learning problem. The best-arm identification problem can also be viewed as a particular type \emph{ranking and selection} problem. Yet despite the best arm identification problem being a natural bridge between the active learning and bandits, surprisingly, the literature has only recently made explicit algorithmic links between them \citep{gantigray2013bridgealmab}. 
 
 
+%, chen2017adaptive,gabillon2012best, jamieson2014best, kaufmann2013information, russo2018simple
 
-\eric{ending new intro here}
-
- -- the selection and the selection with ranking -- 
-
-In this paper, we develop a new method to solve large-scale idea screening challenges that decreases expenses and increases information gained per dollar spent on surveys. The method, Bandit MaxDiff, uses algorithms from multi-armed bandit literature and active learning for ranking and selection problems from the computer science field. 
+In the next section, we dive into each of these three methodological areas formally, in turn, to build up to our general problem framework. From there, we introduce the range of methods -- motivated by active learning, best-arm identification, and traditional bandit literatures -- highlighting how they relate to existing algorithms. Then we turn to our application setting: we review the choice models used MaxDiff data, so that we can introduce \emph{Bandit MaxDiff} as a particular instance of the broader approach. We then present our main empirical results as well as several variants. 
 
 
+% Our problem is a sequential stochastic ranking and selection problem. We also consider circumstances in which ranking does not matter within the selected subset, which is characterized by the best k-arm identification problem. The framework we employ therefore draws on both the active learning and multi-armed bandit methods.
 
-Cite adaptive conjoint a bit more. 
+% We also consider the practical implementation of the three algorithms, including their scalability and speed. We provide alternative, faster versions that may sacrifice theoretical statistical validity. Some fast heuristics, however, perform well.
 
 
-What to review before showing proposed algorithms. 
-2.1- active learning, Bayesian ELO
-2.2- bandit basics, using Thompson sampling
-2.3- best arm bandit, Top Two Thompson Sampling
+% A generalization of the best $k$ arm identification problem is known as the \emph{ranking and selection}, in which the decision maker tries to learn the true ranking of all items or a subset of items to choose the most preferred option. The problem typically does not necessarily involve sequential data collection and does not feature stochastic observations, but both features can appear in variants. Sequential ranking and selection problems often appear in an area known as active learning \citep{balcan2009agnostic,dasgupta2008general}. 
+
+% Active learning algorithms are typically assumed to be deterministic observations for the sequential problem of ranking and selection. Labels are revealed with certainty and do not have to be revisited. In stochastic ranking and selection problems, the observations are values sampled from a distribution with unknown parameters.
+
+%In this paper, we develop a new method to solve large-scale idea screening challenges that decreases expenses and increases information gained per dollar spent on surveys. The method, Bandit MaxDiff, uses algorithms from multi-armed bandit literature and active learning for ranking and selection problems from the computer science field. 
 
 
 
@@ -487,14 +481,6 @@ What to review before showing proposed algorithms.
 
 \section{General Modeling Framework}
 
-% Active learning, classification and regression, deterministic labels, 
-% Active learning, ranking and selection, noisy labels (outcomes), re-sampling,
-% Bandit, ranking and selection, noisy labels (outcomes), re-sampling,v
-
-2.1- active learning, Bayesian ELO \\
-2.2- bandit basics, using Thompson sampling\\
-2.3- best arm bandit, Top Two Thompson Sampling\\
-
 \subsection{Active Learning with Bayesian Decision Theory}
 
 In a sequential decision making problem for marketing, the researcher wants to learn the relative ranking of many potential consumer preferences. Facing uncertainty about the items, the researcher can select which to learn about in subsequent customer interactions.
@@ -515,27 +501,34 @@ We compute a variety of key quantities by integrating over the posterior distrib
 \begin{align} 
 P(y|x,D) = \int_\theta P(y|x,\theta)P(\theta|D)d\theta .
 \end{align}
-Each $y \in \mathcal{Y}$ is a potential outcome, and Bayesian Decision Theory characterizes the different actions' quality over the outcome distribution. The quality of each action is represented by a loss function. We let $l(a,y)$ equal the loss incurred by performing action $a$ when the true output is $y$. The objective of the decision problem is to eventually select the best $a$ using data $D$ to minimize expected loss on any unlabeled input data $x$ with unknown outcome $y$. We can assemble the data $D$ through selecting $x$, giving us an active learning problem.
+Each $y \in \mathcal{Y}$ is a potential outcome, and Bayesian Decision Theory characterizes the different actions' quality over the outcome distribution. The quality of each action is represented by a loss function. We let $\ell(a,y)$ equal the loss incurred by performing action $a$ when the true output is $y$. The objective of the decision problem is to eventually select the best $a$ using data $D$ to minimize expected loss on any unlabeled input data $x$ with unknown outcome $y$. We can assemble the data $D$ through selecting $x$, giving us an active learning problem.
 
-We use the active learning framework known as expected loss optimization (ELO) from \cite{long2010elo}. To achieve loss minimization, we consider the expected loss of action $a$ on any data  $(x,y)$. But we are uncertain about $y$. By integrating over potential outcomes with $y \sim P(y|x,D)$, we compute expected loss as
+We use the active learning framework known as expected loss optimization from \cite{longchapelle2010active}, which has the goal of minimizing expected loss of the decision $a$ for any randomly chosen unlabeled data $(x,y)$. First, given $x$, consider the expected loss of an action $a$. Since we are uncertain about $y$, we integrate over potential outcomes with $y \sim P(y|x,D)$, to compute expected loss, known as \emph{Bayes risk}:
 \begin{align}
-\rho(a) := E_{y} \left[ l(a,y) \right] = \int_y l(a,y) P(y|x,D) dy .
-\end{align}To minimize expected loss for any input data $x$, we select action
-\begin{align}
-a^{*} = \text{arg}\min_a \rho(a) = \text{arg}\min_a \int_y l(a,y) P(y|x,D) dy,
-\end{align}which yields the minimized expected loss (MiEL) for the input $x$:
-\begin{align}
-MiEL(x) := \rho(a^{*}) = \min_a \int_y l(a,y) P(y|x,D) dy .
+\risk(a|x) := E_{y} \left[ \ell(a,y) \right] = \int_y \ell(a,y) P(y|x,D) dy .
 \end{align}
-%The $EL(x)$ is the minimized expected loss (aka., MIEL). Minimized expected loss really should be called $MIEL(x)$. 
-
-Because action $a^{*}$ minimizes expected loss under the posterior, we define $MiEL(x)$ by supposing $a^{*}$ is followed for any given input $x$. In other words, the best action $a^{*}$ may change for different possible choices for $x$, and therefore, the level of best loss, $EL(x)$, may also change. 
-
-We then consider the possible choices for the next input $x$. We have access to a finite pool of possible items, $x \in \mathcal{X}$, or know the distribution of the input values, $P(x)$. The expected error on any arbitrary input or unseen example is the average of expected loss over the marginal input distribution, $\int_x MiEL(x)P(x)dx$, known as the generalization error. We intend to minimize the generalization error under the posterior for any arbitrary input.
-
-For choosing subsequent input and output instances to observe, an active learning strategy selects the input example that would maximize the minimized expected loss ($\max_x$) using 
+To minimize risk for any input data $x$, we select action,
 \begin{align}
-x^{*}  &= \text{arg}\max_x MiEL(x) = \text{arg}\max_{x} \left( \min_{a} \int_y l(a,y) P(y|x,D) dy \right).
+a^{*} = \text{arg}\min_a \rho(a) = \text{arg}\min_a \int_y \ell(a,y) P(y|x,D) dy.
+\end{align}
+Because action $a^{*}$ minimizes expected loss under the posterior for a given data point $x$, so we can call it the risk-minimizing action. We then define $\risk(a^{*}|x)$ to be the \emph{minimized Bayes risk}:
+\begin{align}
+\risk(a^{*}|x) = \min_a \int_y \ell(a,y) P(y|x,D) dy .
+\end{align}
+In other words, the best action $a^{*}$ may change for different possible choices for $x$, and therefore, the level of minimum expected loss, $\risk(a^{*}|x)$, also varies with $x$.\footnote{In \cite{longchapelle2010active}, $\rho(a)$ denotes risk the expression $EL(x)$ denotes the minimized expected loss due to taking the optimal action $a^{*}$ given $x$. But we use Bayes risk $\risk(a|x)$ and minimized Bayes risk, $\risk(a^{*}|x)$.} 
+
+We then consider the possible choices for the next input $x$. We have access to a finite pool of possible items, $x \in \mathcal{X}$, or know the distribution of the input values, $P(x)$. The expected error on any arbitrary input or unseen example is the average of expected loss over the marginal input distribution, $P(x$, which is known as the generalization error: ,$\int_x \risk(a^{*}|x) P(x)dx$. We intend to minimize the generalization error, (average unconditional Bayes risk), under the posterior for any arbitrary input. This yields the following optimization problem:
+\begin{align}
+\min_{x_1,x_2,\ldots,x_T} \int_x \risk(a^{*}|x) P(x)dx,
+\end{align}
+subject to a budget of only $T$ opportunities to select $x$ from $\mathcal{X} \sim P(x)$ to be labeled
+
+Note that we aim to minimize by choosing an entire sequence of examples, $x_1,x_2,\ldots,x_T$, but they do not have to be selected all at once. Instead at any time in the learning process, $t$, we can use all output data $y_1,\ldots,y_t$ collected so far and all $x \in \mathcal{X}$ to select the next $x$ to be labeled. But which one would help us best minimize the generalized risk.
+
+An active learning strategy selects the input example that would maximize the conditional risk using 
+\begin{align}
+x^{*}  &= \mathop{\text{arg}\max}_x \risk(a^{*}|x) 
+= \mathop{\text{arg}\max}_{x} \left( \min_{a} \int_y \ell(a,y) P(y|x,D) dy \right).
 \end{align}
 What is the consequence of selecting $x$ where expected loss would be largest? After incorporating $x$ into the training data, $D \to \{D \cup x \}$, and updating the posterior distributions, the subsequent generalized error (average of expected loss) will have decreased by more than it would have by observing any other $(x,y)$ pair.
 
@@ -543,33 +536,33 @@ The ELO principle dictates the researcher selects data that maximizes the minimi
 
 \subsubsection{Standard Active Learning and Binary Classification}
 
-Consider the binary classification active learning problem. Formally, the binary classification output is $y \in \mathcal{Y} = \{-1,+1\}$, and the action is the prediction $a$, which in this case is also within the set $\{-1,+1\}$. Since the loss is also binary, $l(a,y)=0$ if $a=y$ and $1$ if $a \neq y$. 
+Consider the binary classification active learning problem. Formally, the binary classification output is $y \in \mathcal{Y} = \{-1,+1\}$, and the action is the prediction $a$, which in this case is also within the set $\{-1,+1\}$. Since the loss is also binary, $\ell(a,y)=0$ if $a=y$ and $1$ if $a \neq y$. 
 
 Using past training data $D$ to estimate a model $f_\theta: \mathcal{X} \to \mathcal{Y}$, consider any test data $x \in \mathcal{X}$ (with unknown label $y$) not used for estimating the model ($x \notin D$). We can define any action $a$ as any out-of-sample prediction of $y$. The prediction $a=f_\theta(x)$, for example, could be based on any model (e.g., logistic regression, Lasso or Ridge regularized regression, support vector machine, decision tree, random forest) where cutoffs could be used to create binary predictions. 
 
 The prediction minimizing expected binary loss is therefore $a^{*}$ and equals the prediction of $y$ with the smallest model error:
 \begin{align}
-a^{*} &= \text{arg} \min_{a} \int_y l(a,y) P(y|x,D) dy  \\
+a^{*} &= \text{arg} \min_{a} \int_y \ell(a,y) P(y|x,D) dy  \\
 & = \text{arg} \min_{a} \left\{ 0 \cdot P(y=a|x,D) + 1 \cdot P(y \neq a|x,D) \right\}  \\
 &= \text{arg} \min_{a} P(y \neq a|x,D) \\
 &= \text{arg} \max_{a} P(y = a|x,D) .
 \end{align}
 To minimize expected loss, the researcher selects whichever outcome is more likely. The selected $a^{*}$ yields a minimized expected loss of
 \begin{align}
- MiEL(x) &= \min_{a} P(y \neq a|x,D) \\
+\risk(a^{*}|x) &= \min_{a} P(y \neq a|x,D) \\
  &= \min \left\{ P(y=1|x,D), P(y=0|x,D) \right\},
 \end{align}
 or simply $1 - P(y = a^{*}|x,D)$, the error of the best prediction. 
 
-So far, this would be true of any supervised learning binary classification problem seeking to minimize its prediction error on an out-of-sample data point $x$. But the active learning strategy considers the potential model errors for each unlabeled example and selects the example data $x$ with the highest prediction error, $MiEL(x)$, under the current model posterior. Formally,
+So far, this would be true of any supervised learning binary classification problem seeking to minimize its prediction error on an out-of-sample data point $x$. But the active learning strategy considers the potential model errors for each unlabeled example and selects the example data $x$ with the highest prediction error, $\risk(a^{*}|x)$, under the current model posterior. Formally,
 \begin{align}
-x^{*}  &= \text{arg} \max_{x} \min_{a} \int_y l(a,y) P(y|x,D) dy \\
-&= \text{arg} \max_{x} MiEL(x) \\
+x^{*}  &= \text{arg} \max_{x} \min_{a} \int_y \ell(a,y) P(y|x,D) dy \\
+&= \text{arg} \max_{x} \risk(a^{*}|x) \\
 & =  \text{arg} \max_{x} \min_{a} \left( P(y=1|x,D), P(y=0|x,D) \right),
 \end{align}
 and the data point $x^{*}$ yields
 \begin{align}
-\max_{x} MiEL(x) = \max_{x} \min_{a} \left( P(y=1|x,D), P(y=0|x,D) \right) = 0.5 .
+\max_{x} \risk(a^{*}|x) = \max_{x} \min_{a} \left( P(y=1|x,D), P(y=0|x,D) \right) = 0.5 .
 \end{align}
 For binary classification, an active learning strategy would select the next data points likely to have predicted probability closest to 0.5, because observing its true label would be most informative.
 
@@ -587,7 +580,7 @@ Second, observing $y$ provides a unique label for $x$ in a typical active learni
 The defining elements of our problem are a
 \begin{itemize}
 	\item finite budget ($T << \infty$);
-	\item loss function ($l(a,y)$);
+	\item loss function ($\ell(a,y)$);
 	\item sequential data collection ($D \to D \cup (x,y)$);
 	\item pool of inputs ($\{ x | x \in \mathcal{X} \}$); and
 	\item stochastic output ($y \sim f_{\theta}(x)$).
@@ -662,74 +655,59 @@ Recent theoretical advances show the value of adding perturbations, such as in F
 
 We propose a set of new algorithms using TS as the common base to solve our general problem, which features three dimensions: (1) maximizing minimized expected loss; (2) heuristics oversampling at the threshold; and (3) a diffuse exploration distribution. We illustrate these with alternative approximation methods of posterior sampling: asymptotic distribution and Bayesian Bootstrap.
 
-We seek to identify the best $k$ arms but can select a list of $L$ distinct arms per period. Our final action will be evaluated based on its predicted ranking and selection $\pi$. Consider a posterior draw denoted by $(g)$ with parameter values $\theta^{(g)} = \{u_1,\ldots,u_\numitems\}^{(g)}$. The base TS algorithm uses the posterior predicted values as follows: Generate a predicted ranking $\pi^{(g)} = \{\pi(i)\}^{(g)} = \{ \pi(1),\ldots,\pi(\numitems) \}^{(g)}$, where the best item is $\pi(1)^{(g)} = \text{arg}\max_{j} u_j^{(g)}$; split the $\numitems$ items into the list of the best-$L$ items, $\text{Top}_L^{(g)}=\{ \pi(1), \ldots,\pi(L) \}^{(g)}$, and the remaining items, $\{ \pi(L+1), \ldots,\pi(\numitems) \}^{(g)}$; select $\text{Top}_L^{(g)}$ for the next round. While we do this for a single draw $g$, because we are integrating each over $g=1,\ldots,G$ draws, the posterior probability item $i$ is actually best is equal to $w_i$ (i.e., $P( u_i = u(1) | D ) = w_i$). We also let the true top set be $\topset^{*}(u)$, which is the set of arm indices with highest true means:
+We seek to identify the best $k$ arms but can select a list of $\numperset$ distinct arms per period. Our final action will be evaluated based on its predicted ranking and selection $\pi$. The base TS algorithm uses draws $g=1,\ldots,G$ from a posterior distribution as follows, for every $g$:
+\begin{enumerate}
+	\item Obtain a posterior draw denoted by $(g)$ with parameter values $\theta^{(g)} = \{u_1,\ldots,u_\numitems\}^{(g)}$. 
+	\item Generate a predicted ranking $\pi^{(g)} = \{\pi(i)\}^{(g)} = \{ \pi(1),\ldots,\pi(\numitems) \}^{(g)}$, where the best item is $\pi(1)^{(g)} = \text{arg}\max_{j} u_j^{(g)}$.
+	\item Partition the $\numitems$ items into two lists: the best-$L$ items, $\text{Top}_L^{(g)}=\{ \pi(1), \ldots,\pi(L) \}^{(g)}$, and the remaining items, $\{ \pi(L+1), \ldots,\pi(\numitems) \}^{(g)}$.
+	\item Select $\text{Top}_L^{(g)}$ for the next round. 
+\end{enumerate}
+
+Because we are integrating over the entire posterior, we can do this for each over $g=1,\ldots,G$ draws, and then compute any posterior quantity empirically by averaging across $G$ draws. For instance, this is exactly how TS can provide the posterior probability that a given item $i$ is actually the \emph{single best} item, i.e., $P( u_i = u(1) | D ) =  $). 
+
+But for our problem, we do not want the single best, rather the top set. Then we let the true top set be $\topset^{*}(u)$, which is the set of arm indices with highest true means:
 \begin{align}
 \topset^{*}(u) &= \{i | u(i) \in ( u_{(1)},\ldots,u_{(\numtopset)} ) \} .
 \end{align}
 
 The base \ts algorithm and its \edts variant (Section \ref{sec:edts}) should be employed in settings where either the rank ordering or the estimated utility values within the top \numtopset items is important. For instance, if the manager wants to estimate the item utility values of the top set items with as much as precision as possible, then an appropriate loss function combines components from the standard squared error loss for prediction and binary loss for classification. To maximize the precision of estimating the values of the truly top items, then loss for each item depends on a posterior draw of $u_i$, its unknown true value $u_i$, and whether that item is truly in the true top set. For item $i$ and posterior draw $g$, the loss equals,
 \begin{align}
-l_i^{(g)}(\pi,u) = ( u_i^{(g)} - u_i )^2 \cdot \mathbf{1}\{ i \in \topset^{*}(u) \}.
+\ell_i^{(g)}(\pi,u) = ( u_i^{(g)} - u_i )^2 \cdot \mathbf{1}\{ i \in \topset^{*}(u) \}.
 \end{align}
 
 While our base bandit algorithm gathers the most data on the truly best items and maximizes precision, for settings where selecting the top \numtopset is the objective, without concern for within-set ranking or estimated values, then we consider new variants.
 
-\subsection{New Variant: Max-Min Expected Loss}
+\subsection{New Variants: Active-Learning Inspired}
 
-When we are required to select but not rank the top $k$ items for consumer preference, we have a binary classification, i.e., whether the item is in the set. Instead of selecting the items likely to be most influential as a consumer preference, as a standard bandit algorithm would, we follow the active learning framework for expected loss optimization. Therefore, we select the items likely to produce the greatest expected loss even when trying to minimize it---in other words, those with the maximum minimized expected loss, $MiEL$. 
+\subsubsection{Risk Seeking: Max-Min Expected Loss \mismin}
+%Following the active learning literature, tested we devised the \mismin\ variant to include items most likely to be misclassified. Treating membership in the $\topset$ as the class to learn, we can do this naturally via posterior sampling from TS. And this approach performs quite well, 
 
-We let $\topset(\pi)$ be a predicted top set based on predicted rank ordering $\pi$. We specify the loss function as the misclassification error,
+When we are required to select but not rank the top $k$ items for consumer preference, we have a binary classification, i.e., whether the item is in the set. Instead of selecting the items likely to be most influential as a consumer preference, as a standard bandit algorithm would, we follow the active learning framework for expected loss optimization. Recall the active learning literature suggests in a binary classification setting to select the unlabeled example expected to have highest conditional risk, if it remained unlabeled. 
+
+Therefore, the natural analog here is to select the items likely to produce the greatest expected loss even when trying to minimize it. Therefore we seek out the items with the maximum predicted conditional risk, $\max \risk(\theta|x)$, which in the binary classification setting with symmetric loss, is equivalent to highest probability of misclassification. 
+
+We specify that symmetric 1/0 loss function to be misclassification error,
 \begin{align}
 l(\pi,u) &= \frac{1}{n} \sum_{i=1}^{n} \left| \mathbf{1}\{ i \in \topset^{*}(u) \}-\mathbf{1}\{ i \in \topset(\pi) \} \right|.
 \end{align}
+where $\topset(\pi)$ is a predicted top set based on predicted rank ordering $\pi$. 
 
-%%% Consider leaving out %%%
-% This loss can be rescaled to represent the Hit Rate, 
-% \begin{align*}
-% \frac{1}{k} \sum_{ \topset^{*}(u) }  1 - \mathbf{1}\{ i \in \topset \},
-% \end{align*} 
-% that is, the percentage of the truly top-$k$ items that are predicted to be in the top-$k$ set.
-
-
-We can calculate the top set, minimizing expected loss over the posterior numerically. For any empirical posterior draw $g=1,\ldots,G$, which form a rank order $\pi$, the top set is the following set of indices:
+To obtain that top set, we minimize expected loss over the posterior numerically. For each empirical posterior draw $g=1,\ldots,G$, which form a rank order $\pi$, the top set is the following set of indices:
 \begin{align}
 \topset^{(g)}(\pi) &= \{ \pi(i) \}_k^{(g)} = \{ \pi(1),\ldots,\pi(k) \}^{(g)}.
 \end{align}
 
-
-%%%
-%%% OLD VERSION
-%%%
-%
-% \begin{align}
-% P( i \in \topset^{*}(u) ) = \frac{1}{G} \sum_{g=1}^{G} \mathbf{1}\{ i \in \topset^{(g)}(\pi) \}
-% \end{align}
-%
-% We can compute the loss for any item $i$,  
-% \begin{align}
-% l_i^{(g)}(\pi,u) 
-% = & \mathbf{1}\{ i \in \topset^{(g)}(\pi) \} P( i \notin \topset^{*}(u)  ) \\
-% + & 
-%  \mathbf{1}\{ i \notin \topset^{(g)}(\pi)  \} P( i \in \topset^{*}(u) ) 
-% \end{align}
-
-% \begin{align}
-% =& \mathbf{1}\{ i \in \topset^{(g)}(\pi) \} \left( \frac{1}{G} \sum_{g=1}^{G} \mathbf{1}\{ i \notin \topset^{(g)}(\pi) \} \right) \\
-% +& 
-%  \mathbf{1}\{ i \notin \topset^{(g)}(\pi)  \} \left( \frac{1}{G} \sum_{g=1}^{G} \mathbf{1}\{ i \in \topset^{(g)}(\pi) \} \right) 
-% \end{align}
-
 But at any given time $t$, we are still uncertain about the utility values $u$ and are therefore uncertain about the true top set, $\topset^{*}(u)$. To evaluate the potential loss we could incur with our next ranking of $\pi$, we use our previous beliefs about the top set, denoted $\topset(u) | D_{t-1}$. Using the current draw $g$ from the posterior and given data $D_{t}$, we compute the loss under the considered expected loss-minimizing ranking $\pi$ for any item $i$ as  
 \begin{align}
-l_i^{(g)}(\pi,u) = 
+\ell_i^{(g)}(\pi,u) = 
 & \mathbf{1}\{ i \in \topset^{(g)}(\pi) | D_{t} \} 
   \mathbf{1}\{ i \notin \topset(u) | D_{t-1} ) \} + \nonumber \\
 & \mathbf{1}\{ i \notin \topset^{(g)}(\pi) | D_{t} \} 
   \mathbf{1}\{ i \in \topset(u)| D_{t-1} \}.  
 \end{align}
-Therefore, the minimized expected loss over the posterior for item $i$ is $\min E_{u}[l_i(\pi,u)]$:
+Therefore, the minimized expected loss over the posterior for item $i$ is $\min E_{u}[\ell_i(\pi,u)]$:
 \begin{align}
-MiEL(i) =  
+\risk(i) =  
 & \frac{1}{G} \sum_{g=1}^{G} 
    \left( \mathbf{1}\{ i \in \topset^{(g)}(\pi) | D_{t} \} \right)
   \mathbf{1}\{ i \notin \topset(u) | D_{t-1} ) \} + \nonumber \\ 
@@ -737,11 +715,12 @@ MiEL(i) =
    \left( \mathbf{1}\{ i \notin \topset^{(g)}(\pi) | D_{t} \} \right)
   \mathbf{1}\{ i \in \topset(u)| D_{t-1} \}.  
 \end{align}
-Following the expected loss optimization, we consider an $MiEL(i)$ score for each item and select the highest, $\text{arg}\max MiEL(i)$. In this setting, we select the highest $L$ values.
+Following the expected loss optimization, we consider an $\risk(i)$ score for each item and select the highest, $\text{arg}\max \risk(i)$. In this setting, we select the highest $L$ values.
 
 The procedure is governed by the following rule: If the $i$th item is estimated to be in the top $k$, the score is $s_i=\mathbb{P} (\text{item i is not in the top k})$; if the $i$th item is estimated not to be in the top $k$, the score is $s_i=\mathbb{P} (\text{item i is in the top k})$. We estimate the scores by taking draws from the posterior distribution, then take the $\numperset$ items with the highest scores.
 
 The approach reflects a known heuristic, not derived from a decision theoretic perspective, called ``Misclassification Minimization'' by~\cite{toubia2007adaptive} and motivated by \cite{bradlow1998some}. The researchers' approach is based on a beta-distributed posterior with binary win probability reflecting the preference of an item. The score is computed in closed-form using the cumulative distribution function of a beta distribution. Our approach encompasses the case and permits an arbitrary class of models. 
+
 
 \subsubsection{New Variant: Greatest Uncertainty}
 %The threshold is set to be the midpoint between the top set and the other items. But it is possible that we are so uncertain about some items that their values are rarely near that cutoff in any draw because sometimes they are ranked high and other times, low. 
@@ -750,7 +729,7 @@ We propose a heuristic that selects the items for which membership in the top se
 
 \subsection{New Variant: Closest to the Threshold}
 
-We consider another approach, similarly linked to heuristics, derived from a generalization of the reinforcement learning and dynamic optimization literature. While TS is defined for the bandit problem, a variant called Top-Two Thompson Sampling has been shown theoretically and empirically to solve the best arm identification problem \citep{russo2016simple}. By observing arms with the first and second highest value within a posterior draw in successive rounds, the algorithm better distinguishes between similarly high performers.
+We consider another approach, which we derived from a generalization of the optimization and statistical learning literature. While TS is proven to be optimal for the standard bandit problem, a variant called Top-Two Thompson Sampling has been shown to solve the best arm identification problem, both empirically and theoretically \citep{russo2016simple}. By observing arms with the first and second highest value within a posterior draw in successive rounds, the algorithm better distinguishes between similarly high performers.
 
 We generalize Top-Two Thompson Sampling to find the top $k$ arms. As with standard TS, we take a draw from the posterior distribution $P(u|D)$. For a draw of $u^{(g)}$, we consider the cutoff the midpoint between the $k$th and $(k+1)$th items' values and assign the following score for each item $i$:
 \begin{align}
@@ -758,7 +737,7 @@ s_i= - | u_i - \frac{u_k^{(g)} +u_{k+1}^{(g)} }{2}|.
 \end{align} 
 We then take the $\numperset$ items with the highest score, reflecting the items closest to the threshold. 
 
-Again, the rule in idea screening to ``select ideas near the cutoff'' is well known: \cite{toubia2007adaptive} refer to the heuristic and attribute the idea to \cite{bradlow1998some}. But the researchers employ it as a helpful rule rather than basing it on the now-proven best arm identification algorithm \citep{russo2016simple}.
+Again, the rule in idea screening to ``select ideas near the cutoff'' is well known: \cite{toubia2007adaptive} refer to the heuristic, attributing the idea to \cite{bradlow1998some}. But that past research had employed it as a helpful rule rather than basing it on the now-proven best arm identification algorithm \citep{russo2016simple}. 
 
 \subsubsection{Variants with Random Perturbation}
 
@@ -773,6 +752,7 @@ When analyzing a batch size greater than one, the Misclassification Minimization
 We propose an algorithm, exploration-diffuse TS or \edts, which offers an extra layer of self-correction, making it more robust to non-stationarity and respondent self-selection. The algorithm draws on the popular $\epsilon$-greedy technique \citep{SuttonBarto1998}, which mixes greedy sampling with uniform sampling. But instead of being greedy for $1-\epsilon$ samples, \edts follows standard TS; for $\epsilon$ samples, \edts does not necessarily sample items uniformly but draws parameters from a more diffuse posterior distribution where the variance inflation is controlled by $\delta_p$.
 
 \edts, which intuitively hedges its bets on the most preferred characteristics, is a generalized version of TS. It directly nests standard TS, similar to the way a two-component mixture model nests a pooled model without segments. As $\epsilon \to 0$, the diffuse distribution is never used, so the algorithm collapses to standard TS. As $\delta_p \to 1$, the diffuse distribution becomes equivalent to the non-diffuse distribution. 
+
 
 \subsubsection{Exploration-diffuse and Bayesian Bootstrapping}
 
@@ -813,6 +793,21 @@ We show how \edts performance varies with different $\epsilon$ and $\delta$ valu
 To define an exploration-diffuse TS version with a threshold (\edtsthres), we begin with two draws: $u_R$ from the standard posterior and $u_D$ from the diffuse posterior. We calculate threshold-based item scores $s_R$ and $s_D$ for each and take $(1- \epsilon) \numperset$ items with the best $s_R$ scores and $\epsilon \numperset$ items, with the best $s_D$ scores not already included. 
 
 As \edts nests $\epsilon$-greedy sampling, \edtsthres encompass $\epsilon$-greedy. We use the scores $s_i=|u_i - |$ for $c=\frac{u_k+u_{k+1}}{2}$ and take the $((1-\epsilon)L)$ best but sample the remaining scores uniformly (i.e., the most diffuse distribution).
+
+
+The intuition behind thresholding is best visualized in Figure \ref{fig:Frequency}, which shows how \edts focuses on the top items and \edtsthres provides more of a spread and focuses on items near the decision boundary, in this case the top 20 items. 
+\begin{figure}%
+    \caption{The frequency of the selected survey item is shown for \edts and \edtsthres.}%
+    \label{fig:Frequency}%
+ 	\begin{center}
+    \subfloat[]{{\includegraphics[width=.8\textwidth]{plots/edTSfreq.pdf} }}%
+    \qquad
+    \subfloat[]{{\includegraphics[width=.8\textwidth]{plots/edTSthresfreq.pdf} }}%
+	\end{center}
+\end{figure}
+
+%Imagine showing three items out of six (A, B, C, D, E, and F) to a respondent. We want to identify the top three items. Let A, B, C, D, E, and F be the utility order. We are certain A and B are in the top three, and E and F are not. An algorithm without thresholding would pick A, B, and either C or D. A will be chosen as the best item, and C or D will be chosen as the worst, giving us no new information. An algorithm with thresholding will pick C, D, and either B or E. In either case, the respondent will be forced to compare C and D, providing information about which is in the top three.
+
 
 
 \section{Bandit MaxDiff}
@@ -1036,7 +1031,19 @@ Instead of raw choice data, we have the individual-level posterior mean utilitie
 
 After each batch of respondents, we run aggregate logit model to obtain current beliefs of utilities. We compare those current aggregate estimated utilities to the aggregate of the true aggregate-level utilities, which are the item-specific averaged across all true individual-level utilities. For every case, we run the simulations 100 independent times to obtain a distribution of measures. 
 
-Our primary performance measure is \textbf{top $k$ hit rate}: the proportion of items correctly chosen to be into the top set. That is, we compute the percentage based on the cumulative sum of instances when true top $k$ items that appear in the estimated top $k$ set at each time point. For example, if the estimated scores identify seven of the true top-10 items, irrespective of order, the hit rate for that period is 70\%. We consider a range, $k=3,10,20,40$, depending on the simulation setting. Hit rate is a natural consideration in an active learning problem. It evaluates the quality of the adaptive learning procedures with respect to the eventual decision of selection. It reflects how far we are from always selecting the truly best set of arms for all time periods. 
+Our primary performance measure is \textbf{top $k$ hit rate}: the proportion of items correctly chosen to be into the top set. 
+This hit rate is precisely a rescaled and empirical version of the loss function introduced earlier:
+\begin{align}
+\text{HitRate}(\topset) := \frac{1}{k} \sum_{ \topset^{*}(u) }  1 - \mathbf{1}\{ i \in \topset \},
+\end{align} 
+that is, the percentage of the truly top-$k$ items that are predicted to be in the top-$k$ set.
+
+That is, we compute the percentage based on the cumulative sum of instances when true top $k$ items that appear in the estimated top $k$ set at each time point. For example, if the estimated scores identify seven of the true top-10 items, irrespective of order, the hit rate for that period is 70\%. 
+
+
+
+
+We consider a range, $k=3,10,20,40$, depending on the simulation setting. Hit rate is a natural consideration in an active learning problem. It evaluates the quality of the adaptive learning procedures with respect to the eventual decision of selection. It reflects how far we are from always selecting the truly best set of arms for all time periods. 
 
 But we clarify that this particular hit rate measure is appropriate if the goal of the business problem is selecting the top set. It does not consider the rank ordering within the top set (as a particular loss function for ranking would). And hit rate also does not explicitly evaluate the accuracy and precision of the estimated utilities compared to the truth, as mean squared error, MSE, would.  For the clarity and space, we do not show multiple performance measures for all simulations; only for some simulations settings later on, we will show performance in terms of alternative measures, including MSE of estimated utilities and estimated sum of utility values of the chosen top set compared to that of the true best set (akin to regret). The former should be preferable to hit rate, if the business problem is concerned with rank ordering within the top set.
 
@@ -1050,6 +1057,7 @@ For the main simulation environment, we examine true aggregate utilities in Figu
 
 \subsubsection{Simulation Experiment Design Factors}
 
+
 Every setting can be described by a tuple: $\{N,b,K,\numperset,J,S\}$. In the base setting, we simulate the process of collecting survey data about $K-120$ items from $N=500$ respondents in batches of $b=20$ per period. We use bootstrap sampling with replacement from the original dataset of 981 individuals. We consider the first batch of respondents to be initial group, which always receive $\numperset=20$ items uniformly selected, for all methods. In that sense, the adaptive methods only begin after the $20^{th}$ respondent. Each simulated respondent completes $J=12$ choice sets (best-worst tasks), and each set includes $S=5$ items. We then extend the base setting in a variety of dimensions -- $K$, $N$, $\numperset$, $J$ -- and measure performance by varying $k$.
 
 We test the different adaptive approaches found in Table \ref{methods}. For our base setting, we begin use ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$) for methods involving $\epsilon-\delta$ TS. The natural benchmark common across is existing MaxDiff approach, Fixed Express.
@@ -1062,18 +1070,17 @@ We test the different adaptive approaches found in Table \ref{methods}. For our 
 Our primary results highlight that the proposed adaptive methods \ts and \edts, central to Bandit MaxDiff, perform better for large MaxDiff problems than static approaches. But an adaptive greedy algorithm, which does not explicitly incorporate learning, does not perform well enough. Figure \ref{fig:simple_result} shows how \ts improves substantially over the greedy approach, and \edts shows even more improvement for hit rate.
 
 \begin{figure}
-\caption{The plots show results for the \fixedexpress, \egreedy, \ts, and \edts algorithms for $k=3$, $K=120$, and $\numperset=20$. Performance represents cumulative hit rate per number of respondents at that point in time.}
+\caption{The plots show results for the \fixedexpress, \egreedy, \ts, and \edts algorithms for $\{N=500,b=20,K=120,\numperset=20,J=12,S=5\}$. Performance represents cumulative hit rate per number of respondents at that point in time.}
 \label{fig:simple_result}
 \begin{center}
 	\includegraphics[width=.8\textwidth]{plots/hr120v20k3.pdf}
 \end{center}
 \end{figure}
 
+
 Practically speaking the results are significant. If a marketing researcher wants a hit rate of 80\%, the Bandit MaxDiff approach can achieve it \emph{at least three times more efficiently}: using a smaller sample size (about 160 respondents) than the standard Express MaxDiff approach (at least 500 respondents). As we will see the  holds for the different values tested in the basic setting.
  
-Viewed another way, we see that after 260 respondents the \ts and \edts have achieved hit rates of about 85\% when standard Express MaxDiff reaches 65\%. As more data are collected, the methods exhibit naturally diminishing returns to scale, as they asymptote close to 100\% hit rate and the non-adaptive approach is still improving. For clarity, to highlight differences, we only show a restricted range: above 50\% hit rate (y-axis) and the first 500 respondents (x-axis), but we the gains continue beyond 2,000 respondents for this problem. 
-
-The exact average hit rates for $k=3,10,20,40$, averaged across 100 independent experiments, for this problem are reported in Table \ref{table:at_260_500}.
+Viewed another way, we see that after 260 respondents the \ts and \edts have achieved hit rates of about 85\% when standard Express MaxDiff reaches 65\%. As more data are collected, the methods exhibit naturally diminishing returns to scale, as they asymptote close to 100\% hit rate and the non-adaptive approach is still improving. For clarity, to highlight differences, we only show a restricted range: above 50\% hit rate (y-axis) and the first 500 respondents (x-axis), but we the gains continue beyond 2,000 respondents for this problem. The average hit rates for $k=3,10,20,40$, averaged across 100 independent experiments, for this problem are reported in Table \ref{table:at_260_500}.
 
 We now turn to a comparison between the adaptive methods. While \edts slightly outperforms \ts and \egreedy, the gains are mostly earlier on. But we do not mean to overstate those differences in this problem setting. The performance gap between \edts and \ts widens dramatically when considering non-stationary settings, such as a misinformed start (see Section \ref{sec:robust}). 
 
@@ -1092,20 +1099,52 @@ To better understand, how $\epsilon$ and $\delta$ affect performance of the \edt
 \end{figure}
 
 
+\subsection{Focusing Near the Decision Boundary: Thresholding, Uncertainty, and Misclassification}
 
-\subsection{Results: Thresholding, Uncertainty Reduction, Misclassification}
+The intended purpose of all of these was to force sample of items to be near the decision boundary, serving up the $\numperset$ items closest to those with ranks $k$ and $k+1$, instead of focusing on all of the top items ranked $1,\ldots,\numperset$. And a result the percentage of top $k$ items correctly identified would increase since the most precision would be achieved where it mattered most for the decision. 
 
+For the same problem setting as above, $\{N=500,b=20,K=120,\numperset=20,J=12,S=5\}$, we now examine the performance of the active-learning inspired methods that we propose. We devised algorithms \mismin\ and \uncert\ using the same principles and, not surprisingly, they perform similarly well, as seen in Table \ref{table:at_260_500}. But one downside to these two algorithms are their computational cost, obtaining many draws from the posterior at each time step, required to compute the key quantities (e.g., probability of misclassification and probability of being in the top set). 
 
-
-Each algorithm selects $\numperset=20$ items to show every respondent. We examine hit rate for the top $k$ items, $k = \{3,10,20,40\}$. Smaller $k$ values make the problem more challenging early in the process, as selecting the top three out of 120 is more difficult than selecting the top 40 out of 120, particularly in light of the true utility value distribution (Figure \ref{fig:util}).  
-
-
-Figure \ref{fig:K120_L20_k3hit_k10hit} and Table \ref{table:at_260_500} show the results for the $K=120$-item dataset serving $\numperset=20$ questions per respondent, where all methods are tested.
-
+However, the idea of thresholding can be used in a more computationally efficient manner. The algorithm \edtsthres\ was designed to require only two posterior samples just like \edts.  Figure \ref{fig:threshold_edts_hit10vs20} highlights the impact of adding thresholding to \edts, and indeed it has its desired effect.
+\footnote{When we ad thresholding to \ts without the $\epsilon$-$\delta$ diffusion part, the resulting algorithm, \tsthres, does not perform better than its components may suggest. This is because the extra cushion provided by \edts to sometimes sample extreme points is needed to ensure the thresholding is effective.}
 
 \begin{figure}%
-    \caption{For top $k=\{10,20\}$ with 120 items, the cumulative hit rate obtained (y-axis) improves with the number of respondents interviewed (x-axis) at different rates for each algorithm.}%
+    \caption{Adding threshold to \edts}%
     \label{fig:K120_L20_k3hit_k10hit}%
+	\begin{center}
+	\includegraphics[width=.8\textwidth]{plots/hr120v20k3TS.pdf} 
+	\end{center}
+\end{figure}
+
+In fact, \edtsthres can serve as a computationally faster -- but equally strong performing -- algorithm compared to the active-learning inspired ones, \mismin and \uncert (Figure \ref{fig:mismin_uncert_thresh_ts_hit10} and Table \ref{table:at_260_500}). We revisit this comparison and the built-in robustness of \edts, when considering the misinformed starts. 
+
+\begin{figure}%
+    \caption{Comparing active-learning inspired algorithms (\mismin and \uncert) and thresholding (\edtsthres)}%
+    \label{fig:mismin_uncert_thresh_ts_hit10}%
+ 	\begin{center}
+    \subfloat[Top 10]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k10TS.pdf} }}%
+    \qquad
+    \subfloat[Top 10]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k10.pdf} }}%
+	\end{center}
+\end{figure}
+
+
+
+TS alone has its limits---it is constructed to select the best items (and eventually, only the best item), so it performs well identifying a small number of items ($k=3,10$). TS is not suited for the active learning problem, especially when identifying a larger top set, e.g., when a high hit rate for all items in the survey is required ($k=L=20$). While the \edts algorithm adds exploration to improve performance, it does not direct resources toward the areas of high uncertainty at the decision boundary.
+
+
+We examine hit rate for the top $k$ items, $k = \{3,10,20,40\}$. Smaller $k$ values make the problem more challenging early in the process, as selecting the top three out of 120 is more difficult than selecting the top 40 out of 120, particularly in light of the true utility value distribution (Figure \ref{fig:util}).  
+
+ Table \ref{table:at_260_500} 
+
+
+ %\eric{Why is \ts better than \tsthres for $k=10$?   }
+
+
+%For top $k=20$ with 120 items and 20 items per person, the cumulative hit rate obtained (y-axis) improves with the number of respondents interviewed (x-axis) at different rates for each algorithm.
+\begin{figure}%
+    \caption{Adding threshold to \ts and \edts}%
+    \label{fig:threshold_edts_hit10vs20}%
  	\begin{center}
     \subfloat[Top 10]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k10thres.pdf} }}%
     \qquad
@@ -1113,39 +1152,6 @@ Figure \ref{fig:K120_L20_k3hit_k10hit} and Table \ref{table:at_260_500} show the
 	\end{center}
 \end{figure}
 %\eric{Why is \ts better than \tsthres for $k=10$?  Explain why in a good way \tsthres always does worse than \edtsthres. }
-
-\begin{figure}%
-    \caption{For top $k=20$ with 120 items and 20 items per person, the cumulative hit rate obtained (y-axis) improves with the number of respondents interviewed (x-axis) at different rates for each algorithm. }%
-    \label{fig:K120_L20_k3hit_k10hit}%
- 	\begin{center}
-    \subfloat[Top 20]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k20t.pdf} }}%
-    \qquad
-    \subfloat[Top 20]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k20t2.pdf} }}%
-	\end{center}
-\end{figure}
-
-
-\begin{figure}%
-    \caption{For top $k=\{3,10\}$ with 120 items, the cumulative hit rate obtained (y-axis) improves with the number of respondents interviewed (x-axis) at different rates for each algorithm.}%
-    \label{fig:K120_L20_k3hit_k10hit}%
- 	\begin{center}
-    \subfloat[Top 3]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k3TS.pdf} }}%
-    \qquad
-    \subfloat[Top 10]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k10TS.pdf} }}%
-	\end{center}
-\end{figure}
-
- %\eric{Why is \ts better than \tsthres for $k=10$?   }
-
-\begin{figure}%
-    \caption{For top $k=\{3,10\}$ with 120 items, the cumulative hit rate obtained (y-axis) improves with the number of respondents interviewed (x-axis) at different rates for each algorithm. The plots show results using the \fixedexpress, \edtsthres, \mismin, and \uncert algorithms.}%
-    \label{fig:K120_L20_k3hit_k10hit}%
- 	\begin{center}
-    \subfloat[Top 3]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k3.pdf} }}%
-    \qquad
-    \subfloat[Top 10]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k10.pdf} }}%
-	\end{center}
-\end{figure}
 
 
 \begin{figure}%
@@ -1211,6 +1217,19 @@ k &  \fixedexpressS&\egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& 
 \end{center}
 \end{table}
 
+
+
+\begin{figure}%
+    \caption{F}%
+    \label{fig:winapprox_thresh_hit20}%
+ 	\begin{center}
+    \subfloat[Top 20]{}%
+    \qquad
+    \subfloat[Top 20]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k20t2.pdf} }}%
+	\end{center}
+\end{figure}
+
+
 % \begin{table}
 % \caption{Top k Hit Rate for Various Algorithms at the 260th Respondent with 120 Items}
 % \label{table:at260}
@@ -1229,21 +1248,22 @@ k &  \fixedexpressS&\egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& 
 % \end{center}
 % \end{table}
 
-Our results show algorithm performance depends on the hit rate measure relative to the number of items selected ($k$ versus $\numperset$). For $k \ge L$, the best performers are Greatest Uncertainty with random perturbations (\uncert) and Misclassification Minimization with random perturbations (\mismin). The methods perform nearly as well as the best algorithms for $k < L$, $\epsilon$-diffuse Thompson Sampling with thresholding (\edtsthres) and without thresholding (\edts).
 
-TS alone has its limits---it is constructed to select the best items (and eventually, only the best item), so it performs well identifying a small number of items ($k=3,10$). TS is not suited for the active learning problem, especially when identifying a larger top set, e.g., when a high hit rate for all items in the survey is required ($k=L=20$). While the \edts algorithm adds exploration to improve performance, it does not direct resources toward the areas of high uncertainty at the decision boundary.
 
 \begin{figure}%
-    \caption{The frequency of the selected survey item is shown for \edts and \edtsthres.}%
-    \label{fig:Frequency}%
+    \caption{F}%
+    \label{fig:winapprox_thresh_hit20}%
  	\begin{center}
-    \subfloat[]{{\includegraphics[width=.8\textwidth]{plots/edTSfreq.pdf} }}%
+    \subfloat[Top 20]{}%
     \qquad
-    \subfloat[]{{\includegraphics[width=.8\textwidth]{plots/edTSthresfreq.pdf} }}%
+    \subfloat[Top 20]{{\includegraphics[width=.8\textwidth]{plots/hr120v20k20t2.pdf} }}%
 	\end{center}
 \end{figure}
 
-Why do the threshold-based algorithms, \edtsthres, \uncert, and \mismin, outperform those without thresholds? Imagine showing three items out of six (A, B, C, D, E, and F) to a respondent. We want to identify the top three items. Let A, B, C, D, E, and F be the utility order. We are certain A and B are in the top three, and E and F are not. An algorithm without thresholding would pick A, B, and either C or D. A will be chosen as the best item, and C or D will be chosen as the worst, giving us no new information. An algorithm with thresholding will pick C, D, and either B or E. In either case, the respondent will be forced to compare C and D, providing information about which is in the top three. This is illustrated in Figure \ref{fig:Frequency}, where \edts focuses on the top items and \edtsthres provides more of a spread and focuses on items near rank 20.
+
+Our results show algorithm performance depends on the hit rate measure relative to the number of items selected ($k$ versus $\numperset$). For $k \ge L$, the best performers are Greatest Uncertainty with random perturbations (\uncert) and Misclassification Minimization with random perturbations (\mismin). The methods perform nearly as well as the best algorithms for $k < L$, $\epsilon$-diffuse Thompson Sampling with thresholding (\edtsthres) and without thresholding (\edts).
+
+
 
 % \eric{Add a Takeaway from each section beginning here.} In conclusion, \textbf{we find ... }
 
@@ -1451,6 +1471,9 @@ Draw 3 &4.81 & 5.23 & 5.04 &  3.96 &  4.17 & 4.37 &  3.58 & 2.99 \\
 Table \ref{table:data} shows the exponential weighted utility of a single item. The columns are in current rank order and show the top eight utilities. $S$ is the set containing the current first, second, and third ranked items. Then, $\mu^1_{S}=4.02+3.50+5.08=12.6$ and $\mu_{S^*}^{1}=5.08+4.41+4.16=13.65$, so $\Delta^{1}=\frac{13.65-12.6}{12.6}=.083$. Likewise, $\Delta^{2}=\frac{12.6-12.39}{12.39}=.017$ and $\Delta^{3}=\frac{15.08-15.08}{15.08}=0$. (Note $\Delta^m=0$ when $S$ contains the top utilities.) The histogram of $\Delta$ after 100 iterations and 220 iterations is shown in figure \ref{fig:data}.
 
 The potential value remaining (PVR) is the 95 quantile of the distribution $\Delta$ (Figure \ref{fig:data}). After 100 iterations, PVR is 0.092. While we do not know the utility of $S$, we know an alternative set might perform better by as much as 9.2\%.
+
+\text{plots/3vr120show3.pdf}
+\text{plots/3vr120show3ex.pdf}
 
  %\alexander{Replace this plot with stophisted02.pdf stophistprob02.pdf and stophistTSgr02.pdf}
 
