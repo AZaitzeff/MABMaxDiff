@@ -249,7 +249,7 @@
 \ABSTRACT
 %\textbf{Abstract:}
 {% % Enter your abstract
-Marketing research often measures consumers' preferences to identify what they consider to be most important among many candidates, such as product benefits, innovative features, or message appeals. While the objective of existing methods is typically to estimate parameters representing all preferences, these problem settings call for a different goal: minimize the cost of correctly select the best items while ensuring high the accuracy and precision of estimated preferences for the best items. This goal is especially important in settings with extremely large numbers of items. Common techniques for identifying preferences are idea screening using choice tasks, including conjoint analysis and maximum-difference (MaxDiff) scaling, however, are not built for large-scale problems, like identifying the best dozen items out of hundreds. This research proposes a new approach, rooted in active learning and multi-armed bandit algorithms from statistical machine learning, to make goal-directed adaptive ranking and selection problems more efficient and scalable. Using MaxDiff as an illustration of the broader class of problems, the research proposes a new approach: Bandit MaxDiff. The empirical studies shows Bandit MaxDiff can increase efficiency four-fold over standard MaxDiff scaling by identifying the most influential preferred items with fewer survey respondents. The proposed solution use information from initial respondents, so later respondents receive designs oversampling the items most likely to be the in the overall top set. Instead of learning all preference parameters with equal precision, Bandit MaxDiff estimates the parameters of most interest to the respondent with more precision. The methods are implemented empirically using multiple MaxDiff surveys: one from Proctor \& Gamble, consumer packaged goods manufacturer, and various synthetic datasets. Through a series of simulation experiments, a range of benchmark algorithms are considered to illustrate under what conditions the proposed approach out performs existing methods. The methods draw upon research on the best k-arm identification problem. Several new components, which can apply outside the idea screening and preference measurement problem, are introduced to the algorithms to (a) control robustness in a changing environment when using Thompson Sampling, (b) allow the algorithms to learn an unranked (versus ranked) top set, and (c) evaluate a set of approximations to posterior sampling to allow faster model updates.
+Marketing research often measures consumers' preferences to identify what they consider to be most important among many candidates, such as product benefits, innovative features, or message appeals. While the objective of existing methods is typically to estimate parameters representing all preferences, these problem settings call for a different goal: minimize the cost of correctly select the best items while ensuring high the accuracy and precision of estimated preferences for the best items. This goal is especially important in settings with extremely large numbers of items. Common techniques for identifying preferences are idea screening using choice tasks, including conjoint analysis and maximum-difference (MaxDiff) scaling, however, are not built for large-scale problems, like identifying the best dozen items out of hundreds. This research proposes a new approach, rooted in active learning and multi-armed bandit algorithms from statistical machine learning, to make goal-directed adaptive ranking and selection problems more efficient and scalable. Using MaxDiff as an illustration of the broader class of problems, the research proposes a new approach: Bandit MaxDiff. The empirical studies shows Bandit MaxDiff can increase efficiency four-fold over standard MaxDiff scaling by identifying the most influential preferred items with fewer survey respondents. The proposed solution use information from initial respondents, so later respondents receive designs oversampling the items most likely to be the in the overall top set. Instead of learning all preference parameters with equal precision, Bandit MaxDiff estimates the parameters of most interest to the respondent with more precision. The methods are implemented empirically using multiple MaxDiff surveys: one from Procter \& Gamble, consumer packaged goods manufacturer, and various synthetic datasets. Through a series of simulation experiments, a range of benchmark algorithms are considered to illustrate under what conditions the proposed approach out-performs existing methods. The methods draw upon research on the best k-arm identification problem. Several new components, which can apply outside the idea screening and preference measurement problem, are introduced to the algorithms to (a) control robustness in a changing environment when using Thompson Sampling, (b) allow the algorithms to learn an unranked (versus ranked) top set, and (c) evaluate a set of approximations to posterior sampling to allow faster model updates.
 
 } ~ \\
 
@@ -341,7 +341,7 @@ Taken together, the key contributions of this paper are methodological and subst
 
 \subsection{Relevant Marketing Literature}
 
-This research builds on a range of methodologies that have been well-studied in the marketing literature. To start, adaptive preference measurement is typically performed with adaptive conjoint analysis, usually adaptive choice-based conjoint \citep{arora2001improving,toubia2003fast,toubia2004polyhedral}. And while there are preliminary adaptive approaches for MaxDiff \citep{orme2006adaptive}, it received much less attention in the academic literature. A thorough treatment of choice-based conjoint literature is beyond the scope of this paper, we encourage the reader to see review, \cite{toubia2007chapter}. 
+This research builds on a range of methodologies that have been well-studied in the marketing literature. To start, adaptive preference measurement is typically performed with adaptive conjoint analysis, usually adaptive choice-based conjoint \citep{arora2001improving,toubia2003fast,toubia2004polyhedral}. A thorough treatment of choice-based conjoint literature is beyond the scope of this paper, we encourage the reader to see review, \cite{toubia2007chapter}. And while there are preliminary adaptive approaches for MaxDiff \citep{orme2006adaptive}, it received less attention in the academic literature as has the MaxDiff literature \citep{cohen2003maximum}. The current research builds on the idea of Bandit MaxDiff proposed by \cite{fairchildetal2015banditmaxdiff}, formalizing that approach in the context of the statistical machine learning theory literature, using it as an illustration of a broader class of problems, and then proposing and evaluating a wide range of alternative versions using data from real-world idea screening problems.
 
 Idea screening using customers, while widely practiced is not widely studied. \cite{toubia2007adaptive} is an exception that studies exactly this problem, proposing a variety of active idea screening heuristics. In that work, those heuristics are presented as simple scoring rules to decide which ideas to ask the next consumer about, using previously collected consumer preferences expressed as a binary choice (like / do not like) for each idea. We adopt a similar setting -- and at times similar heuristics for scoring -- but we will show how some of these rules can be extended to be more efficient and how some can be formally derived from the underlying optimization problem.
 
@@ -349,13 +349,9 @@ The specific proposed approach builds on algorithms three related areas in stati
 
 Next, since the problem we address is not exactly an ``earning while learning'' problem and is better characterized as ``pure learning'' problem, we turn to \emph{active learning}. While well-established in the theoretical literatures of statistics and machine learning, active learning rarely appears in marketing studies. One exception that explicitly uses active learning algorithms to optimize preference measurement is \cite{huang2016consumer}, which employs active learning for support-vector machines. Another application, \cite{dzyabura2011activelearn}, uses active learning algorithms to be decision-making heuristics for individual consumer learning. 
 
-But the problem we address is not quite a bandit problem nor an active learning problem; instead, it sits between two an is more aligned with the \emph{best arm identification} problem \citep{
-audibert2010best}. While the objective in a traditional bandit problem is to accumulate maximum reward throughout all periods by taking the actions likely to have highest reward, in the best arm identification setting, the goal is to correctly select the best arm -- or subset of best arms -- after a dedicated learning period. This problem has not yet appeared in the marketing literature, but it has natural connections to the way firms increasingly run A/B testing, or real-time marketing experiments. We revisit this formally and in detail in subsequent sections.
+But the problem we address is not quite a bandit problem nor an active learning problem; instead, it sits between two an is more aligned with the \emph{best arm identification} problem \citep{audibert2010best}. While the objective in a traditional bandit problem is to accumulate maximum reward throughout all periods by taking the actions likely to have highest reward, in the best arm identification setting, the goal is to correctly select the best arm -- or subset of best arms -- after a dedicated learning period. This problem has not yet appeared in the marketing literature, but it has natural connections to the way firms increasingly run A/B testing, or real-time marketing experiments. We revisit this formally and in detail in subsequent sections.
 
 \begin{center}{---}\end{center}
-
- % Since the marketer derives no reward for the initial rounds, the best arm identification problem is known as a pure learning problem as opposed to an earning while learning problem. The best-arm identification problem can also be viewed as a particular type \emph{ranking and selection} problem. Yet despite the best arm identification problem being a natural bridge between the active learning and bandits, surprisingly, the literature has only recently made explicit algorithmic links between them \citep{gantigray2013bridgealmab}. 
-
 
 %, chen2017adaptive,gabillon2012best, jamieson2014best, kaufmann2013information, russo2018simple
 
@@ -383,7 +379,7 @@ In the next section, we dive into each of these three methodological areas forma
 
 
 
-% Facing this problem, firms such as Proctor \& Gamble (P\&G) often turn to MaxDiff surveys to screen out weaker ideas, identify the best items, and learn more about them. Among all corporate users of the market research software, Sawtooth Software, 70\% of them have used MaxDiff in 2017. This data collection and preference learning process can be made more efficient through adaptive methods. But this problem is not the same as that solved by other adaptive approaches, such as adaptive (choice-based) conjoint analysis, or ACA (ACBC) (Aurora and Huber 2002; Toubia et al. 2004) and preliminary adaptive MaxDiff approaches (Orme 2006). 
+% Facing this problem, firms such as Procter \& Gamble (P\&G) often turn to MaxDiff surveys to screen out weaker ideas, identify the best items, and learn more about them. Among all corporate users of the market research software, Sawtooth Software, 70\% of them have used MaxDiff in 2017. This data collection and preference learning process can be made more efficient through adaptive methods. But this problem is not the same as that solved by other adaptive approaches, such as adaptive (choice-based) conjoint analysis, or ACA (ACBC) (Aurora and Huber 2002; Toubia et al. 2004) and preliminary adaptive MaxDiff approaches (Orme 2006). 
 
 % But typical adaptive discrete choice experiment methods do not have the objective suited for this problem. Those methods seek to learn preferences for all items equally. Even the adaptive versions of conjoint, such as ACBC, serve respondents with optimized questions to minimize preference uncertainty everywhere and maximize the researcher's overall learning. By contrast, in our setting, we specifically want to learn how much respondents prefer certain items, such as the top 20 items, and do not need to spend resources learning how precisely the 100th-best item differs from the 90th-best item. 
 
@@ -481,11 +477,12 @@ In the next section, we dive into each of these three methodological areas forma
 
 \subsection{Bayesian Decision Theory}
 
-In our marketing decision making problem, managers we learn the relative ranking of many potential consumer preferences. Facing uncertainty about the items, they can select which to learn about in subsequent customer interactions.
+In our marketing decision making problem, managers we learn the relative ranking of many potential consumer preferences. Facing uncertainty about the items, they can select which to learn about in subsequent customer interactions. We use the Bayesian decision theory framework to make the best decision given limited data following standard practice \citep{GelmanEtAl2004}. 
 
-Taking on the role of decision maker, we consider $\numitems$ items with unknown utilities $u_1(\theta),u_2(\theta), \ldots, u_\numitems(\theta)$ parametrized by a random variable. $\theta$. Their unknown decreasing rank order is $u_{(1)}(\theta) > u_{(2)}(\theta) > \ldots > u_{(\numitems)}(\theta)$. Uncertain about $\theta$, and hence uncertain about the value of the utilities $u$ (and their rank ordering), the manager has a to choose a decision, $a$. 
+Taking on the role of decision maker, we consider $\numitems$ items with unknown utilities $u_1(\theta),u_2(\theta), \ldots, u_\numitems(\theta)$ depending on a random variable, $\theta$,  vector of parameters. The utilities unknown decreasing rank order is $u_{(1)}(\theta) > u_{(2)}(\theta) > \ldots > u_{(\numitems)}(\theta)$. Uncertain about $\theta$, and hence uncertain about the value of the utilities $u$ (and their rank ordering), the manager has a to choose a decision $a$ from a set of possible actions, $a \in \mathcal{A}$. 
 
-We use the Bayesian decision theory framework to make the best decision, given limited data. Let $y \in \mathcal{Y}$ be the customer outcome of interest (e.g., choice, behavior) and $x \in \mathcal{X}$ be the set of items of interest (e.g., ideas, benefits, characteristics, etc. ). Suppose we have some data, $D = \{(x,y)\}_{\{1,...,t\}}$, collected through time $t$, and have uncertainty in $\theta$. With prior $P(\theta)$ and model likelihood of the data $P(\{y\}|\{x\},\theta)$, we obtain the posterior $P(\theta|D)$ -- either directly or numerically -- to characterize beliefs about $\theta$, updating as new data are collected.
+
+Let $y \in \mathcal{Y}$ be the customer outcome of interest (e.g., choice, behavior) and $x \in \mathcal{X}$ be the set of items of interest (e.g., ideas, benefits, characteristics, etc. ). Suppose we have some data, $D = \{(x,y)\}_{\{1,...,t\}}$, collected through time $t$, and have uncertainty in $\theta$. With prior $P(\theta)$ and model likelihood of the data $P(\{y\}|\{x\},\theta)$, we obtain the posterior $P(\theta|D)$ -- either directly or numerically -- to characterize beliefs about $\theta$, updating as new data are collected.
 
 We can then compute a variety of key quantities by integrating over the full posterior distribution. The posterior predictive distribution of an unknown outcome $y$ given some $x$ is defined as:
 \begin{align} 
@@ -494,16 +491,12 @@ P(y|x,D) = \int_\theta P(y|x,\theta)P(\theta|D)d\theta .
 
 \subsubsection{Loss function}
 
-The quality of each action $a$ is represented by a \emph{loss function}. We let $\ell(a,y)$ be the loss incurred by performing action $a$ when the true output is $y$. 
-
-We are interested in a particular class of actions $\mathcal{A}$, where every $a \in \mathcal{A}$ represents a manger selecting a subset of items, indexed by $x_1,\ldots,x_n$, based on predicted rank ordering.
-
-The class of loss functions that we will consider here characterizes the quality of a predicted rank, or a permutation of length $\numitems$, which is denoted as $a=\pi$. The predicted index of the $j$th ranked item is $\pi(j) \in \{1,\ldots,\numitems\}$, and the predicted rank of item $i$ is denoted $r_\pi(i)$. Learning a complete permutation of the set of items encompasses the problems of selecting the single best arm (binary classification), identifying a subset (also binary classification), or ranking items within the subset (classification and partial ranking). We return to these later, when we consider a particular subset, the \emph{top set} of highest-ranked items. We let the true top set be $\topset^{*}(\theta)$, if $\theta$ were given, which is the set of arm indices with highest true means, 
+The quality of each action $a$ is represented by a \emph{loss function}. We let $\ell(a,y)$ be the loss incurred by performing action $a$ when the true output is $y$. We are interested in a particular class of actions $\mathcal{A}$, where every $a \in \mathcal{A}$ represents a manger selecting a subset of items based on predicted rank ordering. Class of loss functions that we will consider here characterizes the quality of a predicted rank, or a permutation of length $\numitems$, which is denoted as $a=\pi$. The predicted index of the $j$th ranked item is $\pi(j) \in \{1,\ldots,\numitems\}$, and the predicted rank of item $i$ is denoted $r_\pi(i)$. Learning a complete permutation of the set of items encompasses the problems of selecting the single best arm (binary classification), identifying a subset (also binary classification), or ranking items within the subset (classification and partial ranking). We consider a particular subset, the \emph{top set} of highest-ranked items. We let the true top set be $\topset^{*}(\theta)$, if $\theta$ were given, which is the set of arm indices with highest true means, 
 \begin{align}
 \topset^{*}(\theta) &= \{i | u_{(i)}(\theta) \in ( u_{(1)}(\theta),\ldots,u_{(k)}(\theta) ) \}.
 \end{align}
 
-One loss function -- the one we will be most interested in throughout the paper -- is appropriate for the selection problem: choose the items of rank $k$ or better, i.e., $\topset(\theta)$ and suffer penalty of 1 for each wrong:
+One particular loss function -- the one we focus on throughout the paper -- that is appropriate for the selection problem is:
 \begin{align}
 \ell_i(a,\theta) = 
 	\begin{cases} 
@@ -511,12 +504,12 @@ One loss function -- the one we will be most interested in throughout the paper 
 	1 &\text{, otherwise} \\
 	\end{cases}
 \end{align}
-This binary loss function maps a ranking action into effectively a binary classification problem. 
+when $a$ classifies each item based on whether it is predicted to be of rank $k$ or better according to rank ordering $\pi$. This binary loss function maps a ranking action into effectively a binary classification problem, where we suffer loss only for each misclassification.
 
-Another class of loss functions are functions of a latent parameters, like utilities, directly, instead of the rank order of the utilities. For instance, if the manager wants to estimate the utility values of the top set items with as much as accuracy and precision as possible, then an appropriate loss function combines components from the standard squared error loss for prediction and binary loss for classification.  While we will not address these directly, the approach can accommodate them, and we will consider the performance of some algorithms in these terms.
+Another type of loss functions depend of a latent parameters, like utilities, directly, instead of the rank order of the utilities. For instance, if the manager wants to estimate the utility values with as much as accuracy and precision as possible, then an appropriate loss function could be standard squared error loss for prediction, e.g., $(a-u(\theta))^2$, if $a$ is a predicted parameter estimate. The manager could also combines components from the square error loss and binary classification, for example, by only considering parameter estimates of items truly in the top set items. While we will not address these directly, and largely use the binary classification loss function, the approach we detail in the paper can accommodate them, and we will later evaluate performance in terms of true utility values as an extension.
 
 
-\subsubsection{Risk as Expected Loss}
+\subsubsection{Bayes Risk as Expected Loss}
 
 The objective of the decision problem is to eventually select the best $a$ using data $D$ to minimize expected loss, for any randomly chosen $x$ with unknown $y$. Since $y$ is unknown but $x$ is given, we can characterize the average quality of an action $a$, its expected loss, by integrating over the predicted outcome distribution $P(y|x,D)$. 
 
@@ -533,7 +526,7 @@ Because action $a^{*}$ minimizes expected loss under the posterior for a given d
 \begin{align}
 \risk(a^{*}|x) = \min_a \int_y \ell(a,y) P(y|x,D) dy .
 \end{align}
-In other words, the best action $a^{*}$ may change for different possible choices for $x$, and therefore, the level of minimum expected loss, $\risk(a^{*}|x)$, also varies with $x$.
+Note that the best action $a^{*}$ may change for different possible choices for $x$, and therefore, the level of minimum expected loss, $\risk(a^{*}|x)$, also varies with $x$.
 
 With the fundamentals of Bayesian decision theory established, given a dataset $D$, we can now turn towards the sequential data collection problem: how should we best assemble subsequent data through selecting $x$? 
 
@@ -542,60 +535,54 @@ With the fundamentals of Bayesian decision theory established, given a dataset $
 
 We use the active learning framework, known as expected loss optimization, from \cite{longchapelle2010active}, which has the goal of minimizing expected loss of the decision $a$ for any randomly chosen unlabeled data $(x,y)$.\footnote{Without changing the meaning, we use a different notation. In \cite{longchapelle2010active}, $\rho(a)$ denotes risk the expression $EL(x)$ denotes the minimized expected loss due to taking the optimal action $a^{*}$ given $x$. But we use Bayes risk $\risk(a|x)$ and minimized Bayes risk, $\risk(a^{*}|x)$.} 
 
-We then consider the possible choices for the next example $x$ to observe. We have access to a finite pool of items, $x \in \mathcal{X}$, and know their marginal input distribution $\mathcal{X} \sim P(x)$. The average Bayes risk for any arbitrary input or unseen example requires an average over that marginal input distribution, $P(x$, which is known as the generalization error: $\int_x \risk(a^{*}|x) P(x)dx$. We intend to minimize the generalization error, under the posterior for any arbitrary input. This yields the following optimization problem:
+We then consider the possible choices for the next example $x$ to observe. We have access to a finite pool of items, $x \in \mathcal{X}$, and know their marginal input distribution $\mathcal{X} \sim P(x)$. The average Bayes risk for any arbitrary input or unseen example requires an average over that marginal distribution, $P(x)$, which is known as the \emph{generalization error}: $\int_x \risk(a^{*}|x) P(x)dx$. We intend to minimize the generalization error, under the posterior for any arbitrary input. This yields the following optimization problem seeking a data collection policy, denoted by $\phi$, to minimize average Bayes risk:
 \begin{align}
-\min_{x_1,x_2,\ldots,x_T} \int_x \risk(a^{*}|x) P(x)dx,
+\min_{\phi;x_1,x_2,\ldots,x_T} \int_{\phi;x} \risk(a^{*}|x) P(x)dx,
 \end{align}
-subject to a budget of only $T$ opportunities to select $x$ from $\mathcal{X} \sim P(x)$ to be labeled. 
+subject to a budget of only $T$ opportunities to label examples, $x \in \mathcal{X}$, and integrating over the randomness inherent in following policy  $\phi$. 
 
-Note that we aim to minimize by choosing an entire sequence of examples, $x_1,x_2,\ldots,x_T$, but they do not have to be selected all at once. Instead at any time in the learning process, $t$, we can use all output data $y_1,\ldots,y_t$ collected so far and all $x \in \mathcal{X}$ to select the next $x$ to be labeled. But which one would help us best minimize the generalized risk.
+That data collection policy is an \emph{active learning strategy}, which selects the next input example based on current data and estimates. Note that while we aim to minimize the objective by choosing an entire sequence of examples, $x_1,x_2,\ldots,x_T$, these do not have to be selected all at once. Instead, at any time in the learning process, $t$, $\phi$ uses all output data $y_1,\ldots,y_t$ collected so far and all $\mathcal{X}$ to select the next $x$ to be labeled. 
 
-An \emph{active learning strategy} selects the next input example. One standard active learning strategy seeks to maximize the conditional risk, selecting:
+Which sequential data collection policy would help us best minimize the generalized risk? There are many active learning strategies \citep{balcan2009agnostic,balcan2010true,dasgupta2008general,fu2013survey}. One standard active learning strategy, which we consider here, selects the example that \emph{maximizes} the conditional risk:
 \begin{align}
 x^{*}  &= \mathop{\text{arg}\max}_x \risk(a^{*}|x) 
 = \mathop{\text{arg}\max}_{x} \left( \min_{a} \int_y \ell(a,y) P(y|x,D) dy \right).
 \end{align}
-The algorithm that aims to eventually minimize average risk on unlabeled data, selects the data point that maximizes risk given the current data.  
-
-What is the consequence of selecting $x$ where expected loss would be largest? After incorporating $x$ into the training data, $D \to \{D \cup x \}$, updating the posterior distributions, and taking the optimal action after data collection, then the resulting generalized error will have decreased by more than it would have by observing any other $(x,y)$ pair. In other words, select the example where even the best decision would be most incorrect is chosen for observation. 
-
-
+That is, the active learning algorithm that aims to eventually minimize average risk on unlabeled data, selects the data point that maximizes risk given the current data.  The intuition for this is clear when considering the consequence of selecting $x$ ,where expected loss would be largest. After incorporating $x$ into the data, $D \to \{D \cup x \}$, updating the posterior distributions, and taking the optimal action $a^{*}$ after data collection, then the resulting generalized error will have decreased by more than it would have by observing any other $(x,y)$ pair. In other words, this standard active learning strategy chooses to observe the example for which even the best decision would be most incorrect. 
 
 
 \subsection{Multi-Armed Bandit Problem}
 
-While we have just reviewed the active learning setup, we now switch gears to contrast it with the traditional multi-armed bandit problem. In the standard multi-armed bandit problem, the decision maker seeks to maximize reward by sequentially selecting one of $\numitems$ arms, $x_1,\ldots,x_\numitems$, with unknown mean rewards. Suppose the mean rewards are item utilities $u_1(\theta), \ldots, u_\numitems(\theta)$. The essential problem is how to trade off ``earning" (selecting the arm that offers the best utility at the time) versus ``learning" (selecting other arms to reduce uncertainty). 
+While we have just reviewed the active learning setup, we now contrast it with the traditional multi-armed bandit problem. In the standard multi-armed bandit problem, the decision maker seeks to maximize reward by sequentially selecting one of $\numitems$ arms, $x_1,\ldots,x_\numitems$, with unknown mean rewards \citep{GittinsEtAl2011,Robbins1952,thompson1933likelihood}. Suppose the mean rewards are item utilities $u_1(\theta), \ldots, u_\numitems(\theta)$. The essential problem is how to trade off ``earning" (selecting the arm that offers the best utility at the time) versus ``learning" (selecting other arms to reduce uncertainty). 
 
-Whereas active learning only considers reward (or loss, typically) for the final action $a$ at ending time $T$, the bandit objective function considers cumulative reward throughout all periods $t=1,2,...,T$. In the bandit, each selection of $x$ is not just another label $y$acquired; instead, it is itself another action $a$, and $y_t$ is the reward from selecting $x_t$, which accumulates as $\sum_{t=1}^{T} y_t$. The standard bandit loss function represents cumulative \emph{regret}, the gap between optimal and realized performance, which is simply linear loss, $\ell(a,\theta) = (y^{*} - y_t)$, where $y_t$ is chosen by $a_t$, and also where $E[y^{*}] = u_{(1)}(\theta)$ and $E[y_t] = u_{a_t}(\theta)$. Therefore, the expected regret can be written with the Bayesian notation, conditional on a parameter $\theta$, as follows:
+Whereas active learning only considers reward (or loss, typically) for the final action $a$ at ending time $T$, the bandit objective function considers cumulative reward throughout all periods $t=1,2,...,T$. In the bandit, each selection of $x$ is not just another label $y$acquired; instead, it is itself another action $a$, and $y_t$ is the reward from selecting $x_t$, which accumulates as $\sum_{t=1}^{T} y_t$. The standard bandit loss function represents cumulative \emph{regret} \citep{Auer2002,LaiRobbins1985}. The regret is the gap between optimal and realized performance, which is simply linear loss, $\ell(a,\theta) = (y^{*} - y_t)$, where $y_t$ is the observed stochastic reward from choosing action $a_t$ at time $t$, and also where $E[y^{*}] = u_{(1)}(\theta)$ and $E[y_t] = u_{a_t}(\theta)$. Therefore, the expected regret can be expressed conditional on a parameter $\theta$, as follows:
 \begin{align}
-E_{y|\theta}\left[ \ell(a,\theta) | \theta \right] &= E_{y|\theta}\left[ \sum_{t=1}^{T} (y^{*} - y_t) \right] = u_{(1)}(\theta) \cdot T - \sum_{t=1}^{T} u_{a_t}(\theta) 
+E_{y}\left[ \ell(a,\theta) | \theta \right] &= E_{y}\left[ \sum_{t=1}^{T} (y^{*} - y_t) \right] = u_{(1)}(\theta) \cdot T - \sum_{t=1}^{T} u_{a_t}(\theta) 
 \end{align}
-where $u_{(1)}(\theta)$ is the true optimal arm with highest mean reward that an omniscient optimal player selects every period, and where the action sequence, $a_1,a_2,\ldots,a_T$, is generated by the bandit policy $\phi(\cdot)$, selecting which arms to play in round $t+1$ based on the full history of actions and rewards captured in the past data, $D_t$. That is, $\phi$ takes inputs $D_{t}$ and outputs $a \in \{1,\ldots,\numitems\}$, so it is a mapping, $\phi: \mathcal{X} \times \mathcal{Y} \to \mathcal{A}$. Then integrating over the posterior yields the Bayes risk of a bandit policy $\phi$ is,
+where $u_{(1)}(\theta)$ is the true optimal arm with highest mean reward that an omniscient optimal player selects every period, and where the action sequence, $a_1,a_2,\ldots,a_T$, is generated by the bandit policy $\phi(\cdot)$, selecting which arms to play in round $t+1$ based on the full history of actions and rewards captured in the past data, $D_t$. That is, $\phi$ takes inputs $D_{t}$ and outputs $a \in \{1,\ldots,\numitems\}$, so it is a mapping, $\phi: \mathcal{X} \times \mathcal{Y} \to \mathcal{A}$. Then integrating over the posterior yields the Bayes risk of a bandit policy $\zeta$ is,
 \begin{align}
-\risk(\phi) = E_{y,\phi}\left[ \ell(a,\theta) \right] = 
+\risk(\zeta) = E_{y,\phi}\left[ \ell(a,\theta) \right] = 
 \int_{\theta} \left(  u_{(1)}(\theta) \cdot T - \sum_{t=1}^{T} u_{\phi_t}(\theta) \right) P(\theta|y,D)  d\theta
 \end{align}
 
-The ending points of the two sequential decision-making problems illustrate a stark contrast between them. The bandit converges to selecting the optimal arm repeatedly and will regularly re-sample arms to further reduce uncertainty in the expected rewards. But in standard active learning, repeatedly selecting an example to label makes know sense. Since labels are typically considered deterministic, and the goal of active learning is purely learning. 
+The multi-armed bandit and active learning settings are both sequential decision-making problems, but they differ. The ending points of the two problems illustrate a stark contrast: The bandit converges to selecting the optimal arm repeatedly and will regularly re-sample arms to further reduce uncertainty in the expected rewards. But in standard active learning, repeatedly selecting an example to label makes know sense. Since labels are typically considered deterministic, and the goal of active learning is purely learning \citep{gantigray2013bridgealmab}. 
 
 
 
 \subsubsection{Thompson Sampling}
 
-Just as we reviewed a fundamental active learning approach, selecting the highest risk example to observe, so too we review the Bayes-risk minimizing optimal policy for the multi-armed bandit problem: Thompson Sampling (TS). TS although quite old \citep{thompson1933likelihood} has recently been proven to be an optimal bandit algorithm through various theoretical perspectives \citep{KaufmannEtAl2012,OrtegaBraun2013,RussoVanRoy2015}. TS has been studied in marketing \citep{schwartzetal2017} and operations research \citep{RussoVanRoy2014}, and is also the preferred method of optimizing A/B testing in industry \citep{Scott2010,scott2015multi}. For a review, see \cite{russo2017tutorial}. 
+Just as we reviewed a fundamental active learning approach, selecting the highest risk example to observe, so too we review the Bayes-risk minimizing optimal policy for the multi-armed bandit problem: Thompson Sampling (TS). TS although quite old \citep{thompson1933likelihood} has recently been proven to be an optimal bandit algorithm through various theoretical perspectives \citep{KaufmannEtAl2012,OrtegaBraun2013,RussoVanRoy2015}. TS has been studied in computer science \citep{ChapelleLi2011}, marketing \citep{schwartzetal2017} and operations research \citep{RussoVanRoy2014}, and is also the preferred method of optimizing A/B testing in industry \citep{Scott2010,scott2015multi}. For a review of Thompson Sampling and guide to its practical implementation, see \cite{russo2017tutorial}. 
 
-The key to TS is using the posterior distribution, $P(\theta|D)$, to select actions in proportion to their probability of being optimal. This can be seen a as a stochastic decision, selecting arm $x_i$ with probability $w_i$ defined as,
+The key to TS is using the posterior distribution of parameters, $P(\theta|D)$, to select actions in proportion to their posterior probability of being the optimal action. This can be seen as a stochastic decision, selecting action (arm) $x_i$ with probability $w_i$, defined as,
 \begin{align} 
-w_i &= P(. u_i(\theta) = u_{(1)}(\theta) | D ) \\
+w_i &= P(u_i(\theta) = u_{(1)}(\theta) | D ) \\
 &= \int_\theta \mathbf{1}_i\left\{ u_i(\theta) = u_{(1)}(\theta)| \theta \right\} P(\theta|D)d\theta ,
 \end{align}
-where $u_{(1)}(\theta)=\max_{j=1,\ldots,n} u_j(\theta)$, the highest mean reward among all arms. 
+where $u_{(1)}(\theta)=\max_{j=1,\ldots,n} u_j(\theta)$, the highest mean reward among all arms, as expressed in \cite{Scott2010} to reflect \cite{thompson1933likelihood}. These naturally correspond to the item utilities in our problem setting.
 
 While this probability $w_i$ can be computed numerically, it need not be computed to actually run the algorithm. For instance, equivalently, TS can be viewed as drawing a stochastic action, defined as a random variable $A_t = \mathop{\text{arg}\max}_{j=1,\ldots,n} u_{j}(\theta) | D_t$. Then draws of $A_t$ from its underlying distribution will yield $a_i$ in proportion to $w_i$.
 
-TS is also extremely flexible, requiring only the ability to draw from a posterior distribution. This is typically done numerically, using an empirical posterior, such as, asymptotic approximation and the Bayesian Bootstrap (both of which we will employ here) and a full Markov Chain Monte Carlo sampler.
-
-
+TS is also extremely flexible, requiring only the ability to draw from a posterior distribution. This is typically done numerically, but a full Markov Chain Monte Carlo sampler is often not computationally practical for real-time application, so TS work typically uses an approximate posterior sampling method, such as, asymptotic approximation \citep{ChapelleLi2011} and the Bayesian Bootstrap \citep{eckles2014thompson}, both of which we will employ here in this work.
 
 % \subsubsection{???Departures from Standard Active Learning}
 
@@ -648,13 +635,13 @@ TS is also extremely flexible, requiring only the ability to draw from a posteri
 
 \subsection{Problem Setup and links to Active Learning and Bandit Settings}
 
-As we have seen the bandit problem does not quite match our problem of interest since we are primarily interested in a pure learning problem, and not earning during the learning process. However, we also have seen that our problem also differs from the traditional active learning problem, since we do not have the equivalent of deterministic labels -- we are interested in consumer preferences measurement which has inherent randomness. 
+As we have seen the bandit problem does not quite match our problem of interest since we are primarily interested in a pure learning problem, and not earning during the learning process. However, we also have seen that our problem also differs from the traditional active learning problem, since we do not have the equivalent of deterministic labels in consumer preference measurement, which has inherent randomness. 
 
-But our setting more closely the best arm identification problem, where the setup is identical to that of the bandit, but the objective is nearly identical that of active learning. As in active learning problems, the loss function depends only on a single decision, selecting the arm after $T$ periods. 
+Instead, our setting more closely the \emph{best arm identification} problem, where the setup is identical to that of the bandit, but the objective is nearly identical that of active learning since it is known as a pure learning (or pure exploration) problem. As in active learning problems, the loss function depends on a decision only in a single period $T+1$, selecting the arm(s) once after $T$ period of learning. This pure learning best arm identification problem is distinct from the canonical bandit problem, which calls for a learning-earning tradeoff. 
 
-Unlike the bandit and more like the active learning setting, however, we observe an outcome immediately (e.g., choice, revealed preference), but that outcome does not represent a reward. In fact, there is no real-time reward feedback. For instance, whether the best items have been correctly identified cannot be evaluated in during the data collection process, but only after.
+Unlike the bandit and more like the active learning setting, however, we observe an outcome immediately every period (e.g., choice, revealed preference), but that outcome does not represent a reward. In fact, there is no real-time reward feedback. For instance, whether the best items have been correctly identified cannot be evaluated in during the data collection process, but only after.
 
-The problem of identifying the best arms among a set has historically received little focus. But it has recently attracted attention in the computer science literature \citep{gabillon2012best,jamieson2014lil,kalyanakrishnan2012pac,kaufmann2016complexity,kaufmann2013information,russo2018simple}, in large part due to an increase in rigorous study of A/B testing. The best arm identification problem is distinct because it involves pure learning, where the canonical bandit problem calls for a learning-earning tradeoff. 
+The problem of identifying the best arms among a set has historically received little focus. But it has recently attracted attention in the computer science literature \citep{gabillon2012best,jamieson2014lil,kalyanakrishnan2012pac,kaufmann2016complexity,kaufmann2013information,russo2018simple}, in large part due to an increase in rigorous study of A/B testing. 
 
 %Recent theoretical advances show the value of adding perturbations, such as in Follow The Perturbed Leader~\citep{kalai2005efficient}. Others show adding perturbations with Gumbel-distributed noise leads to an optimal multi-armed bandit strategy~\citep{abernethy2015fighting,kujala2005following}. The perturbation methods provide an intuitive randomization decision strategy appropriate for our application, but their connection to other approaches and applications are limited. Perturbation resolves the learning-earning tradeoff for the stochastic multi-armed bandit setting and improves pure learning in the active setting, but it also goes further in the adversarial setting. This suggests the strategy is more robust in an environment with non-random dynamic changes.
 
@@ -665,30 +652,24 @@ Among the literature analyzing algorithms for the best arm identification proble
 The benefit of this top-two sampling is that it permits additional exploration to provide more guarantees that the item, which currently seems to be optimal, is in fact optimal. By forcing the algorithm to select a second action, it give another a chance. ... \eric{STOPPED HERE!}
 
 
-\section{Proposed New Algorithms for General Problem: Best-Arm Identification} 
+\section{Proposed Approach: New Algorithms for Best k-Arm Identification Bandit Problem} 
 
 We propose a set of new algorithms using TS as the common base to solve our general problem, which features three dimensions: (1) maximizing minimized expected loss; (2) heuristics oversampling at the threshold; and (3) a diffuse exploration distribution. We illustrate these with alternative approximation methods of posterior sampling: asymptotic distribution and Bayesian Bootstrap.
 
-We seek to identify the best $k$ arms but can select a list of $\numperset$ distinct arms per period. Our final action will be evaluated based on its predicted ranking and selection $\pi$. The base TS algorithm uses draws $g=1,\ldots,G$ from a posterior distribution as follows, for every $g$:
+We seek to identify the best $k$ arms but can select a list of $\numperset$ distinct arms per period. Our final action will be evaluated based on its predicted ranking and selection $\pi$. The base TS algorithm uses draws $g=1,\ldots,G$ from a posterior distribution. Our approach builds on this as follows, for every $g$:
 \begin{enumerate}
 	\item Obtain a posterior draw denoted by $(g)$ with parameter values $\theta^{(g)} = \{u_1,\ldots,u_\numitems\}^{(g)}$. 
 	\item Generate a predicted ranking $\pi^{(g)} = \{\pi(i)\}^{(g)} = \{ \pi(1),\ldots,\pi(\numitems) \}^{(g)}$, where the best item is $\pi(1)^{(g)} = \text{arg}\max_{j} u_j^{(g)}$.
 	\item Partition the $\numitems$ items into two lists: the best-$L$ items, $\text{Top}_L^{(g)}=\{ \pi(1), \ldots,\pi(L) \}^{(g)}$, and the remaining items, $\{ \pi(L+1), \ldots,\pi(\numitems) \}^{(g)}$.
 	\item Select $\text{Top}_L^{(g)}$ for the next round. 
 \end{enumerate}
+Because we are integrating over the entire posterior, we can do this for each over $g=1,\ldots,G$ draws, and then compute any posterior quantity empirically by averaging across $G$ draws. For instance, this is exactly how TS can provide the posterior probability that a given item $i$ is actually the \emph{single best} item, i.e., $P( u_i = u(1) | D ) =  $). But for our problem, we do not want the single best, rather the top set. 
 
-Because we are integrating over the entire posterior, we can do this for each over $g=1,\ldots,G$ draws, and then compute any posterior quantity empirically by averaging across $G$ draws. For instance, this is exactly how TS can provide the posterior probability that a given item $i$ is actually the \emph{single best} item, i.e., $P( u_i = u(1) | D ) =  $). 
+The base \ts algorithm and its \edts variant (Section \ref{sec:edts}) should be employed in settings where either the rank ordering or the estimated utility values within the top \numtopset items is important. The base Bandit MaxDiff algorithm gathers the most data on the truly best items and maximizes precision.
 
-But for our problem, we do not want the single best, rather the top set. 
+However, for settings where selecting the top \numtopset is the objective, without concern for within-set ranking or estimated values, then we consider new variants. We now detail these variants for the true best $k$-arm identification problem, starting with algorithms inspired by active learning. Then we detail how the \edts variant, can also be modified to serve the same best $k$-arm goal with a threshold, as a computationally efficient alternative. 
 
-
-
-The base \ts algorithm and its \edts variant (Section \ref{sec:edts}) should be employed in settings where either the rank ordering or the estimated utility values within the top \numtopset items is important. 
-
-
-While our base bandit algorithm gathers the most data on the truly best items and maximizes precision, for settings where selecting the top \numtopset is the objective, without concern for within-set ranking or estimated values, then we consider new variants.
-
-\subsection{New Variants: Active-Learning Inspired}
+\subsection{New Variants: Active Learning Inspired Algorithms}
 
 \subsubsection{Risk Seeking: Max-Min Expected Loss \mismin}
 %Following the active learning literature, tested we devised the \mismin\ variant to include items most likely to be misclassified. Treating membership in the $\topset$ as the class to learn, we can do this naturally via posterior sampling from TS. And this approach performs quite well, 
