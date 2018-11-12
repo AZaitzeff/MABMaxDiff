@@ -647,12 +647,15 @@ The problem of identifying the best arms among a set has historically received l
 
 \subsection{Top Two Thompson Sampling}
 
-Among the literature analyzing algorithms for the best arm identification problem, one explicitly takes the Bayesian decision theoretic perspective and leverages Thompson sampling. That is so-called \emph{Top Two Thompson Sampling}, proposed by and analyzed -- both empirically and theoretically -- by \cite{russo2018simple}. The idea behind this algorithm is straightforward: draw one action via Thompson Sampling, and then draw another independent sample until it is different from the first. Importantly, this takes two draws from the underlying multinomial action distribution. 
+Among the literature analyzing algorithms for the best arm identification problem, one explicitly takes the Bayesian decision theoretic perspective: \emph{Top Two Thompson Sampling}, which is proposed by and analyzed -- both empirically and theoretically -- by \cite{russo2018simple}. The idea behind this algorithm is straightforward: draw one action via TS, and then draw another independent sample via TS, stopping when the drawn second action is different from the first. Importantly, this takes two draws from the underlying multinomial action distribution. 
 
-The benefit of this top-two sampling is that it permits additional exploration to provide more guarantees that the item, which currently seems to be optimal, is in fact optimal. By forcing the algorithm to select a second action, it give another a chance. ... \eric{STOPPED HERE!}
+The benefit of this top-two sampling is that it permits additional exploration to provide more guarantees that the item, which currently seems to be optimal, is in fact optimal. By forcing the algorithm to select a second action, it gives another a chance to the posterior to provide more exploration. This two sampling approach is naturally limiting and does not immediately provide a corresponding best $k$-arm equivalent. \cite{russo2018simple} proposes a heuristic for such a case: (1)
+draw a first sample via TS to obtain the predicted $\topset$; (2) draw a second independent sample via TS and obtain its predicted $\topset$; (3) consider the set of items that are in only one (but not both) samples' $\topset$; and (4) draw an action uniformly from that set of non-overlapping items.
+
+This may be viewed as a bit ad hoc initially. But the intuition lines up with active learning approach we will consider since it is an approximation of the items that are most likely to be misclassified as an item in the true top $k$ set, which is precisely our main proposed algorithms, \mismin. Therefore, one of our proposed algorithms could be viewed as the full generalization of the newly proposed Top Two \ts.
 
 
-\section{Proposed Approach: New Algorithms for Best k-Arm Identification Bandit Problem} 
+\section{Proposed Approach: New Algorithms for Best $k$-Arm Identification Bandit Problem} 
 
 We propose a set of new algorithms using TS as the common base to solve our general problem, which features three dimensions: (1) maximizing minimized expected loss; (2) heuristics oversampling at the threshold; and (3) a diffuse exploration distribution. We illustrate these with alternative approximation methods of posterior sampling: asymptotic distribution and Bayesian Bootstrap.
 
