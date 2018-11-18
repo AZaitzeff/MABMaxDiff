@@ -121,13 +121,14 @@
 \newcommand{\edtsthresS}{$\epsilon$-$\delta$-\textbf{TS-thr} } 
 \newcommand{\uncertS}{\textbf{uncert} } 
 %% Notation in this paper %%
-% S - a set of items in a questions
-% |S| - number of items per question
-% N- number of respondents
+
+% N- number of respondents indexed by n
 % L - items per respondent
 % J - question sper respondent
 % m - number of total items
 % b - batch size
+% \mathcal{S} - a set of items in a questions
+% S = |\mathcal{S}| - number of items per question
 
 \newcommand{\numitems}{n} 
 \newcommand{\numtopset}{k} 
@@ -637,7 +638,7 @@ TS is also extremely flexible, requiring only the ability to draw from a posteri
 
 As we have seen the bandit problem does not quite match our problem of interest since we are primarily interested in a pure learning problem, and not earning during the learning process. However, we also have seen that our problem also differs from the traditional active learning problem, since we do not have the equivalent of deterministic labels in consumer preference measurement, which has inherent randomness. 
 
-Instead, our setting more closely the \emph{best arm identification} problem, where the setup is identical to that of the bandit, but the objective is nearly identical that of active learning since it is known as a pure learning (or pure exploration) problem. As in active learning problems, the loss function depends on a decision only in a single period $T+1$, selecting the arm(s) once after $T$ period of learning. This pure learning best arm identification problem is distinct from the canonical bandit problem, which calls for a learning-earning tradeoff. 
+Instead, our setting more closely the \emph{best arm identification} problem, where the setup is identical to that of the bandit, but the objective is nearly identical that of active learning since it is known as a pure learning (or pure exploration) problem. As in active learning problems, the loss function depends on a decision only in a single period $T+1$, selecting the arm(s) once after $T$ period of learning. This pure learning best arm identification problem is distinct from the canonical bandit problem, which calls for a learning-earning trade off. 
 
 Unlike the bandit and more like the active learning setting, however, we observe an outcome immediately every period (e.g., choice, revealed preference), but that outcome does not represent a reward. In fact, there is no real-time reward feedback. For instance, whether the best items have been correctly identified cannot be evaluated in during the data collection process, but only after.
 
@@ -647,108 +648,110 @@ The problem of identifying the best arms among a set has historically received l
 
 \subsection{Top Two Thompson Sampling}
 
-Among the literature analyzing algorithms for the best arm identification problem, one explicitly takes the Bayesian decision theoretic perspective: \emph{Top Two Thompson Sampling}, which is proposed by and analyzed -- both empirically and theoretically -- by \cite{russo2018simple}. The idea behind this algorithm is straightforward: draw one action via TS, and then draw another independent sample via TS, stopping when the drawn second action is different from the first. Importantly, this takes two draws from the underlying multinomial action distribution. 
+Among the literature analyzing algorithms for the best arm identification problem, one that explicitly takes considers a Bayesian decision theoretic perspective is \emph{Top Two Thompson Sampling} (TTTS). TTTS is proposed by \cite{russo2018simple} and is analyzed both empirically and theoretically. The idea behind this algorithm is straightforward: draw one sample via TS to select one action, and then draw another independent sample via TS to pick a second action, stopping when the drawn second action is different from the first. In this way, TTTS takes draws from the underlying multinomial action distribution until it has two unique actions. 
 
-The benefit of this top-two sampling is that it permits additional exploration to provide more guarantees that the item, which currently seems to be optimal, is in fact optimal. By forcing the algorithm to select a second action, it gives another a chance to the posterior to provide more exploration. This two sampling approach is naturally limiting and does not immediately provide a corresponding best $k$-arm equivalent. \cite{russo2018simple} proposes a heuristic for such a case: (1)
-draw a first sample via TS to obtain the predicted $\topset$; (2) draw a second independent sample via TS and obtain its predicted $\topset$; (3) consider the set of items that are in only one (but not both) samples' $\topset$; and (4) draw an action uniformly from that set of non-overlapping items.
+The benefit of this top-two method of sampling is that it permits additional exploration, which mathematically provides more guarantees that the item that currently seems to be optimal is, in fact, optimal. While the algorithm gives provides more exploration than regular \ts, this top-two approach is still naturally limiting and does not immediately provide a corresponding top-$k$ equivalent. As a concluding thought, \cite{russo2018simple} proposes a heuristic for generalizing to such a case: (1) draw a first sample via TS to obtain the predicted $\topset$; (2) draw a second independent sample via TS and obtain its predicted $\topset$; (3) consider the set of items that are in only one (but not both) samples' $\topset$; and (4) draw an action uniformly from that set of non-overlapping items.
 
-This may be viewed as a bit ad hoc initially. But the intuition lines up with active learning approach we will consider since it is an approximation of the items that are most likely to be misclassified as an item in the true top $k$ set, which is precisely our main proposed algorithms, \mismin. Therefore, one of our proposed algorithms could be viewed as the full generalization of the newly proposed Top Two \ts.
+This scheme may initially be viewed as ad hoc. However, the intuition aligns with active learning approach we will consider. We view it as an approximation to sampling the items that are most likely to be misclassified as an item in the true top $k$ set. That precisely describes our main proposed algorithms, \mismin. Therefore, \mismin algorithm could be viewed as the full $k$-arm a more exact generalization of TTTS.
 
 
-\section{Proposed Approach: New Algorithms for Best $k$-Arm Identification Bandit Problem} 
+\section{Proposed Approach: New Algorithms for Best Arm Identification Bandit Problem} 
 
-We propose a set of new algorithms using TS as the common base to solve our general problem, which features three dimensions: (1) maximizing minimized expected loss; (2) heuristics oversampling at the threshold; and (3) a diffuse exploration distribution. We illustrate these with alternative approximation methods of posterior sampling: asymptotic distribution and Bayesian Bootstrap.
+We propose a set of new algorithms -- all relying on the basic \ts as a building block -- to solve our general class of problems. These algorithms differ along three dimensions: (1) ``risk seeking'' to maximize minimized expected loss; (2) heuristics to oversample near a decision threshold; and (3) a diffuse distribution for additional exploration. We also illustrate these with alternative approximation methods of posterior sampling for \ts: asymptotic distribution and Bayesian Bootstrap.
 
-We seek to identify the best $k$ arms but can select a list of $\numperset$ distinct arms per period. Our final action will be evaluated based on its predicted ranking and selection $\pi$. The base TS algorithm uses draws $g=1,\ldots,G$ from a posterior distribution. Our approach builds on this as follows, for every $g$:
+We seek to identify the best $k$ arms but can select a list of $\numperset$ distinct arms per period. Our final action will be evaluated based on its predicted ranking and selection $\pi$. The basic \ts algorithm uses draws $g=1,\ldots,G$ from a posterior distribution. Our approach builds on this as follows, for every $g$:
 \begin{enumerate}
-	\item Obtain a posterior draw denoted by $(g)$ with parameter values $\theta^{(g)} = \{u_1,\ldots,u_\numitems\}^{(g)}$. 
-	\item Generate a predicted ranking $\pi^{(g)} = \{\pi(i)\}^{(g)} = \{ \pi(1),\ldots,\pi(\numitems) \}^{(g)}$, where the best item is $\pi(1)^{(g)} = \text{arg}\max_{j} u_j^{(g)}$.
+	\item Obtain a posterior draw denoted by $(g)$ with parameter values $\theta^{(g)}$. 
+	\item Generate a predicted ranking $\pi^{(g)} = \{ \pi(1),\ldots,\pi(\numitems) \}^{(g)}$, where the best item is $\pi(1)^{(g)} = \mathop{\text{arg}\max}_{j} u_j( \theta^{(g)} )$.
 	\item Partition the $\numitems$ items into two lists: the best-$L$ items, $\text{Top}_L^{(g)}=\{ \pi(1), \ldots,\pi(L) \}^{(g)}$, and the remaining items, $\{ \pi(L+1), \ldots,\pi(\numitems) \}^{(g)}$.
 	\item Select $\text{Top}_L^{(g)}$ for the next round. 
 \end{enumerate}
-Because we are integrating over the entire posterior, we can do this for each over $g=1,\ldots,G$ draws, and then compute any posterior quantity empirically by averaging across $G$ draws. For instance, this is exactly how TS can provide the posterior probability that a given item $i$ is actually the \emph{single best} item, i.e., $P( u_i = u(1) | D ) =  $). But for our problem, we do not want the single best, rather the top set. 
+Because we are integrating over the entire posterior, we can do this for each over $g=1,\ldots,G$ draws, and then compute any posterior quantity empirically by averaging across $G$ draws. For instance, this is exactly how TS can provide the posterior probability that a given item $i$ is actually the \emph{single best} item, i.e., $P( u_i = u(1) | D ) =  \frac{1}{G} \sum_{}^{} \mathbf{1} \left\{ i = \mathop{\text{arg}\max}_{j} u_j( \theta^{(g)} ) \right\}$. But for our problem, we do not want the single best, rather the top set of best $k$ items, which of the variants we are about to describe will provide.
 
-The base \ts algorithm and its \edts variant (Section \ref{sec:edts}) should be employed in settings where either the rank ordering or the estimated utility values within the top \numtopset items is important. The base Bandit MaxDiff algorithm gathers the most data on the truly best items and maximizes precision.
 
-However, for settings where selecting the top \numtopset is the objective, without concern for within-set ranking or estimated values, then we consider new variants. We now detail these variants for the true best $k$-arm identification problem, starting with algorithms inspired by active learning. Then we detail how the \edts variant, can also be modified to serve the same best $k$-arm goal with a threshold, as a computationally efficient alternative. 
+For settings where selecting the top \numtopset is the objective, without concern for within-set ranking or estimated values, then we consider new variants. We now detail these variants for the true best $k$-arm identification problem, starting with algorithms inspired by active learning (Section \ref{sec:newal}). Then we define an extension of \ts, which we call the \edts (Section \ref{sec:edts}), which should be employed in settings where either the rank ordering or the estimated utility values within the top \numtopset items is important. The base \ts algorithm gathers the most data on the truly best items and maximizes precision. Finally, we show how \edts can also be modified to solve the best $k$-arm problem, by sampling near the decision threshold, serving as as a computationally efficient alternative to the active learning inspired algorithms.. 
 
-\subsection{New Variants: Active Learning Inspired Algorithms}
 
-\subsubsection{Risk Seeking: Max-Min Expected Loss \mismin}
-%Following the active learning literature, tested we devised the \mismin\ variant to include items most likely to be misclassified. Treating membership in the $\topset$ as the class to learn, we can do this naturally via posterior sampling from TS. And this approach performs quite well, 
 
-When we are required to select but not rank the top $k$ items for consumer preference, we have a binary classification, i.e., whether the item is in the set. Instead of selecting the items likely to be most influential as a consumer preference, as a standard bandit algorithm would, we follow the active learning framework for expected loss optimization. Recall the active learning literature suggests in a binary classification setting to select the unlabeled example expected to have highest conditional risk, if it remained unlabeled. 
+\subsection{New Variants: Active Learning Inspired Algorithms}\label{sec:newal}
 
-Therefore, the natural analog here is to select the items likely to produce the greatest expected loss even when trying to minimize it. Therefore we seek out the items with the maximum predicted conditional risk, $\max \risk(\theta|x)$, which in the binary classification setting with symmetric loss, is equivalent to highest probability of misclassification. 
 
-We specify that symmetric 1/0 loss function to be misclassification error,
+
+
+\subsubsection{Risk Seeking: \mismin} \label{sec:mismin}
+
+The problem of identifying and selecting the top $k$ items for consumer preference can be considered to be a type of binary classification problem, classifying whether or not any item is in the top set. At any given stage in the learning process, which items should be sampled? While a standard multi-armed bandit algorithm would select the items likely to be in the top set, an active learning framework applies an alternative strategy. By using expected loss optimization in a binary classification, active learning algorithm would select the unlabeled example expected to have highest conditional risk, if it remains unlabeled (i.e., ``risk seeking'').
+
+Therefore, we consider a variant that selects the items likely to have the maximum predicted conditional risk, $\max_i \risk_i(\pi)$. In the binary classification setting with symmetric loss, this is equivalent to highest probability of misclassification. We consider that symmetric 1/0 loss function to be misclassification error,
 \begin{align}
-l(\pi,u) &= \frac{1}{n} \sum_{i=1}^{n} \left| \mathbf{1}\{ i \in \topset^{*}(u) \}-\mathbf{1}\{ i \in \topset(\pi) \} \right|.
+l(\pi,\theta) &= \frac{1}{n} \sum_{i=1}^{n} \left| \mathbf{1}\{ i \in \topset^{*}(\theta) \}-\mathbf{1}\{ i \in \topset(\pi) \} \right|.
 \end{align}
 where $\topset(\pi)$ is a predicted top set based on predicted rank ordering $\pi$. 
 
-To obtain that top set, we minimize expected loss over the posterior numerically. For each empirical posterior draw $g=1,\ldots,G$, which form a rank order $\pi$, the top set is the following set of indices:
+To obtain that top set, we minimize expected loss over the posterior numerically. For each empirical posterior draw $\theta^{(g)}$, for $g=1,\ldots,G$, which form a rank order $\pi$, the top set is the following set of indices:
 \begin{align}
-\topset^{(g)}(\pi) &= \{ \pi(i) \}_k^{(g)} = \{ \pi(1),\ldots,\pi(k) \}^{(g)}.
+\topset^{(g)}(\pi) &= \{ \pi(1),\ldots,\pi(k) \}^{(g)}.
 \end{align}
+where $u_{\pi(1)}( \theta^{(g)} ) \geq \ldots \geq u_{\pi(k)}( \theta^{(g)} )$.
 
-But at any given time $t$, we are still uncertain about the utility values $u$ and are therefore uncertain about the true top set, $\topset^{*}(u)$. To evaluate the potential loss we could incur with our next ranking of $\pi$, we use our previous beliefs about the top set, denoted $\topset(u) | D_{t-1}$. Using the current draw $g$ from the posterior and given data $D_{t}$, we compute the loss under the considered expected loss-minimizing ranking $\pi$ for any item $i$ as  
+But at any given time $t$, we are still uncertain about the utility values $u(\theta)$ and are therefore uncertain about the true top set, $\topset^{*}(\theta)$. To evaluate the potential loss we could incur with our next ranking of $\pi$, we use our previous beliefs about the top set, denoted $\topset(\theta) | D_{t-1}$. Using the current draw $g$ from the posterior and given data $D_{t}$, we compute the loss under the considered expected loss-minimizing ranking $\pi$ for any item $i$ as  
 \begin{align}
-\ell_i^{(g)}(\pi,u) = 
+\ell_i^{(g)}(\pi,\theta) = 
 & \mathbf{1}\{ i \in \topset^{(g)}(\pi) | D_{t} \} 
-  \mathbf{1}\{ i \notin \topset(u) | D_{t-1} ) \} + \nonumber \\
+  \mathbf{1}\{ i \notin \topset(\theta) | D_{t-1} ) \} + \nonumber \\
 & \mathbf{1}\{ i \notin \topset^{(g)}(\pi) | D_{t} \} 
-  \mathbf{1}\{ i \in \topset(u)| D_{t-1} \}.  
+  \mathbf{1}\{ i \in \topset(\theta)| D_{t-1} \}.  
 \end{align}
-Therefore, the minimized expected loss over the posterior for item $i$ is $\min E_{u}[\ell_i(\pi,u)]$:
+Therefore, the minimized expected loss over the posterior for item $i$, or conditional risk, is:
 \begin{align}
-\risk(i) =  
-& \frac{1}{G} \sum_{g=1}^{G} 
-   \left( \mathbf{1}\{ i \in \topset^{(g)}(\pi) | D_{t} \} \right)
-  \mathbf{1}\{ i \notin \topset(u) | D_{t-1} ) \} + \nonumber \\ 
-& \frac{1}{G} \sum_{g=1}^{G}
-   \left( \mathbf{1}\{ i \notin \topset^{(g)}(\pi) | D_{t} \} \right)
-  \mathbf{1}\{ i \in \topset(u)| D_{t-1} \}.  
+\risk_i(\pi) =  
+& \frac{1}{G} \sum_{g=1}^{G} \ell_i^{(g)}(\pi,\theta).
 \end{align}
-Following the expected loss optimization, we consider an $\risk(i)$ score for each item and select the highest, $\text{arg}\max \risk(i)$. In this setting, we select the highest $L$ values.
 
-The procedure is governed by the following rule: If the $i$th item is estimated to be in the top $k$, the score is $s_i=\mathbb{P} (\text{item i is not in the top k})$; if the $i$th item is estimated not to be in the top $k$, the score is $s_i=\mathbb{P} (\text{item i is in the top k})$. We estimate the scores by taking draws from the posterior distribution, then take the $\numperset$ items with the highest scores.
+We the consider the conditional risk, $\risk_i(\pi)$ score for each item. For a problem with $L=1$ items to observe next, then we would select the one item, $\mathop{\text{arg}\max}_{i} \risk_i(\pi)$. In this setting, in which we can serve a list of several items, $L > 1$, per respondent, we select the items with highest $L$ values of $\risk_i(\pi)$.
 
-The approach reflects a known heuristic, not derived from a decision theoretic perspective, called ``Misclassification Minimization'' by~\cite{toubia2007adaptive} and motivated by \cite{bradlow1998some}. The researchers' approach is based on a beta-distributed posterior with binary win probability reflecting the preference of an item. The score is computed in closed-form using the cumulative distribution function of a beta distribution. Our approach encompasses the case and permits an arbitrary class of models. 
+The approach reflects a known heuristic, not derived from a decision theoretic perspective, called ``Misclassification Minimization'' by~\cite{toubia2007adaptive} and motivated by \cite{bradlow1998some}. The researchers' approach creates a score, which is based on a beta-distributed posterior with binary win probability reflecting the preference of an item. That score is computed in closed-form using the cumulative distribution function of a beta distribution. That is, if $i$th item \emph{is} estimated to be in the top $k$ based on current data, then its score is $s_i=\mathbb{P} (\text{item i \emph{is not} in the top k})$, and if the item is currently estimated to \emph{not be} in the top set, then its score $s_i$ is the probability that it \emph{is} in the top set.
+
+However, our \mismin\ approach differs from that literature's prior implementation because (i) it sets score $s_i = \risk_i(\pi)$, (ii) it permits an arbitrary class of models with correlations across $u_i(\theta),~i=1,\ldots,n$, and (iii) it is principled as it reflects active learning algorithms proven to be optimal. 
 
 
-\subsubsection{New Variant: Greatest Uncertainty}
-%The threshold is set to be the midpoint between the top set and the other items. But it is possible that we are so uncertain about some items that their values are rarely near that cutoff in any draw because sometimes they are ranked high and other times, low. 
+\subsubsection{New Variant: Greatest Uncertainty \uncert}
 
-We propose a heuristic that selects the items for which membership in the top set is most uncertain and call it ``Greatest Uncertainty.''  We define the items' score as $s_i=-|.5-\mathbb{P} (\text{item i is in the top k})|$. We estimate this quantity by taking a large number of draws from the posterior distribution. We use the $\numperset$ items with the highest score relative to an item with classification probability 0.5. An alternative would be to take $\numtopset/\numitems$ items, using the size of the top set as a proportion of the total. 
+For the next variant, we propose a heuristic that selects the items for which membership in the top set is most uncertain, and call it \uncert, or ``Greatest Uncertainty.'' Instead of considering an explicit loss function, we compute the posterior probability that an item currently is believed to be in the true top set, and observe how close that is to 0.5. Using $G$ draws from the posterior, we have for item $i$:
+\begin{align}
+s_i = - \left|0.5 - \frac{1}{G} \sum_{g=1}^{G}
+ \mathbf{1}\{ i \in \topset^{(g)}(\pi) | D_{t} \} \right|
+\end{align}
+This algorithm then selects the $\numperset$ items with the highest scores $s_i$, which are the ones whose top set classification probability is closest to 0.5. While \uncert\ is naturally similar to \mismin\ under a symmetric 1/0 loss function, it need not be for a general loss function. 
+
 
 \subsection{New Variants: Closest to the Threshold}
-
-We consider another approach, which we derived from a generalization of the optimization and statistical learning literature. 
-
-We generalize Top-Two Thompson Sampling to find the top $k$ arms. As with standard TS, we take a draw from the posterior distribution $P(u|D)$. For a draw of $u^{(g)}$, we consider the cutoff the midpoint between the $k$th and $(k+1)$th items' values and assign the following score for each item $i$:
+We define the \emph{threshold} value to be at the boundary of a classification decision. For the $\topset$, we consider the threshold to be the midpoint between utility values of the $k$th and $(k+1)$th items. Here, we define the score $s_i$ for each item $i$ using one posterior draw $g$ as follows:
 \begin{align}
-s_i= - | u_i - \frac{u_k^{(g)} +u_{k+1}^{(g)} }{2}|.
+s_i= - \left| u_i(\theta^{(g)}) - \frac{u_{\pi(k)}(\theta^{(g)}) + u_{\pi(k+1)}(\theta^{(g)}) }{2} \right|.
 \end{align} 
-We then take the $\numperset$ items with the highest score, reflecting the items closest to the threshold. 
+This algorithm also takes the $\numperset$ items with the highest score, which are the items closest to the threshold.  The rule in idea screening to ``select ideas near the cutoff'' is also known as a heuristic, where \cite{toubia2007adaptive} also attributed the idea to \cite{bradlow1998some}. But that past research had employed it as a helpful heuristic rule rather than proposing it as an approximation to an active learning algorithm (e.g., \mismin), which generalizes the best one arm identification method of TTTS \citep{russo2018simple}. 
 
-Again, the rule in idea screening to ``select ideas near the cutoff'' is well known: \cite{toubia2007adaptive} refer to the heuristic, attributing the idea to \cite{bradlow1998some}. But that past research had employed it as a helpful rule rather than basing it on the now-proven best arm identification algorithm \citep{russo2018simple}. 
-
-\subsubsection{Variants with Random Perturbation}
-
-Using~\cite{toubia2007adaptive},  we perturb respondents' scores by a normal vector with mean zero and variance $c\frac{1}{n_i}$, where $n_i$ is the number of questions with item $i$ and $c$ in some constant, taking it to be $\frac{1}{10}$. (We also tested $c=\frac{1}{2}$, which preformed similarly.) Using the perturbed scores, we set the $\numperset$ items accordingly. Our recommended range for the parameter is $.01 \leq c \leq 1$.
-
-~\cite{toubia2007adaptive} provide the reasoning for using variance that decreases over time rather than fixed variance via genetic algorithms. The method avoids misclassifying an item that will not be sampled further.
-
-When analyzing a batch size greater than one, the Misclassification Minimization and Greatest Uncertainty techniques would show the same items to all respondents. After receiving identical scores for the next $b$ respondents, adding the perturbation vector varies the items shown. This is useful because the Misclassification Minimization and Greatest Uncertainty techniques use Bayes Bootstrapping to estimate probabilities, which requires significant computation.
-
-\subsubsection{Exploration-diffuse Thompson Sampling} \label{sec:edts}
-
-We propose an algorithm, exploration-diffuse TS or \edts, which offers an extra layer of self-correction, making it more robust to non-stationarity and respondent self-selection. The algorithm draws on the popular $\epsilon$-greedy technique \citep{SuttonBarto1998}, which mixes greedy sampling with uniform sampling. But instead of being greedy for $1-\epsilon$ samples, \edts follows standard TS; for $\epsilon$ samples, \edts does not necessarily sample items uniformly but draws parameters from a more diffuse posterior distribution where the variance inflation is controlled by $\delta_p$.
-
-\edts, which intuitively hedges its bets on the most preferred characteristics, is a generalized version of TS. It directly nests standard TS, similar to the way a two-component mixture model nests a pooled model without segments. As $\epsilon \to 0$, the diffuse distribution is never used, so the algorithm collapses to standard TS. As $\delta_p \to 1$, the diffuse distribution becomes equivalent to the non-diffuse distribution. 
+We note that, unlike the the \mismin\ and \uncert\ which require many, say $G$, posterior draws, we can compute any item's closest-to-the-threshold score using only one draw. This makes it a computationally faster. However, since it relies on one draw, its implementation will be sensitive to the particular approach of sampling via \ts, so we propose our novel method of making \ts more robust and stable. 
 
 
+\subsubsection{Exploration-Diffuse Thompson Sampling: \edts} \label{sec:edts}
+
+We propose an algorithm, exploration-diffuse TS or \edts, which has an extra layer of self-correction to offer the following benefits: it is a fast approximation to risk seeking \mismin\; it is more flexible giving researchers a tuning parameter; and it 
+is more robust than TS to non-stationarity issues, such as, respondent self-selection. The algorithm draws on the popular $\epsilon$-greedy technique \citep{SuttonBarto1998}, which mixes uniform random sampling $\epsilon \%$ of the time with a deterministic greedy selection heuristic (i.e., pick the winner) $(1-\epsilon )\%$ of the time. But instead of being greedy, this algorithm follows standard \ts for $1-\epsilon$ of samples. And for $\epsilon$ of samples, instead of uniformly randomly sampling, this algorithm draws parameters from a more diffuse posterior distribution, where the variance inflation is controlled by $\delta_p > 1$. That is, it draws utilities $u(\theta^{(g)}$ from a mixture of the regular ($R$) and more diffuse ($D$) distributions characterizing parameter uncertainty as follows:
+
+\begin{align}
+u(\theta^{(g)}) = 
+\begin{cases}
+u_{D}(\theta^{(g)}) \sim N(\mu(\hat{\theta}), \delta_{p}^2 \mathbf{I} \Sigma^2(\hat{\theta})) \text{, with probability } \epsilon \\
+u_{R}(\theta^{(g)}) \sim N(\mu(\hat{\theta}), \Sigma^2(\hat{\theta})) \text{, with probability } 1-\epsilon \\
+\end{cases}
+\end{align}
+where $\hat{\theta}$ is a point estimate obtained via Laplace approximation using maximum likelihood, so $\mu(\hat{\theta})$ and $\Sigma^2(\hat{\theta}$ are asymptotic mean utilities vector and variance-covariance matrix of population-level utilities. And the tuning parameter, $\delta_{p}^2$, directly inflates the variance of the asymptotic distribution of the parameters (approximate posterior) to force higher sampling variability reflecting higher uncertainty. 
+
+This algorithm, \edts, is generalized version of \ts. It directly nests standard \ts, similar to the way a two-component mixture model nests a pooled model without segments. As $\epsilon \to 0$, the diffuse distribution is never used, so the algorithm collapses to standard \ts. As $\delta_p \to 1$, the diffuse distribution becomes equivalent to the non-diffuse distribution.  These two parameters, $\epsilon$ and $\delta_p$, can be set by the researcher and provide a continuum of values to affect the speed of the learning process and its ability to self-correct, if needed. 
+
+Intuitively hedging its bets on the most preferred items, \edts is less aggressive in selecting items early, even if it eventually converges to the true set. This is best seen in Figure \ref{fig:dots}, illustrating which items are shown to which successive respondent when applying.
 
 \begin{figure}[!ht]
 \caption{Respondent-by-item counts are shown to illustrate oversampling as data accumulate.}
@@ -759,13 +762,16 @@ We propose an algorithm, exploration-diffuse TS or \edts, which offers an extra 
 
 \subsubsection{Exploration-diffuse and Bayesian Bootstrapping}
 
-To implement \edts, much like any TS-based algorithm we consider, the researcher must choose between alternative computational approaches for characterizing asymptotic point estimate distribution and Bayesian Bootstrapping. 
+As in any TS-based algorithm, the researcher must choose between alternative computational approaches for characterizing parameter uncertainty. In addition to Markov Chain Monte Carlo, we also consider the asymptotic distribution based on point estimates with Laplace Approximation, discussed in the Appendix, and Bayesian Bootstrapping later in the application.
+%%%%%%%%%%%%%%%%%%%
 
-We consider Laplace Approximation to the posterior, using mean and asymptotic variance-covariance of the asymptotic multivariate normal distribution. Here, we let $\delta_p$ be a variation inflation factor directly applied to the estimates as, $\delta_p  \hat \sigma$, ($\delta_p \geq 1$), where higher values force more sampling uncertainty.
+To implement \edts, this choice is particularly relevant as we decide how to encourage higher sampling variability in the more diffuse version of the distribution of parameter uncertainty. If we use Laplace Approximation to the posterior, as we did above, then we let $\delta_p$ be a variation inflation factor directly applied to the estimates as, $\delta_p \mathbf{I} \sigma$. However, instead of making the distributional assumptions in the asymptotic approach, we can consider Bayesian Bootstrapping. 
 
-However, instead of making the distributional assumptions in the asymptotic approach, we consider Bayesian Bootstrapping. We let $\delta$ be the percentage of data to be used for the bootstrapped subsample size, indirectly inflating the estimator's variance. In the Bayesian Bootstrap case, the lower values in $0 < \delta \leq 1$ lead to more uncertainty in the estimate across bootstrapped samples.
+For \edts with the Bayesian Bootstrap, we subsample a portion of respondents, with replacement, using all observations from each chosen respondent. We let $\delta$ be the percentage of respondents to be used for the bootstrapped subsample, indirectly inflating the variance of the subsequent parameter estimate. Hence, lower values in $0 < \delta \leq 1$ lead to more uncertainty in the estimate across bootstrapped samples.
 
-Figure \ref{fig:illustrating_edts} illustrates how \edts differs from TS. We sample only 15 of the 20 items dictated by standard TS ($\numperset=20$, $\epsilon=1/4$). The remaining 5 of 20 items are drawn using a more diffuse TS approach. Here, we subsample $\delta$=.25 of the data with replacement and draw $u$ as a Bayesian Bootstrap of the subsampled data. 
+Figure \ref{fig:illustrating_edts} illustrates how \edts differs from TS, where we have $\numperset=20$ and $\epsilon=1/4$. We sample $(1-\epsilon)\cdot \numperset$, 15 of the 20, items dictated by standard TS. The remaining $\epsilon \cdot \numperset$, 5 of 20, items are drawn using a more diffuse TS approach. Here, we subsample $\delta = 1/4$ of the data with replacement and draw $u(\theta)$ as a Bayesian Bootstrap of the sub-sampled data. 
+
+The consequences are that the \edts density does not spike as quickly as that of the \ts. Speed is controlled through two parameters: the proportion of items sampled from the diffuse distribution ($\epsilon$) and a factor increasing variance for the diffuse distribution ($\delta$). As $\epsilon$ increases and $\delta$ decreases, the algorithm slows and explores a wider range of items.
 
 \begin{figure}
 \caption{Shown is an illustration of TS versus \edts for two items (1st, top; 60th, bottom) at two points in time (left, early; right, late). The graphs show the TS and \edts belief distributions and the underlying diffuse distribution in \edts. The distributions are shown for early beliefs after respondent 40 (left column of plots) and late beliefs after respondent 500 (right).}
@@ -781,9 +787,7 @@ Figure \ref{fig:illustrating_edts} illustrates how \edts differs from TS. We sam
     \end{center}
 \end{figure}
 
-For the $\epsilon$-$\delta$ case, density does not spike as quickly. Speed is controlled through two parameters: the proportion of items sampled from the diffuse distribution ($\epsilon$) and a factor increasing variance for the diffuse distribution ($\delta$). As $\epsilon$ increases and $\delta$ decreases, the algorithm slows and explores more to settle on its set of items. 
-
-We show how \edts performance varies with different $\epsilon$ and $\delta$ values in Section \ref{sec:empirical_main}.  For our empirical analysis, we use ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). We also test ($\epsilon=\frac{1}{2}$, $\delta=\frac{1}{4}$) and ($\epsilon=1$, $\delta=\frac{1}{4}$), which perform on par with ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). Our recommended ranges for the parameters are $\frac{1}{5}\leq \epsilon \leq \frac{1}{2}$, $\frac{1}{4}\leq \delta \leq \frac{1}{2}$.
+In Section \ref{sec:empirical_main}, we will show how \edts performance varies with different values of $\epsilon$ and $\delta$. As a review, for our empirical analysis, we use ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). We also test ($\epsilon=\frac{1}{2}$, $\delta=\frac{1}{4}$) and ($\epsilon=1$, $\delta=\frac{1}{4}$), which perform on par with ($\epsilon=\frac{1}{4}$, $\delta=\frac{1}{4}$). Our recommended ranges for the parameters are $\frac{1}{5}\leq \epsilon \leq \frac{1}{2}$, $\frac{1}{4}\leq \delta \leq \frac{1}{2}$.
 
 % \begin{figure}[!ht]
 % \caption{Selecting your $\epsilon$-$\delta$ values. 
@@ -791,16 +795,13 @@ We show how \edts performance varies with different $\epsilon$ and $\delta$ valu
 % \label{fig:ed}
 % \end{figure}
 
-\subsubsection{Exploration Diffuse with Threshold}
+\subsubsection{Exploration-Diffuse TS with Threshold: \edtsthres}
 
-To define an exploration-diffuse TS version with a threshold (\edtsthres), we begin with two draws: $u_R$ from the standard posterior and $u_D$ from the diffuse posterior. We calculate threshold-based item scores $s_R$ and $s_D$ for each and take $(1- \epsilon) \numperset$ items with the best $s_R$ scores and $\epsilon \numperset$ items, with the best $s_D$ scores not already included. 
+To define an exploration-diffuse TS version with a threshold (\edtsthres), we begin with two draws as described earlier in Section \ref{sec:edts}: draw $u_R(\theta)$ from the standard posterior, and draw $u_D(\theta)$ from the diffuse posterior. We then calculate threshold-based item scores $s_R$ and $s_D$ for each, selecting $(1- \epsilon) \numperset$ items with the best $s_R$ scores and $\epsilon \numperset$ items, with the best $s_D$ scores not already included. 
 
-As \edts nests $\epsilon$-greedy sampling, \edtsthres encompass $\epsilon$-greedy. We use the scores $s_i=|u_i - |$ for $c=\frac{u_k+u_{k+1}}{2}$ and take the $((1-\epsilon)L)$ best but sample the remaining scores uniformly (i.e., the most diffuse distribution).
-
-
-The intuition behind thresholding is best visualized in Figure \ref{fig:Frequency}, which shows how \edts focuses on the top items and \edtsthres provides more of a spread and focuses on items near the decision boundary, in this case the top 20 items. 
+The intuition behind thresholding is best visualized in Figure \ref{fig:Frequency}, which shows how \edts focuses on the top items and \edtsthres provides more of a spread and focuses on items near the decision boundary. This illustrates why \edtsthres should be utilized when selecting an unordered top set is the goal, but \edts\ should be used when the parameter estimates or rank ordering within that top set are important to the eventual decision.
 \begin{figure}%
-    \caption{The frequency of the selected survey item is shown for \edts and \edtsthres.}%
+    \caption{The Effect of Threshold-based Sampling. The frequency of the selected survey item is shown for \edts\ and \edtsthres\ for the best $k=20$ items.}%
     \label{fig:Frequency}%
  	\begin{center}
     \subfloat[]{{\includegraphics[width=.8\textwidth]{plots/edTSfreq.pdf} }}%
@@ -809,34 +810,31 @@ The intuition behind thresholding is best visualized in Figure \ref{fig:Frequenc
 	\end{center}
 \end{figure}
 
-%Imagine showing three items out of six (A, B, C, D, E, and F) to a respondent. We want to identify the top three items. Let A, B, C, D, E, and F be the utility order. We are certain A and B are in the top three, and E and F are not. An algorithm without thresholding would pick A, B, and either C or D. A will be chosen as the best item, and C or D will be chosen as the worst, giving us no new information. An algorithm with thresholding will pick C, D, and either B or E. In either case, the respondent will be forced to compare C and D, providing information about which is in the top three.
+
+Finally, another consideration of the algorithms proposed so far is how to best handle batches of respondents without updating after every single respondent, a very natural consideration in practice when running live in-market surveys. For \ts, \edts, and \edtsthres, we naturally can use independent draws for each potential respondent. But, \mismin\ and \uncert\ require many draws to be applied and will not accommodate that, so we discuss how to do so using random perturbations, following \cite{toubiaflores2007}, to handle batches in the Appendix. 
 
 
 
-\section{Bandit MaxDiff}
 
-Now we instantiate the general set of algorithms in the particular setting of applying the propose algorithms -- inspired by bandits and active learning -- to develop a better procedure for adaptive MaxDiff. First, we formally review MaxDiff, and then integrate the newly proposed methods based on Thompson Sampling.
+\section{Application: Bandit MaxDiff Problem}
+
+Now we instantiate the general set of algorithms in the particular setting of applying the proposed variants -- inspired by bandits and active learning -- to develop a better procedure for adaptive MaxDiff. This application is based on the initial idea proposed in \cite{fairchildetal2015banditmaxdiff}, but the current research extends that earlier work in a variety methodological directions. First, we formally review MaxDiff, and then integrate the newly proposed methods based on Thompson Sampling.
 
 
-\section{Preference Measurement}
-\subsection{Idea Screening and MaxDiff Scaling}
-\begin{figure}
-\caption{MaxDiff has become more popular over time with data analysis software users} \label{fig:pop}
-\begin{center}
-\includegraphics[width=0.5\textwidth]{plots/maxdiffpop}
-\end{center}
-\end{figure}
-MaxDiff is a preference measurement and characteristic scaling method. In a MaxDiff questionnaire, the researcher asks respondents for their most and least preferred items out of a set and repeats the choice task for subsequent sets. Initially proposed by~\cite{louviere1991best}, MaxDiff was first released as a software system in 2004 by Sawtooth Software. Since its release, its popularity has increased steadily, and the technique was used by more than 70\% of Sawtooth Software users in 2017 (Figure \ref{fig:pop}). These users are practitioners of marketing research and consumer insights across industries.
+\subsection{Idea Screening and MaxDiff}
 
-The MaxDiff approach provides more discrimination among items and respondents than traditional rating scales \citep{cohen2004s}. It also avoids the scale-use bias common to traditional ratings techniques \citep{marley2005some,chrzan2006empirical}.
+MaxDiff is a preference measurement and scaling method using survey questionnaires. In a MaxDiff questionnaire, the researcher asks respondents for their most and least preferred items out of a set and repeats the choice task for subsequent sets. Initially proposed by~\cite{louviere1991best}, MaxDiff was first released as a software system in 2004 by Sawtooth Software. Since its release, its popularity has increased steadily. Its penetration was about 10\% in 2005 until the technique was used by more than 70\% of Sawtooth Software users in 2017.\footnote{According to Sawtooth Software annual survey of its users. These users are practitioners of marketing research and consumer insights across industries.}
 
-The MaxDiff technique is closely related to conjoint analysis, but MaxDiff allows the respondent to select a best and worst item instead of only one, which is what makes it best-worst scaling \citep{marley2005some}. In its most common form, MaxDiff may be thought of as a one-attribute, choice-based conjoint study with many levels. But MaxDiff can be applied to full-profile multi-attribute alternatives as well \citep{marley2012models}. The differences between conjoint and MaxDiff in their static form are not as relevant for large-scale ranking and selection problems as the differences between the adaptive versions, as the adaptive conjoint objective differs from our objective.
+Compared to traditional rating scales, the MaxDiff approach provides more discrimination among items and respondents \citep{cohen2004s}. It also avoids the scale-use bias common to traditional ratings techniques \citep{marley2005some,chrzan2006empirical}. The MaxDiff technique is closely related to conjoint analysis, but MaxDiff allows the respondent to select a best and worst item instead of only one, which is what makes it best-worst scaling \citep{marley2005some}. In its most common form, MaxDiff may be thought of as a one-attribute, choice-based conjoint study with many levels. But MaxDiff can also be applied to full-profile multi-attribute alternatives, where each item is a product described by a combination of attributes \citep{marley2012models}, but we continue to use the language of items instead of alternatives for clarity. The technical differences between conjoint and MaxDiff in their static form are not as relevant as the differences between the context in which they are typically used. For large-scale ranking and selection problems for idea screening, like the focus of this paper, conjoint is not typically the marketing research method; the community of marketing research practitioners and analysts turn to MaxDiff, even if it is just the first phase of analysis, before subsequent studies, either MaxDiff or Conjoint, are conducted.
 
-\subsection{Studying Many Items with MaxDiff}
+And the implication for the adaptive version is also meaningful: adaptive conjoint aims to achieve the goal of learning all parameters. But our problem calls explicitly for unequal learning, so the Bandit MaxDiff approaches are designed to learn about the top set of items (and those nearly in the top set) more precisely than all others.  This distinction becomes even more pronounced in large-scale problems where researchers are studying even more items.
 
-Market researchers used MaxDiff for analyzing large numbers of possible consumer preferences, and the definition of ``large'' has changed in recent years. \cite{hendrix2007alternative} describe ``large sets'' as about 40 to 60 items, proposing MaxDiff variants Augmented and Tailored MaxDiff to handle them. \cite{wirth2012largeset} also investigated MaxDiff variants, Express and Sparse MaxDiff, for handling ``very large sets'' of more than 100 items. The researchers conduct a simulation study of robotic respondents using 120 items and a real study among consumer respondents with 60 items. In this paper, we refer to even larger numbers of survey items, at least 100 items and potentially 300 or more. Our goal is to explore how algorithms scale and how market researchers can push MaxDiff further than ever before.
 
-A 2015 Sawtooth Software customer feedback survey revealed users' need to accommodate more consumer preference items (see Appendix, Figure \ref{fig:max_and_purpose}). Nearly 20\% of respondents indicated their firms had conducted a study with more than 50 items; the maximum was 400. However, according to Sawtooth Software guidance for typical problems, the recommended number of items for a MaxDiff study is about 30, and the alternative profiles recommended for a conjoint study is about 20. The respondents were also asked the main purpose for their large-scale MaxDiff studies. For 42\% of the studies, the main purpose was to identify the top or top few items. Our research shows that for such settings, traditional design strategies can be wasteful, and an adaptive approach can save firms time and money.
+\subsubsection{Studying Many Items with MaxDiff}
+
+Market researchers used MaxDiff for analyzing large numbers of possible consumer preferences, and the definition of ``large'' has changed in recent years. \cite{hendrix2007alternative} describe ``large sets'' as about 40 to 60 items, proposing MaxDiff variants Augmented and Tailored MaxDiff to handle them. \cite{wirth2012largeset} also investigated MaxDiff variants, Express and Sparse MaxDiff, for handling ``very large sets'' of more than 100 items. The researchers conduct a simulation study using 120 items and a live study surveying consumer respondents about 60 items. However, in this paper, we refer to even larger numbers of survey items, at least 100 and potentially 300 or more. 
+
+Our general approach based on bandits, active learning, and best-arm identification can be applied here to push MaxDiff further than ever before. And indeed, there is an unmet need to do so. A 2015 Sawtooth Software customer feedback survey revealed users' need to accommodate more consumer preference items (see Appendix). Nearly 20\% of respondents indicated their firms had conducted a study with more than 50 items; the maximum was 400. However, according to Sawtooth Software guidance for typical problems, the recommended number of items for a MaxDiff study is about 30, and the alternative profiles recommended for a conjoint study is about 20. The respondents were also asked the main purpose for their large-scale MaxDiff studies. For 42\% of the studies, the main purpose was to identify the top or top few items. Our research shows that for such settings, traditional design strategies can be wasteful, and an adaptive approach can save firms time and money.
 
 
 % One setting where practitioners consider MaxDiff studies with more than 50 or even 400 distinct product features or service characteristics is the way those items are defined. Those MaxDiff items may represent conjoined elements, like a combination of packaging style, color, claims, and highlighted ingredients. In addition, profiles involving multiple, highly interactive attributes pose challenges for choice-based conjoint analyses, making large-scale MaxDiff studies viable alternatives.
@@ -844,109 +842,76 @@ A 2015 Sawtooth Software customer feedback survey revealed users' need to accomm
 
  % can be up to 4x more efficient-- without the Bandit MaxDiff approach, you are potentially wasting 75 cents of every dollar you are spending on MaxDiff data collection. 
 
-\subsection{MaxDiff: A Best-Worst Scaling Choice Model}
+\subsubsection{Formalizing Best-Worst Choice Model}
 
-In a standard MaxDiff study, every respondent selects both the best and worst option from an available set of characteristics in each discrete choice task. The model for the data comes from a class known as best-worst scaling, one of which is MaxDiff. We adopt our framework from the best-worst scaling literature \citep{marley2005some,marley2012models}. 
-
-Suppose we a set, $S$, for each choice task. Then we can define two random variables: best ($B_z$) and worst ($W_z$) for each $z \in S$.  We then define a third random variable, best-worst $BW_{r,s}$, for any $r,s \in S$. Following a random utility framework, the utilities have deterministic and stochastic components. Thurstone provides a consistent random utility model where each $\gamma_z$ features the extreme value distribution. Because the model is consistent, we have $B_z=-W_z=U_z$ and $BW_{r,s}=U_r-U_s$ and
-\begin{align*}
-&B_z=v_z+\gamma_z\\
-&W_z=-v_z-\gamma_z\\
-&BW_{r,s}=v_r-v_s+\gamma_r-\gamma_s.
-\end{align*}We can write the probability an item is the best and worst as
-\begin{align*}
-&B_S (x)= Pr⁡( B_x=\max_{z \in S} B_z)\\
-&W_S (y)= Pr⁡( W_y=\max_{z \in S} W_z).
-\end{align*}
-Without using the particular utility or item scale, we can derive choice probabilities. In the most general form, we suppose $b()$ and $w()$ are separate interval scales. The resulting probability of an item being best or worst is
-\begin{align*}
-&B_S (x)= \frac{b(x)}{\sum_{z \in S}b(z)}\\
-&W_S (y)= \frac{w(y)}{\sum_{z \in S}w(z)}.
-\end{align*}
-For any pair of items $x,y \in S$, we can indicate the joint probability that $x$ is best and $y$ is worst. However, when considering best and worst together, the scales $b$ and $w$ are not separately identified. We fix their ratio for the same item by setting $w(z)=\frac{c}{b(z)}$. The resulting joint probability is a function of the scale ratios for pairs: 
-\begin{align*}
-&BW_S(x,y)=Pr(U_x>U_z>U_y | z \in S -\{x,y\}, x\neq y)\\
-&BW_S(x,y)=\frac{b(x)/b(y)}{\sum_{r,s \in S, r \neq s}b(r)/b(s)}.
-\end{align*}
-To accommodate the standard utility structure, we let utility $u(z)=\log{(b(z))}$, making each of the probabilities 
-\begin{align*}
-&B_S(x)=\frac{e^{u(x)}}{\sum_{z \in S} e^{u(z)}}\\
-&W_S(y)=\frac{e^{u(y)}}{\sum_{z \in S} e^{u(z)}}\\
-&WB_S(x,y)=\frac{e^{u(x)-u(y)}}{\sum_{r,s \in S, r\neq s} e^{u(r)-u(s)}}.
-\end{align*}
-We can derive the same representation from the random utility model suggested by \cite{marley2005some}. We can view best-worst choice as a generalization of the classic multinomial logit technique for selecting best only.
-
-\subsubsection{Best-Worst Model Estimation}
-
-One way to estimate the MaxDiff choice model is to enumerate all possible pairs of items and describe the joint probability of being best and worst. This is the probability of yielding the largest difference $BW_S(x,y)$ in consumer behavior. This pairwise approach is not practical because it scales quadratically for number of items. So, we adopt an alternative approach reflecting the literature and practice that is shown to be a near exact approximation of the full model \cite{cohen2003maximum}. This allows us to estimate the best model and worst model independently, without explicitly estimating the best-worst probability. (See Appendix for details.)
-
-%\textbf{Emphasize our goal is to identify the top items.}
-
-\section{Bandit MaxDiff}
-
-%We utilize the best available bandit alogrithms and draw upon the active learning and best k arm identification problems. Thompson Sampling involves allocating resources to an action in proportion to the probability that it is the best action~\cite{thompson1933likelihood}. 
-
-Our proposed approach, Bandit MaxDiff, incorporates adaptive learning as a natural method for solving top-set ranking and selection problems. Our approach leverages prior learning during survey administration to create more efficient questionnaires and more precise aggregate score estimates. On the one hand, we want to come to a conclusion about the relative importance of a large number of product or service characteristics within a MaxDiff problem. On the other hand, we want to utilize what we have learned as we go to target actions likely to allow the researcher greater precision. TS has proven useful for these types of problems \citep{schwartzetal2017,russo2017tutorial}.
-
-For each of our survey respondents, we select $\numperset$ items and generate a MaxDiff design of $J$ best-worst tasks, each with a choice set of $|S|$ items. For example, as our empirical default, we use $\numperset=20$, $J=12$, and $|S|=5$, standard numbers used in MaxDiff studies \citep{wirth2012largeset}. 
-
-We begin as in a traditional MaxDiff design, showing each item an equal number of times across all respondents and tasks to ensure a balanced design.  For the first respondent, we select the $\numperset$ items uniformly. 
-
-After the initial respondent batch, we remain uncertain about each item's parameter value, so we continue collecting data. But we do not need to reduce uncertainty equally, so we adapt strategically. At each subsequent period after collecting a set amount of respondent data, we estimate a model to characterize our parameter beliefs. We systematically oversample the items already viewed as most preferred, the top set. But we also recognize our uncertainty about the top-set items. Figure \ref{fig:dots} shows the oversampling as data accumulate. As the sample size increases, uncertainty around which items are best tightens.
+In a standard MaxDiff study, every respondent selects both the best and worst option from an available set of characteristics in each discrete choice task. The model for the data comes from a class known as best-worst scaling, one of which is MaxDiff. We adopt our framework from the best-worst scaling literature \citep{marley2005some,marley2012models}. We provide a formal review and derivation of the best-worst choice model in the Appendix.
 
 
-Bandit MaxDiff uniquely translates our current beliefs about parameters into decisions about what to ask subsequent respondents via oversampling the best items in a principled manner. The approach is summarized in Table \ref{methods}.
+
+
+\subsection{Bandit MaxDiff Algorithms}
+
+When we apply our proposed general approach based on active learning and best-arm identification to idea screening, we call it Bandit MaxDiff. Our approach leverages prior learning during survey administration to create more efficient questionnaires and more precise aggregate score estimates. On the one hand, we want to come to a conclusion about the relative importance of a large number of product or service characteristics within a MaxDiff problem. On the other hand, we want to utilize what we have learned as we go to target actions likely to allow the researcher greater precision. 
+
+We provide a sketch of the specific instantiation of our method as we implement the Bandit MaxDiff algorithm in Algorithm \ref{alg:ts_simple}. For each of our survey respondents, we select $\numperset$ items and generate a MaxDiff design of $J$ best-worst tasks, each with a choice set $\mathcal{S}$ of size $S = |\mathcal{S}|$ items. For example, as our empirical default, we use $\numperset=20$, $J=12$, and $S=5$, standard numbers used in MaxDiff studies \citep{wirth2012largeset}.  We begin as in a traditional MaxDiff design, showing each item an equal number of times across all respondents and tasks to ensure a balanced design, selecting the $\numperset$ items uniformly, for each respondent in the initial batch surveyed.
+
+After the initial batch, we remain uncertain about each item's parameter value, so we continue collecting data. But we do not need to reduce uncertainty equally, so we adapt strategically. At each subsequent period after collecting a set amount of respondent data, we estimate a model of past respondents' choices to characterize our parameter beliefs. We systematically oversample the items already viewed as most preferred, the top set. But we also recognize our uncertainty about the top-set items. Figure \ref{fig:dots} shows the oversampling as data accumulate. As the sample size increases, uncertainty around which items are best tightens. In this manner, Bandit MaxDiff translates our current beliefs about parameters into decisions about what to ask subsequent respondents via oversampling the best items in a principled manner. 
+
 
 \begin{algorithm}
 \caption{Bandit MaxDiff: \ts} \label{alg:ts_simple}
 \begin{algorithmic}[1]
-\State Given: $K,\numperset,J,S,b$.
+\State Given: $K,\numperset,J,S,\mathcal{S},b$.
 \State Initialize first set of questions by sampling $\numperset$ items uniformly.
-\State Design MaxDiff questionnaire covering $\numperset$ items with $J$ tasks of $S$ questions each, $\text{MDDesign}($\numperset$,S,J)$, for the next batch of $b$ respondents.
-\State Collect new data from respondents with $n = b*t$ respondents.
-\State Bayesian Bootstrap sample weight replacement using weights ($\alpha_1, ...., \alpha_n)\sim \text{expon}(1)$, obtaining some subset of $n$ previous respondents.
-\State Estimate model parameters ($\theta_t$) and obtain estimated utilities $u = (u_1,...,u_K)$.
-\State Choose $\numperset$ items using draws from empirical posterior.
-\State Select next questions for respondents.
+\State Design MaxDiff questionnaires covering $\numperset$ items with $J$ tasks of $S$ questions each for the next batch of $b$ respondents.
+\For {$t=1,2,\ldots,$} \While {Stopping Rule not met}
+\State Collect new data from $b$ respondents, for a total of $m = b \cdot t$ respondents.
+\State Bayesian Bootstrap sample weight replacement using weights $(\lambda_1^{(g)}, ...., \lambda_n^{(g)})\sim \text{expon}(1)$.
+\State Obtain model parameters, $\theta_t^{(g)}$, using weighted estimation.
+\State Compute estimated utilities $u(\theta_t^{(g)}) = (u_1(\theta_t^{(g)}),...,u_K(\theta_t^{(g)}))$.
+\State Choose $\numperset$ items using draws from empirical posterior for each of $b$ respondents.
+\State Design MaxDiff questionnaires covering $\numperset$ items for next $b$ respondents.
+\State Check Stopping Rule.
+\EndWhile \EndFor
 \end{algorithmic}
 \end{algorithm}
-% $S=\#\{\mathcal{S}\}$
 
 
 
 \subsection{Bandit MaxDiff and Posterior Sampling} \label{sec:bmd_ts_edts}
 
-The Bandit MaxDiff base algorithm draws on TS to address the multi-armed bandit problem. The method's specific instantiation is shown in Algorithm \ref{alg:ts_simple}.
+The Bandit MaxDiff base algorithm utilizes \ts at is core, but the method is agnostic to the particular method of sampling $\theta^{(g)}$ for draws any $g$. So we address alternative methods for approximate posterior sampling in the Appendix, including Bayesian bootstrapping.
   
-\subsubsection{Learning with Bayesian Bootstrapping}
+\subsubsection{Sampling with Bayesian Bootstrapping}
 
-For TS models, we first characterize parameter uncertainty. We use a multinomial logit model; the first but least practical option to obtain posterior draws would be to use the Markov Chain Monte Carlo, which would be too slow to update in real time. A more practical way to approximate the posterior is to sample from the asymptotic distribution via the maximum likelihood implied by the estimated mean and standard errors, a Laplace Approximation of the Posterior \citep{tierney1986accurate}. The Laplace approach reflects the estimated population preferences and normally distributed error, with standard deviations equal to the standard errors of the parameter estimates. The method would work quickly, but it forces the joint posterior into a multivariate normal distribution. 
+For TS models, we first characterize parameter uncertainty. We use a multinomial logit model; the first but least practical option to obtain posterior draws would be to use the Markov Chain Monte Carlo, which would be too slow to update in real time. A more practical way to approximate the posterior is to sample from the asymptotic distribution via the maximum likelihood implied by the estimated mean and standard errors, a Laplace Approximation of the Posterior \citep{tierney1986accurate}. The Laplace approach reflects the estimated population preferences and normally distributed error, with standard deviations equal to the standard errors of the parameter estimates. The method would work quickly, but it forces the joint posterior into a multivariate normal distribution. And this is not always desirable. 
 
-We can obtain posterior samples using the Bayesian Bootstrap method by sampling weights $\beta$ for each respondent: $\beta_1,\beta_2,\ldots,\beta_N \sim \text{exp}(1)$. The weights are used for sampling respondents with replacements to form a new bootstrapped dataset. If a respondent is sampled, all the data is included in the bootstrapped sample. The probability of any one respondent $i$'s data being sampled in any one draw is $\beta_i / \sum_{i}^{N}\beta_i$.  For each bootstrapped dataset, we obtain parameter estimates of $\theta$ using a weighted  maximum likelihood estimate as follows:
+We can obtain posterior samples using the Bayesian Bootstrap method by sampling a vector of weights for all respondents, $(\lambda_1, ...., \lambda_N)\sim \text{expon}(1)$. The weights are used for sampling respondents with replacements to form a new bootstrapped dataset. If a respondent is sampled, all the data is included in the bootstrapped sample. The probability of any one respondent $m$'s data being sampled in any one draw is $\lambda_n / \sum_{m=1}^{M}\lambda_m$.  For each bootstrapped dataset, we obtain parameter estimates of $\theta$ using a weighted maximum likelihood estimate across all $M$ respondents so far as follows:
 \begin{align}
-&LL(\theta;\beta)=\sum_{n=1}^N \beta_n
-\sum_{x \in S_n} 
+&LL(\theta;\lambda)= 
+\left( \frac{1}{\sum_{m=1}^{M}\lambda_m} \right)
+\sum_{m=1}^M \lambda_m \cdot
+	\sum_{j \in \mathcal{S}_m} 
 	\left(
-		Y_{B_{S_n}}(x)
-		\log{\frac{e^{\theta_x}}{\sum_{z\in S_n} e^{\theta_z}}} 
+		Y_{j,B_{\mathcal{S}_m}}
+		\log{\frac{e^{u_j(\theta)}}{\sum_{z\in \mathcal{S}_m} e^{u_z(\theta)}}} 
 		+ 
-		Y_{W_{S_n}}(x)
-		\log{\frac{e^{-\theta_x}}{\sum_{z\in S_n} e^{-\theta_z}}}
+		Y_{j,W_{\mathcal{S}_m}}
+		\log{\frac{e^{-u_j(\theta)}}{\sum_{z\in \mathcal{S}_m} e^{-u_z(\theta)}}}
 	\right) \\
-&\theta^\beta = \text{arg}\max_{\theta} LL(\theta;\beta) ,
+&\theta^\lambda = \text{arg}\max_{\theta} LL(\theta;\lambda) ,
 \end{align}
 
-where each estimate $\theta^\beta = u_1^\beta, \ldots, u_K^\beta$ implies a rank ordering of all items $\pi_{u}^{\theta^\beta} = \pi(1),\ldots,\pi(\numperset),\pi(\numperset+1),\ldots,\pi(K)$. The items corresponding to $\pi(1),\ldots,\pi(\numperset)$ form the next list of $\numperset$ items to show the next respondent. 
+where each estimate $u(\theta^\lambda) = u_1(\theta^\lambda), \ldots, u_K(\theta^\lambda)$ implies a rank ordering of all items $\pi(u|\theta^\lambda) = \pi(1),\ldots,\pi(\numperset),\pi(\numperset+1),\ldots,\pi(K)$. The items corresponding to $\pi(1),\ldots,\pi(\numperset)$ form the next list of $\numperset$ items to show the next respondent. 
 
-While the Bayesian Bootstrap is rarely used for posterior sampling, we use it throughout our empirical application because of its conceptual appeal and speed. Because we only need one set of $\numperset$ items per respondent, we can obtain new bootstrapped samples $\theta^{\beta}$ and $\pi(u|\theta^\beta)$ for each new respondent. If we seek the probabilities with which any item would be selected, we can obtain many independent and parallelized samples. 
+While the Bayesian Bootstrap is not commonly used for posterior sampling in choice modeling we use it throughout our empirical application because of its conceptual appeal and speed. Indeed other bandit algorithms have turned to it for similar reasons \citep{eckles2014thompson}. Because we only need one set of $\numperset$ items per respondent, we can obtain new bootstrapped samples $\theta^{\lambda}$ and $\pi(u|\theta^\lambda)$ for each new respondent. If we seek the probabilities with which any item would be selected, we can obtain many independent and parallelized samples. 
 
-\subsubsection{Bandit MaxDiff and \ts Intuition }
 
-While collecting data for the Bandit MaxDiff algorithm, imagine we have 100 respondents and can summarize the population's preferences for 300 characteristics, with their item-specific parameter values in a multinomial logit model. To generate a MaxDiff task for the 101st respondent, we draw from the population preferences, leveraging mean estimates and normal errors with standard deviations equal to the standard errors' point estimates. We sort the newly sampled vector of preference values from the most to least preferred item. The most preferred can be used to create the sequence of MaxDiff choice tasks for the 101st respondent.
+\subsubsection{Intuition for Bandit MaxDiff: \ts and \edts}
 
-A typical bandit algorithm is not practical here. While selecting an arm means including an item in the survey for the next respondent, the reward is not revealed each period. Since each respondent must see only a subset of items, the item receiving the ``best'' label in a choice task does not translate directly to a reward. The choice data allows us to infer how each item ranks among all characteristics, aligning with our managerial goal.
+While collecting data for the Bandit MaxDiff algorithm, imagine we have surveyed $t \cdot b = 100$ respondents so far, and infer the population's preferences for $\numitems=300$ characteristics, with their item-specific parameter values in a multinomial logit model. To generate a MaxDiff task for the 101st respondent, we use Thompson Sampling described simply as follows: we draw from the population-level preferences, using mean estimates and normal errors with standard deviations equal to the standard errors' point estimates. We then sort the newly sampled vector of preference values from the most to least preferred item. The set of the most preferred items can be used to create the sequence of MaxDiff choice tasks for the 101st respondent.
 
-The posterior variation---the sample-to-sample differences in parameter value and relative rank ordering---is critical. Even when little data has been collected, we have substantial uncertainty. The independent samples differ in rank order of item utilities. This allows MaxDiff designs across respondents with less overlap in items. Later, uncertainty is reduced most around the truly high-utility items. Across independent samples, item ranking is highly correlated near the top but not near the bottom, where uncertainty remains. As a result, the top subset of $\numperset$ items selected converges to the same group for each respondent. The algorithm learns over time, identifying items with truly high utility with high precision (Figure \ref{fig:illustrate_ts}). 
+The the sample-to-sample differences in parameter value and relative rank ordering are critical. When little data has been collected, we have substantial uncertainty. The independent samples -- via some approximate posterior sampling -- will differ even in terms of rank order of item utilities. This allows MaxDiff designs across respondents to have less overlap in items across respondents. Later, uncertainty is reduced most around only a subset of the best items. Across independent samples, the resulting ranking of items will be highly correlated near the top but not near the bottom, where uncertainty remains. As a result, the top subset of $\numperset$ items selected converges to the same group for each respondent. The algorithm learns over time, identifying items with truly high utility items. And estimates the utility of items shown most often, with higher accuracy and precision (Figure \ref{fig:illustrate_ts}). 
 
 \begin{figure}
 \caption{Shown is an illustration of a MaxDiff Thompson Sampling procedure.}
@@ -958,36 +923,40 @@ The posterior variation---the sample-to-sample differences in parameter value an
     \end{center}
 \end{figure}
 
-\subsection{Exploration-diffuse Thompson Sampling}
 
-Changes over time can cause robustness issues for TS algorithms. On the one hand, TS features built-in robustness---the algorithm is stochastic and adapts continuously. If early survey data leads the algorithm astray, it will self-correct, eventually finding and converging on the respondents' most preferred items. 
+Changes over time can cause robustness issues for TS algorithms. On the one hand, TS features built-in robustness---the algorithm is stochastic and adapts continuously. If early survey data leads the algorithm astray, it will self-correct, eventually finding and converging on the respondents' most preferred items. But such sampling could be too aggressive, as the natural parameter uncertainty is not sufficient. Or it may be too slow to adjust to large changes in the sampled respondents, reflecting either a shift in the population or that the earlier respondents are not representative of the broader population. This potential problem can be addressed with \edts.
 
-Suppose  early respondents make choices leading the researchers to believe certain survey items are best when they are not. Subsequent respondents will then be shown the items, and uncertainty will be reduced, indicating other items are likely better. By sampling from the item utilities' joint belief distribution, we will be less likely to draw the items which will eventually be shown as poor performers. 
 
-Such sampling could be too aggressive, as the natural parameter uncertainty is not sufficient. Or it may be too slow to adjust to large changes in the sampled respondents, reflecting either a shift in the population or that the earlier respondents are not representative of the broader population. This potential problem can be addressed with \edts.
+
+\subsection{Benchmark Algorithms}
+
+Before proceeding to the empirical analysis, Table \ref{metods} summarizes all algorithms presented so far, and we now describe some additional benchmarks that will be used in testing. 
+
+\paragraph{Uniform Sampling: Fixed Express MaxDiff}
+We uniformly and randomly draw $\numperset$ of $K$ items without replacement to show to each respondent, achieving balance across items and respondents. For example, in a problem with $\numperset=20$ of $K=120$, each item appears $\frac{J*S}{L} = \frac{12*5}{20} = 3$ times per respondent on average.
+
+\paragraph{$\epsilon$-Greedy}
+We test $\epsilon$-greedy (\egreedy) as a baseline for our adaptive methods, letting $\theta$ be the current estimated parameters. We take the $(1-\epsilon)L$ items with the greatest $\theta$ value and choose the remaining $\epsilon L$ uniformly. We use $\epsilon=\frac{1}{4}$ for our empirical analysis and test others. For greedy alone, $\epsilon=0$ would always serve the top $\numperset$ items with the highest estimated average utility to subsequent survey respondents. We also implement this with a threshold and call it \egreedythres.
+
 
 
 \begin{table}
+\caption{Summary of Adaptive MaxDiff Algorithms.}\label{methods}
 \begin{tabular}{p{3in}|p{3in}}
 Algorithm & Description of sampling scheme \\
 \hline
-MaxDiff TS & Take $\numperset$ items with highest utility sampled from the posterior.\\
-MaxDiff $\epsilon$-Diffuse TS & Take $(1-\epsilon)L$ items with highest utility sampled from the regular posterior; sample from diffuse posterior distribution, and take $\epsilon L$ items with highest sampled utility from remaining items.\\
-$\epsilon$-Greedy & Take $(1-\epsilon)L$ with greatest current estimated $\theta$; take remaining $\epsilon L$ uniformly from remaining items.\\
-TS Closest to the Threshold & Take $\numperset$ items with sampled utility closest to $\frac{u_k+u_{k+1}}{2}$.\\
-$\epsilon$-Diffuse TS Closest to the Threshold & Take $(1-\epsilon)L$ (from posterior) and  $\epsilon L$ (from diffuse posterior) items with sampled utility closest to $\frac{u_k+u_{k+1}}{2}$.\\
-$\epsilon$-Greedy Closest to the Threshold & Take $(1-\epsilon)L$ items with estimated utility closest to $\frac{\theta_k+\theta_{k+1}}{2}$ and $\epsilon L$ items uniformly from remaining.\\
-Misclassification Minimization with Random Perturbation& Take $\numperset$ items most likely misclassified (bottom items that should be top and vice-versa); add perturbation to probability.\\
-Greatest Uncertainty with Random Perturbation& Take $\numperset$ items with probabilities of being top at closest to 50\%; add perturbation to probability.\\
+\ts & Take $\numperset$ items with highest utility sampled from the posterior.\\
+\edts & Take $(1-\epsilon)L$ items with highest utility sampled from the regular posterior; sample from diffuse posterior distribution, and take $\epsilon L$ items with highest sampled utility from remaining items.\\
+\edtsthres & Take $(1-\epsilon)L$ (from posterior) and  $\epsilon L$ (from diffuse posterior) items with sampled utility closest to $\frac{u_k+u_{k+1}}{2}$.\\
+\hline
+\mismin & Take $\numperset$ items most likely misclassified (bottom items that should be top and vice-versa); add perturbation to probability.\\
+\uncert & Take $\numperset$ items with probabilities of being top at closest to 50\%; add perturbation to probability.\\
+\hline
+\textbf{Uniform} (fixed express) & Take $L$ items uniformly. \\
+\egreedy & Take $(1-\epsilon)L$ with greatest current estimated $\theta$; take remaining $\epsilon L$ uniformly from remaining items.\\
+\hline
 \end{tabular}
-\caption{Summary of Adaptive MaxDiff Algorithms.}\label{methods}
 \end{table}
-
-% \textbf{Shea: Make captions for all tables flush left}
-
-%%Discuss relation to the Follow the regularized leader / perturbed leader 
-
-% \subsection{BAM for Best-Arm Identification}
 
 % \subsubsection{New Variant: Closest to the Threshold}
 
@@ -998,16 +967,6 @@ Greatest Uncertainty with Random Perturbation& Take $\numperset$ items with prob
 % draw2: 7 5 5 9 8 6  -->  d  e  a  f  b  c 
 % draw3: 6 4 5 8 7 5  -->  d  e  a  c  f  b 
 % \end{verbatim}
-
-% \subsubsection{Algorithm Misclassification Minimization}
-
-\subsubsection{Uniform Sampling: Fixed Express MaxDiff}
-We uniformly and randomly draw $\numperset$ of $K$ items without replacement to show to each respondent, achieving balance across items and respondents. For example, in a problem with $\numperset=20$ of $K=120$, each item appears $\frac{J*S}{L} = \frac{12*5}{20} = 3$ times per respondent on average.
-
-\subsubsection{$\epsilon$-Greedy}
-We test $\epsilon$-greedy as a baseline for our adaptive methods, letting $\theta$ be the current estimated parameters. We take the $(1-\epsilon)L$ items with the greatest $\theta$ value and choose the remaining $\epsilon L$ uniformly. We use $\epsilon=\frac{1}{4}$ for our empirical analysis and test others. For greedy alone, $\epsilon=0$ would always serve the top $\numperset$ items with the highest estimated average utility to subsequent survey respondents.
-
-
 
 
 
@@ -1021,7 +980,7 @@ We compare our proposed set of adaptive approaches to existing adaptive and non-
 
 \subsubsection{Data Generating Process}
 
-Our dataset, consisting of 981 respondents and 120 items, comes from a survey conducted by P\&G using Sawtooth Software. The items represent product features and benefits, but the subject matter and item text is hidden for confidentiality purposes. The questions come from a sparse MaxDiff study using a fixed, non-adaptive design with balance across all items and respondents. 
+We use a survey conducted by P\&G using Sawtooth Software, consisting of 981 respondents and 120 items. The items represent product features and benefits, but the subject matter and item text is hidden for confidentiality purposes. The questions come from a sparse MaxDiff study using a fixed, non-adaptive design with balance across all items and respondents. 
 
 Instead of raw choice data, we have the individual-level posterior mean utilities for all respondents and items, which are obtained via Markov Chain Monte Carlo sampling for a hierarchical Bayes logit model. We call these individual-level mean utilities the ``truth'' in our data-generating process. The utilities offer realistic preference patterns across the items and respondents and permit us to generate data for our respondent simulations.  Therefore, our simulated respondents mimic the actual respondents' preferences on average---to answer each new MaxDiff task, we perturb those true utilities with independent and identically distributed Gumbel error. 
 
@@ -1405,7 +1364,7 @@ k &  \fixedexpressS&\egreedyS&\egreedythresS&\tsS&\edtsS&\tsthresS&\edtsthresS& 
 
 We have used hit rate as an indicator of performance in the classification task of selecting the top set of items. But we recognize that this a dichotomization of a continuous measure. Instead of just looking at the estimated relative rank of the top set of items and the rest, we consider the implication of that in terms of actual item utility. For instance, to differentiate between an algorithm that puts the top nine items and the 11th item in the top 10 and one that puts the top nine items and the 40th item in the top 10, we would want to consider the actual values of those items. Therefore, we define \emph{percent true utility} ($PTU$). First, the exponential weighted sum of true utilities of the items in a set. So we consider, $\mu_\pi=\sum_{\pi(i) \in \topset(\pi)} e^{u_\pi(i)(\theta)}$, where $\topset(\pi)$ denote the current estimate of the top $k$ items based on a predicted ranking $\pi$. And we let $\mu^{*}$ be the corresponding sum for the items in the $\topset^{*}(\theta)$, the true top set of $k$ items. Then, the $PTU = \frac{\mu_\pi}{\mu^{*}},$ the estimated exponential weighted sum of true utilities of the selected top $k$ items based on respondents so far divided by the maximum value of the exponential weighted sum of true utilities that could be attained with $k$ items of the total of $\numitems$. 
 
-In this sense, PTU is a generalization of simple hit rate, and it can be used to further differentiate the algorithms. We measure performance of algorithms on the main empirical setting, $\numitems=120,\numperset=20,J=12,|S|=5$, and measuring top $k=20$. While the hit rate shows the Fixed Express, \ts, and \edts algorithms to perform similarly, PTU illustrates how \edts has an edge over \ts and Fixed Express (Figure \ref{fig:20util}).  This becomes a problem of learning the rank ordering of the values of $\mu^s$ for all sets $s$, and a variety of such subsets are shown in Table \ref{table:PTU} in terms of their PTU.
+In this sense, PTU is a generalization of simple hit rate, and it can be used to further differentiate the algorithms. We measure performance of algorithms on the main empirical setting, $\numitems=120,\numperset=20,J=12,S=|\mathcal{S}|=5$, and measuring top $k=20$. While the hit rate shows the Fixed Express, \ts, and \edts algorithms to perform similarly, PTU illustrates how \edts has an edge over \ts and Fixed Express (Figure \ref{fig:20util}).  This becomes a problem of learning the rank ordering of the values of $\mu^s$ for all sets $s$, and a variety of such subsets are shown in Table \ref{table:PTU} in terms of their PTU.
 
 \begin{figure}
 \caption{Performance in terms of percentage of true utility for the top 20 of 120 items.}
@@ -1598,23 +1557,41 @@ For binary classification, an active learning strategy would select the next dat
 
 
 
+\subsection{MaxDiff: Formalizing a Best-Worst Choice Model}
 
-\section{MaxDiff} 
+Suppose we a set, $S$, for each choice task. Then we can define two random variables: best ($B_z$) and worst ($W_z$) for each $z \in S$.  We then define a third random variable, best-worst $BW_{r,s}$, for any $r,s \in S$. Following a random utility framework, the utilities have deterministic and stochastic components. Thurstone provides a consistent random utility model where each $\gamma_z$ features the extreme value distribution. Because the model is consistent, we have $B_z=-W_z=U_z$ and $BW_{r,s}=U_r-U_s$ and
+\begin{align*}
+&B_z=v_z+\gamma_z\\
+&W_z=-v_z-\gamma_z\\
+&BW_{r,s}=v_r-v_s+\gamma_r-\gamma_s.
+\end{align*}We can write the probability an item is the best and worst as
+\begin{align*}
+&B_S (x)= Pr⁡( B_x=\max_{z \in S} B_z)\\
+&W_S (y)= Pr⁡( W_y=\max_{z \in S} W_z).
+\end{align*}
+Without using the particular utility or item scale, we can derive choice probabilities. In the most general form, we suppose $b()$ and $w()$ are separate interval scales. The resulting probability of an item being best or worst is
+\begin{align*}
+&B_S (x)= \frac{b(x)}{\sum_{z \in S}b(z)}\\
+&W_S (y)= \frac{w(y)}{\sum_{z \in S}w(z)}.
+\end{align*}
+For any pair of items $x,y \in S$, we can indicate the joint probability that $x$ is best and $y$ is worst. However, when considering best and worst together, the scales $b$ and $w$ are not separately identified. We fix their ratio for the same item by setting $w(z)=\frac{c}{b(z)}$. The resulting joint probability is a function of the scale ratios for pairs: 
+\begin{align*}
+&BW_S(x,y)=Pr(U_x>U_z>U_y | z \in S -\{x,y\}, x\neq y)\\
+&BW_S(x,y)=\frac{b(x)/b(y)}{\sum_{r,s \in S, r \neq s}b(r)/b(s)}.
+\end{align*}
+To accommodate the standard utility structure, we let utility $u(z)=\log{(b(z))}$, making each of the probabilities 
+\begin{align*}
+&B_S(x)=\frac{e^{u(x)}}{\sum_{z \in S} e^{u(z)}}\\
+&W_S(y)=\frac{e^{u(y)}}{\sum_{z \in S} e^{u(z)}}\\
+&WB_S(x,y)=\frac{e^{u(x)-u(y)}}{\sum_{r,s \in S, r\neq s} e^{u(r)-u(s)}}.
+\end{align*}
+We can derive the same representation from the random utility model suggested by \cite{marley2005some}. We can view best-worst choice as a generalization of the classic multinomial logit technique for selecting best only.
 
-\subsection{MaxDiff in Practice}
+\subsubsection{Best-Worst Model Estimation}
 
-In a survey of Sawtooth Software customers, it is noteworthy that there exists a desire to run large MaxDiff studies with larger numbers of items than currently recommended (Figure \ref{fig:max_and_purpose}). And yet despite that recommendation, a number of customers have run much larger studies than MaxDiff was initially intended to accommodate. 
-\begin{figure}
-\caption{A 2015 Sawtooth Software customer feedback survey explored the maximum number of items users studied via MaxDiff (top: mean= 40, median=30, maximum=400) and their main purpose in conducting a study with at least 41 items (bottom). } 
-\label{fig:max_and_purpose}
-\begin{center} 
-\includegraphics[width=0.7\textwidth]{plots/maxnumstudy}
-\includegraphics[width=0.7\textwidth]{plots/maxdiffpurpose}
-\end{center}
-\end{figure}
+One way to estimate the MaxDiff choice model is to enumerate all possible pairs of items and describe the joint probability of being best and worst. This is the probability of yielding the largest difference $BW_S(x,y)$ in consumer behavior. This pairwise approach is not practical because it scales quadratically for number of items. So, we adopt an alternative approach reflecting the literature and practice that is shown to be a near exact approximation of the full model \cite{cohen2003maximum}. This allows us to estimate the best model and worst model independently, without explicitly estimating the best-worst probability. 
 
-\subsection{Model Estimation Details}
-For any individual-task combination, let $Y_{B_S}(z)$ be the binary choice variable, where $Y_{B_S}(z)$ equals 1 if the item $z \in S$ is selected as best in the set $S$ and 0 otherwise. $Y_{W_S}(z)$ is the indicator of whether item $z \in S$ is selected as worst. The design matrix $X_{B_S}$ (of size $N*J$-by-$K$) contains indicator variables taking on a value of 1 for each item in the current set $S$ faced by a respondent, and 0 otherwise. To signal the item as worst, we set $X_{W_S}=-X_{B_S}$, so $X_{W_S}$ contains values of 0 or -1. We express choice probabilities -- within each of task and each respondent -- as a multinomial logit probability vector with $|S|$ alternatives. Then we stack all $J$ tasks for all $N$ respondents into vector notation, which gives the log-likelihood expression as a matrix:
+For any individual-task combination, let $Y_{B_S}(z)$ be the binary choice variable, where $Y_{B_S}(z)$ equals 1 if the item $z \in S$ is selected as best in the set $S$ and 0 otherwise. $Y_{W_S}(z)$ is the indicator of whether item $z \in S$ is selected as worst. The design matrix $X_{B_S}$ (of size $N*J$-by-$K$) contains indicator variables taking on a value of 1 for each item in the current set $S$ faced by a respondent, and 0 otherwise. To signal the item as worst, we set $X_{W_S}=-X_{B_S}$, so $X_{W_S}$ contains values of 0 or -1. We express choice probabilities -- within each of task and each respondent -- as a multinomial logit probability vector with $S=|\mathcal{S}|$ alternatives. Then we stack all $J$ tasks for all $N$ respondents into vector notation, which gives the log-likelihood expression as a matrix:
 \[
 \log \frac{
 	\exp{\left(\begin{bmatrix}Y_B\\Y_W\end{bmatrix}\theta \right)} 
@@ -1630,6 +1607,22 @@ The total sum of the log-likelihood can be written as,
 LL(\theta)=\sum_{n=1}^N \sum_{x \in S_{n(j)}} Y_{B_{S_{n(j)}}}(x)\log{\frac{e^{\theta_x}}{\sum_{z\in S_{n(j)}} e^{\theta_z}}}+ Y_{W_{S_{n(j)}}}(x)\log{\frac{e^{-\theta_x}}{\sum_{z\in S_{n(j)}} e^{-\theta_z}}},
 \]
 where $S_{n(j)}$ denotes the set from the $j$th choice task faced by respondent $n$. We then find $\theta$ that maximizes the log-likelihood. 
+
+
+
+\subsection{MaxDiff in Practice: Sawtooth Software Survey}
+
+In a survey of Sawtooth Software customers, it is noteworthy that there exists a desire to run large MaxDiff studies with larger numbers of items than currently recommended (Figure \ref{fig:max_and_purpose}). And yet despite that recommendation, a number of customers have run much larger studies than MaxDiff was initially intended to accommodate. 
+\begin{figure}
+\caption{A 2015 Sawtooth Software customer feedback survey explored the maximum number of items users studied via MaxDiff (top: mean= 40, median=30, maximum=400) and their main purpose in conducting a study with at least 41 items (bottom). } 
+\label{fig:max_and_purpose}
+\begin{center} 
+\includegraphics[width=0.7\textwidth]{plots/maxnumstudy}
+\includegraphics[width=0.7\textwidth]{plots/maxdiffpurpose}
+\end{center}
+\end{figure}
+
+
 
 \section{Practical Considerations for Implementation}
 
@@ -1658,7 +1651,7 @@ Both practical considerations avoid latency during a single survey and across re
 % \subsection{What about Double Adaptivity?}
 % In~\cite{orme2006adaptive}, one of the authors presented a paper on Adaptive MaxDiff that featured within-respondent adaptation rather than what we have shown here in Bandit MaxDiff based on Thompson Sampling, which is an across-respondent adaptive approach. For the within-respondent adaptive procedure, items that a respondent indicates are worst are dropped from further consideration by that same respondent through a round-robin tournament until eventually that respondent's best item is identified.  We thought adding this additional layer of within-respondent adaptivity on top of the Bandit MaxDiff approach could additionally lift its performance.  To our surprise, this double-adaptive approach actually performed worse than Bandit MaxDiff alone in terms of hit rates for the top 3 or 10 items for the sample.  After some head-scratching (and much code checking), we determined that the lack of improvement was due to degree of heterogeneity across the robotic respondents.  For example, if we are interviewing a respondent who doesn't agree much with the overall population regarding which are the top items, it is detrimental to allow that respondent to drop from further consideration (due to judging them worst) what actually are among the globally most preferred items.  It serves the greater good for each respondent to spend increased effort judging among the items that previous respondents on average have judged as potentially best.
 
-\subsection{Asymptotic Distribution vs. Bayesian Bootstrap}
+\subsection{Asymptotic Distribution vs. Win Approximation}
 
 As an alternative to Bayesian Bootstrapping for posterior draws, we can sample from the asymptotic distribution via MLE implied by the estimated mean and standard errors, sampling $u \sim N(\theta,H^{-1})$, where $\theta$ is the minimizer of the negative log-likelihood and $H$ is the Hessian of the negative log-likelihood evaluated at $\theta$. The sampling methods perform similarly using draws from Bayesian Bootstrapping and asymptotic distribution.
 
@@ -1669,6 +1662,15 @@ Another method allows for online updates for streaming data without model estima
 \end{align}
 
 The mean and variance can be used for sampling from the winning percentages distribution in TS or \edts. For TS, after sampling one $p_{k,win}^{ts}$ for each of the $k=1,\ldots,K$ items independently, we can rank order and identify the top set of values. For \edts, we do this for two different normal distributions, one with $\text{se}_{k,win}$ and one with the inflated standard error, $\delta \text{se}_{k,win}$.
+
+
+
+\subsection*{Handling Batches with Random Perturbation}
+
+Another consideration of the algorithms proposed so far is how to best handle batches of respondents without updating after every single respondent. For instance, when only updating the algorithm in batches of respondents and choosing which items to show to multiple respondents,\mismin\ and \uncert\  without modifications, would show the same items to all respondents in the next batch. But a better approach would allow for variation reflecting some model uncertainty, adding independently and identically distributed random perturbations across all items to generate. 
+
+We perturb respondents' scores, following Using~\cite{toubia2007adaptive}, by using Gaussian noise, a normally distributed variable with mean $0$ and variance $c\frac{1}{n_i}$, where $n_i$ is the number of questions with item $i$ and $c$ in some constant, taking it to be $\frac{1}{10}$. (We also tested $c=\frac{1}{2}$, which preformed similarly.) Using the perturbed scores, we set the $\numperset$ items accordingly. Our recommended range for the parameter is $.01 \leq c \leq 1$. ~\cite{toubia2007adaptive} provide the reasoning for using variance that decreases over time rather than fixed variance via genetic algorithms. The method avoids misclassifying an item that will not be sampled further.
+
 
 
 \subsection{Best, Not Best-Worst}
