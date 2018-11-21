@@ -13,7 +13,7 @@
 
 %MKSC_FORMAT% 
 %\documentclass[nonblindrev]{informs3}
-\documentclass[blindrev,mnsc]{informs3}
+\documentclass[blindrev]{informs3} %mnsc
 %\documentclass[a4paper,11pt]{article}
 
 
@@ -150,35 +150,37 @@
 \begin{document}
 %%%%%%%%%%%%%%%%
 
-% % Cover Page
-% \begin{center}
+% Cover Page
+\begin{center}
 
-% 	~ \\
+	~ \\
 
-% 	\vspace{2in}
+	\vspace{2in}
 
-% 	\titleofthispaper
+	\titleofthispaper
 
-% 	\vspace{1in}
+	\vspace{1in}
 
-% 	{Eric Schwartz,}
-% 	\emph{University of Michigan, {ericmsch@umich.edu} } \\
-% 	{Kenneth Fairchild,} 
-% 	\emph{Sawtooth Software} \\
-% 	{Bryan Orme,}
-% 	\emph{Sawtooth Software} \\
-% 	{Alexander Zaitzeff,}
-% 	\emph{University of Michigan} 
+	{Eric Schwartz,}
+	\emph{University of Michigan, {ericmsch@umich.edu} } \\
+	{Kenneth Fairchild,} 
+	\emph{Sawtooth Software} \\
+	{Bryan Orme,}
+	\emph{Sawtooth Software} \\
+	{Alexander Zaitzeff,}
+	\emph{University of Michigan} 
 
-% 	\vspace{1in}
+	\vspace{1in}
 
-% 	%Date
-% 	\today
-% 	%January 31, 2018
+	%Date
+	\today
+	%January 31, 2018
+ \end{center}
+
+ \newpage
 
 
-% \end{center}
-\MANUSCRIPTNO{MS-}
+\MANUSCRIPTNO{No.}
 
 % Outcomment only when entries are known. Otherwise leave as is and 
 %   default values will be used.
@@ -228,7 +230,6 @@
 
 
 % Enter the full title:
-%\titleofthispaper \\
 %MKSC_FORMAT% 
 \TITLE{Active Learning and Best-Arm Identification in Marketing: Efficient Idea Screening with Bandit MaxDiff}
 
@@ -242,12 +243,7 @@
 
 
 %MKSC_FORMAT% 
-\ABSTRACT
-%\textbf{Abstract:}
-{% % Enter your abstract
-
-Marketing research often involves measuring consumer preferences.  That is, researchers must attempt to determine, from among several candidates, which product features are most important to consumers or which brand messages they find most effective.  Most existing methods for measuring consumer preferences attempt to estimate parameters representing all preferences equally.  These methods include idea screening using choice tasks, including conjoint analysis and maximum-difference (MaxDiff) scaling.  But such techniques are not well suited to large-scale problems, in which, for example, a manager is attempting to identify the best dozen items out of hundreds. Those sorts of problem settings -- in which a very large number of features or messages must be tested -- call for a different goal: minimizing the cost of correctly selecting the most preferred items while still doing so accurately. This research achieves that goal by proposing a new approach, drawing upon the best-arm identification problem -- with elements of active learning and multi-armed bandit algorithms from statistical machine learning -- by making goal-directed adaptive ranking and selection methods more efficient and scalable. Using MaxDiff as an illustration of the broader class of problems, the research proposes a new approach: Bandit MaxDiff.  Bandit MaxDiff uses information from initial respondents to inform later testing such that the group of items shown to later respondents oversamples those items early responses indicate are most likely to be the in or near the overall top set. Empirical studies show that Bandit MaxDiff can increase efficiency four-fold over standard MaxDiff scaling. These studies, through multiple MaxDiff surveys from leading software providers and consumer packaged goods companies and through a series of simulation experiments, consider a range of benchmark algorithms to evaluate the conditions in which the proposed approaches outperform existing methods. Several new components, which can apply outside the idea-screening and preference-measurement contexts, are introduced to the algorithms to (a) control robustness in a changing environment when using Thompson Sampling, (b) allow the algorithms to learn an unranked (as opposed to ranked) top set, and (c) evaluate a set of approximations to posterior sampling to allow faster model updates.
-
+\ABSTRACT{% % Enter your abstract
 } 
 
 
@@ -255,17 +251,32 @@ Marketing research often involves measuring consumer preferences.  That is, rese
 
 
 %MKSC_FORMAT% 
-\KEYWORDS
-%\textbf{Keywords:}
-{best arm identification, multi-armed bandit, active learning, idea screening, adaptive maximum-difference surveys, best-worst scaling, Bayesian decision theory, Thompson Sampling, Bayesian bootstrap}
-
-
-
-%\textbf{Outdated Abstract, see Introduction.} For large MaxDiff studies whose main purpose is identifying the top few items for the sample, a new adaptive approach called Adaptive MaxDiff may increase efficiency fourfold over standard non-adaptive MaxDiff.  Adaptive MaxDiff leverages information from previous respondents via aggregate logit and Thompson Sampling so later respondents receive designs that oversample the topmost items that are most likely to turn out to be the overall winners. Our approach applies beyond MaxDiff problems to a more general set of bandit problems. We propose a flexible algorithm, $\epsilon$-Diffuse Thompson Sampling (TS), which nests traditional TS. Blending ideas from $\epsilon$-greedy in machine learning and Bayesian approaches, this is a more robust version of TS, which a manager can control with tuning parameters. For instance, being less risk averse, one may drawn more items from diffuse posteriors, making the algorithm robust to changing environments, even extreme non-stationarity. We implement the methods using MaxDiff survey from a large consumer packaged goods manufacturer. Beyond showing our approach outperforms better than current methods, we show under which conditions it performs even better than (larger problems) or just as well as existing methods (smaller problems).
+\KEYWORDS{%%%	
+}
 
 %MKSC_FORMAT%  
-\maketitle
 
+% \maketitle
+
+
+
+\begin{center}
+	\titleofthispaper
+	~ \\ ~ \\
+	\emph{Abstract}
+	~ \\ ~ \\
+\end{center}
+
+\SingleSpacedXI
+Marketing research often involves measuring consumer preferences.  That is, researchers must attempt to determine, from among several candidates, which product features are most important to consumers or which brand messages they find most effective.  Most existing methods for measuring consumer preferences attempt to estimate parameters representing all preferences equally.  These methods include idea screening using choice tasks, including conjoint analysis and maximum-difference (MaxDiff) scaling.  But such techniques are not well suited to large-scale problems, in which, for example, a manager is attempting to identify the best dozen items out of hundreds. Those sorts of problem settings -- in which a very large number of features or messages must be tested -- call for a different goal: minimizing the cost of correctly selecting the most preferred items while still doing so accurately. This research achieves that goal by proposing a new approach, drawing upon the best-arm identification problem -- with elements of active learning and multi-armed bandit algorithms from statistical machine learning -- by making goal-directed adaptive ranking and selection methods more efficient and scalable. Using MaxDiff as an illustration of the broader class of problems, the research proposes a new approach: Bandit MaxDiff.  Bandit MaxDiff uses information from initial respondents to inform later testing such that the group of items shown to later respondents oversamples those items early responses indicate are most likely to be the in or near the overall top set. Empirical studies show that Bandit MaxDiff can increase efficiency four-fold over standard MaxDiff scaling. These studies, through multiple MaxDiff surveys from leading software providers and consumer packaged goods companies and through a series of simulation experiments, consider a range of benchmark algorithms to evaluate the conditions in which the proposed approaches outperform existing methods. Several new components, which can apply outside the idea-screening and preference-measurement contexts, are introduced to the algorithms to (a) control robustness in a changing environment when using Thompson Sampling, (b) allow the algorithms to learn an unranked (as opposed to ranked) top set, and (c) evaluate a set of approximations to posterior sampling to allow faster model updates.
+~ \\
+~ \\
+\emph{Key words:}
+best arm identification, multi-armed bandit, active learning, idea screening, adaptive maximum-difference surveys, best-worst scaling, Bayesian decision theory, Thompson Sampling, Bayesian bootstrap
+
+\newpage
+
+\OneAndAHalfSpacedXI
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
